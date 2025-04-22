@@ -1,6 +1,4 @@
 <?php
-// Заглушка для printLog, чтобы не было ошибки в тестах
-function printLog($msg) {}
 
 use PHPUnit\Framework\TestCase;
 use Mordheim\Warband;

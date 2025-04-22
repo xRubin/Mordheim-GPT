@@ -45,7 +45,7 @@ class Turn
                     $f->state = \Mordheim\FighterState::PANIC;
                 }
             }
-            printLog("Банда {$warband->name} не прошла тест на бегство! Все бойцы в панике.");
+            \Mordheim\BattleLogger::add("Банда {$warband->name} не прошла тест на бегство! Все бойцы в панике.");
             return;
         }
 
@@ -55,9 +55,9 @@ class Turn
             if ($fighter->state === \Mordheim\FighterState::PANIC) {
                 if (\Mordheim\Psychology::leadershipTest($fighter, $warband->fighters)) {
                     $fighter->state = \Mordheim\FighterState::STANDING;
-                    printLog("{$fighter->name} преодолел панику и возвращается в бой!");
+                    \Mordheim\BattleLogger::add("{$fighter->name} преодолел панику и возвращается в бой!");
                 } else {
-                    printLog("{$fighter->name} всё ещё в панике!");
+                    \Mordheim\BattleLogger::add("{$fighter->name} всё ещё в панике!");
                 }
             }
             // --- All Alone ---
@@ -76,16 +76,16 @@ class Turn
                 if (count($closeEnemies)>=2 && count($closeAllies)===0) {
                     if (!\Mordheim\Psychology::allAloneTest($fighter, $enemies, $allies)) {
                         $fighter->state = \Mordheim\FighterState::PANIC;
-                        printLog("{$fighter->name} не выдержал одиночества и впадает в панику!");
+                        \Mordheim\BattleLogger::add("{$fighter->name} не выдержал одиночества и впадает в панику!");
                     }
                 }
             }
             // --- Stupidity ---
             if ($fighter->hasSkill('Stupidity') && $fighter->state === \Mordheim\FighterState::STANDING) {
                 if (!\Mordheim\Psychology::leadershipTest($fighter, $warband->fighters)) {
-                    printLog("{$fighter->name} не прошёл тест тупости и стоит без дела!");
+                    \Mordheim\BattleLogger::add("{$fighter->name} не прошёл тест тупости и стоит без дела!");
                 } else {
-                    printLog("{$fighter->name} прошёл тест тупости и может действовать нормально.");
+                    \Mordheim\BattleLogger::add("{$fighter->name} прошёл тест тупости и может действовать нормально.");
                 }
             }
             // --- Fear & Terror ---
