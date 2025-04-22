@@ -1,0 +1,18 @@
+{
+    "name": "autoheim/mordheim",
+    "description": "PHP библиотека для эмуляции правил Mordheim и сражений на 3D поле.",
+    "type": "library",
+    "require": {
+        "php": ">=8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mordheim\\": "src/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "minimum-stability": "stable",
+    "license": "MIT"
+}
