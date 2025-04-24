@@ -20,6 +20,10 @@ class Skills
                 'Strongman' => new Skill('Strongman', 'Can use two-handed weapons without penalty.'),
                 'Resilient' => new Skill('Resilient', '-1 to be wounded.'),
                 'Quick Shot' => new Skill('Quick Shot', 'May shoot twice if not moved.'),
+                'Sprint' => new Skill('Sprint', 'May add +D6 to movement when running.'),
+                'Acrobat' => new Skill('Acrobat', 'Ignores falling damage and dangerous terrain when jumping or falling.'),
+                'Leap' => new Skill('Leap', 'Can jump up to 6\" horizontally (Initiative test required).'),
+                'Jump Up' => new Skill('Jump Up', 'May stand up from knockdown without spending movement.'),
                 // ... Добавить остальные навыки уровня 1a
                 'Eagle Eyes' => new Skill('Eagle Eyes', ''),
                 'Scale Sheer Surfaces' => new Skill('Scale Sheer Surfaces', ''),

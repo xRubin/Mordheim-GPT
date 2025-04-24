@@ -121,8 +121,19 @@ class Fighter
             }
         }
         $movePoints = $this->characteristics->movement;
+        $sprintBonus = 0;
+        // Sprint: +D6 к движению при беге (если partialMove == false)
+        if ($this->hasSkill('Sprint') && !$partialMove) {
+            $sprintBonus = \Mordheim\Dice::roll(6);
+            \Mordheim\BattleLogger::add("{$this->name} использует Sprint: бонус к движению = $sprintBonus");
+            $movePoints += $sprintBonus;
+        }
+        \Mordheim\BattleLogger::add("{$this->name}: movePoints = $movePoints (base: {$this->characteristics->movement}, sprintBonus: $sprintBonus)");
         // Получаем полный путь до цели
         $path = \Mordheim\PathFinder::findPath($field, $this->position, $target, $blockers);
+        if ($path) {
+            \Mordheim\BattleLogger::add("{$this->name}: путь до цели: " . json_encode(array_map(fn($p) => $p['pos'], $path)));
+        }
         if ((!$path || count($path) < 2) && !$partialMove) {
             $log[] = 'Нет пути к цели или недостаточно очков движения';
             return $log;
@@ -135,7 +146,7 @@ class Fighter
         // Определяем, куда реально можем дойти по накопленной стоимости пути
         $lastReachableIdx = 0;
         for ($i = 1; $i < count($path); $i++) {
-            if ($path[$i]['cost'] > $movePoints) break;
+            if ($path[$i]['cost'] > $movePoints + 1e-6) break; // допускаем погрешность для float
             $lastReachableIdx = $i;
         }
         // Если можем дойти до цели полностью
@@ -148,12 +159,12 @@ class Fighter
                 $from = $to;
             }
             $this->position = $from;
-        } elseif ($partialMove && $lastReachableIdx > 0) {
-            // Двигаемся максимально далеко по пути
+        } elseif ($lastReachableIdx > 0) {
+            // Двигаемся максимально далеко по пути (даже если partialMove == false)
             $from = $this->position;
             for ($i = 1; $i <= $lastReachableIdx; $i++) {
                 $to = $path[$i]['pos'];
-                \Mordheim\BattleLogger::add("{$this->name} перемещается с [" . implode(',', $from) . "] на [" . implode(',', $to) . "] (частичное движение)");
+                \Mordheim\BattleLogger::add("{$this->name} перемещается с [" . implode(',', $from) . "] на [" . implode(',', $to) . "] (максимальное движение)");
                 $from = $to;
             }
             $this->position = $from;
