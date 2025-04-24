@@ -2,6 +2,8 @@
 
 namespace Mordheim;
 
+use Mordheim\Exceptions\EquipmentManagerAddWeaponException;
+
 class EquipmentManager
 {
     /** @var Weapon[] */
@@ -13,6 +15,8 @@ class EquipmentManager
     {
         foreach ($weapons as $weapon) {
             $this->addWeapon($weapon);
+            $weaponNames = array_map(fn($w) => $w->name, $this->weapons);
+            \Mordheim\BattleLogger::add("[DEBUG] Оружие после добавления: " . implode(',', $weaponNames));
         }
         foreach ($armors as $armor) {
             $this->addArmor($armor);
@@ -22,12 +26,15 @@ class EquipmentManager
     public function addWeapon(Weapon $weapon): bool
     {
         $freeHands = 2;
-        if ($weapon->hasRule(\Mordheim\SpecialRule::DOUBLE_HANDED)) {
-            $freeHands -= 2;
-        } else {
-            $freeHands -= 1;
+        foreach (array_merge($this->weapons, [$weapon]) as $w) {
+            if ($weapon->hasRule(\Mordheim\SpecialRule::DOUBLE_HANDED)) {
+                $freeHands -= 2;
+            } else {
+                $freeHands -= 1;
+            }
         }
-        if ($freeHands < 0) return false;
+        if ($freeHands < 0)
+            throw new EquipmentManagerAddWeaponException();
         $this->weapons[] = $weapon;
         return true;
     }
@@ -65,6 +72,24 @@ class EquipmentManager
     public function getWeapons(): array
     {
         return $this->weapons;
+    }
+
+    /**
+     * Возвращает количество одноручного оружия ближнего боя
+     */
+    public function countOneHandedMeleeWeapons(): int
+    {
+        $count = 0;
+        foreach ($this->weapons as $weapon) {
+            if (
+                $weapon->damageType === 'Melee'
+                && !$weapon->hasRule(\Mordheim\SpecialRule::DOUBLE_HANDED)
+                && !$weapon->hasRule(\Mordheim\SpecialRule::TWO_HANDED)
+            ) {
+                $count++;
+            }
+        }
+        return $count;
     }
 
     public function getMovementPenalty(): int

@@ -8,10 +8,11 @@ class PathFinder
      * @param GameField $field
      * @param array $start [x,y,z]
      * @param array $goal [x,y,z]
+     * @param callable $weights функция весов движения (dx, dy, dz) => float
      * @param array $blockers массив позиций [[x,y,z], ...]
      * @return array|null путь в виде массива [['pos'=>[x,y,z], 'cost'=>float], ...] или null если нет пути
      */
-    public static function findPath(GameField $field, array $start, array $goal, array $blockers = []): ?array
+    public static function findPath(GameField $field, array $start, array $goal, callable $weights, array $blockers = []): ?array
     {
         // Приоритетная очередь: массив из [стоимость, путь]
         $queue = new \SplPriorityQueue();
@@ -26,11 +27,6 @@ class PathFinder
             [1,1,0], [1,-1,0], [-1,1,0], [-1,-1,0], // диагонали
             [0,0,1], [0,0,-1] // этажи
         ];
-        $weights = function($dx, $dy, $dz) {
-            if ($dz !== 0) return 2.0; // вверх/вниз
-            if ($dx !== 0 && $dy !== 0) return 1.4; // диагональ
-            return 1.0; // горизонталь/вертикаль
-        };
         while (!$queue->isEmpty()) {
             $path = $queue->extract();
             $lastStep = end($path);

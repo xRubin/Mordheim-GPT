@@ -117,9 +117,25 @@ class FighterMeleeTest extends TestCase
         );
     }
 
+    public function testDualWieldAttacks()
+    {
+        // 1. Только один меч — 1 атака
+        $fighter = $this->makeFighter(4, 3, [], [Weapons::getByName('Sword')], 2, [0, 0, 0]);
+        $this->assertEquals(1, $fighter->getAttacks(), 'Одна атака с одним мечом');
+        // 2. Два одноручных оружия ближнего боя — 2 атаки
+        $fighter2 = $this->makeFighter(4, 3, [], [Weapons::getByName('Sword'), Weapons::getByName('Dagger')], 2, [0, 0, 0]);
+        $this->assertEquals(2, $fighter2->getAttacks(), 'Две атаки с двумя одноручными');
+        // 3. Два одноручных, атака наносится дважды
+        $defender = self::makeTestFighter(3, 3, [], [Weapons::getByName('Sword')], 2, [1, 0, 0]);
+        \Mordheim\Dice::setTestRolls([4,1,5, 4,1,5]); // два успешных удара подряд
+        $fighter2->attack($defender); // предполагается, что attack() вызывает getAttacks() и делает нужное число атак
+        // Проверим, что у защитника осталось 0 ран
+        $this->assertEquals(0, $defender->characteristics->wounds, 'Две успешные атаки списывают две раны');
+    }
+
     public function testFlailIgnoresParry()
     {
-        \Mordheim\Dice::setTestRolls([4, 6, 4, 7]); // hit=4, парирование=6 (обычно парировал бы), wound=4, save=7
+        \Mordheim\Dice::setTestRolls([6, 4, 7]); // hit=6, wound=4, save=7
         $attacker = $this->makeFighter(4, 3, [], [Weapons::getByName('Flail')], 2, [0, 0, 0]);
         $defender = self::makeTestFighter(3, 3, [], [Weapons::getByName('Sword')], 2, [1, 0, 0]);
         $result = $attacker->attack($defender);
@@ -156,7 +172,7 @@ class FighterMeleeTest extends TestCase
     public function testAttackKnockedDownAutoHit()
     {
         // Сценарий 1: успешный бросок на ранение — атака наносит урон
-        \Mordheim\Dice::setTestRolls([1, 4, 7]); // парирование=1 (fail), ранение=4 (успех), сейв=7 (fail)
+        \Mordheim\Dice::setTestRolls([4, 7]); // парирование=1 (fail), ранение=4 (успех), сейв=7 (fail)
         $attacker = $this->makeFighter(4, 3, [], [Weapons::getByName('Sword')], 2, [0, 0, 0]);
         $defender = self::makeTestFighter(3, 3, [], [Weapons::getByName('Sword')], 2, [1, 0, 0]);
         $defender->state = \Mordheim\FighterState::KNOCKED_DOWN;

@@ -6,12 +6,20 @@ use Mordheim\PathFinder;
 
 class PathFinderTest extends TestCase
 {
+    private function getMovementWeights(): callable
+    {
+        return function ($dx, $dy, $dz) {
+            if ($dz !== 0) return 2.0;
+            if ($dx !== 0 && $dy !== 0) return 1.4;
+            return 1.0;
+        };
+    }
     public function testStraightPathNoObstacles()
     {
         $field = new GameField();
         $start = [0,0,0];
         $goal = [3,0,0];
-        $path = PathFinder::findPath($field, $start, $goal);
+        $path = PathFinder::findPath($field, $start, $goal, $this->getMovementWeights());
         $this->assertNotNull($path);
         $this->assertEquals($goal, end($path)['pos']);
     }
@@ -27,7 +35,7 @@ class PathFinderTest extends TestCase
         }
         $start = [0,0,0];
         $goal = [2,2,0];
-        $path = PathFinder::findPath($field, $start, $goal);
+        $path = PathFinder::findPath($field, $start, $goal, $this->getMovementWeights());
         $this->assertNotNull($path);
         // Должен обойти стену по диагонали
         $this->assertEquals($goal, end($path)['pos']);
@@ -47,7 +55,7 @@ class PathFinderTest extends TestCase
         }
         $start = [0,0,0];
         $goal = [4,4,0];
-        $path = PathFinder::findPath($field, $start, $goal);
+        $path = PathFinder::findPath($field, $start, $goal, $this->getMovementWeights());
         $this->assertNotNull($path);
         $this->assertEquals($goal, end($path)['pos']);
     }
@@ -64,7 +72,7 @@ class PathFinderTest extends TestCase
         }
         $start = [0,0,0];
         $goal = [2,2,0];
-        $path = PathFinder::findPath($field, $start, $goal);
+        $path = PathFinder::findPath($field, $start, $goal, $this->getMovementWeights());
         $this->assertNull($path);
     }
 
@@ -74,13 +82,13 @@ class PathFinderTest extends TestCase
         // Без лестницы нельзя на 1 этаж
         $start = [0,0,0];
         $goal = [0,0,1];
-        $path = PathFinder::findPath($field, $start, $goal);
+        $path = PathFinder::findPath($field, $start, $goal, $this->getMovementWeights());
         $this->assertNull($path);
         // Ставим лестницу
         $cell = $field->getCell(0,0,0);
         $cell->ladder = true;
         $field->setCell(0,0,0,$cell);
-        $path = PathFinder::findPath($field, $start, $goal);
+        $path = PathFinder::findPath($field, $start, $goal, $this->getMovementWeights());
         $this->assertNotNull($path);
         $this->assertEquals($goal, end($path)['pos']);
     }
@@ -91,14 +99,14 @@ class PathFinderTest extends TestCase
         $start = [0,0,0];
         $goal = [2,0,0]; // путь по горизонтали, 2 клетки, вес 2.0
         // Без ограничения по стоимости — путь есть
-        $path = PathFinder::findPath($field, $start, $goal);
+        $path = PathFinder::findPath($field, $start, $goal, $this->getMovementWeights());
         $this->assertNotNull($path);
         $this->assertEquals($goal, end($path)['pos']);
         // Проверим стоимость итогового пути
         $this->assertEquals(2.0, end($path)['cost']);
         // Проверим диагональ (вес 1.4)
         $goalDiag = [1,1,0];
-        $path = PathFinder::findPath($field, $start, $goalDiag);
+        $path = PathFinder::findPath($field, $start, $goalDiag, $this->getMovementWeights());
         $this->assertNotNull($path);
         $this->assertEquals($goalDiag, end($path)['pos']);
         $this->assertEquals(1.4, end($path)['cost']);
