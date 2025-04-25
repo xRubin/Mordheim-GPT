@@ -1,11 +1,11 @@
 <?php
 
 use Mordheim\Characteristics;
+use Mordheim\Data\Skills;
 use Mordheim\Data\Weapons;
 use Mordheim\EquipmentManager;
 use Mordheim\Fighter;
 use PHPUnit\Framework\TestCase;
-use Mordheim\Data\Skills;
 
 class FighterShootingTest extends TestCase
 {
@@ -21,7 +21,7 @@ class FighterShootingTest extends TestCase
             {
             }
         });
-        $result = $shooter->shoot($target);
+        $result = \Mordheim\Rule\Shoot::apply($shooter, $target);
         $this->assertIsBool($result);
     }
 
@@ -53,7 +53,7 @@ class FighterShootingTest extends TestCase
             {
             }
         });
-        $result = $shooter->shoot($target);
+        $result = \Mordheim\Rule\Shoot::apply($shooter, $target);
         $this->assertIsBool($result);
     }
 
@@ -69,7 +69,7 @@ class FighterShootingTest extends TestCase
             {
             }
         });
-        $result = $shooter->shoot($target, false, false, false, 1);
+        $result = \Mordheim\Rule\Shoot::apply($shooter, $target, false, false, false, 1);;
         $this->assertIsBool($result);
     }
 
@@ -85,7 +85,7 @@ class FighterShootingTest extends TestCase
             {
             }
         });
-        $result = $shooter->shoot($target);
+        $result = \Mordheim\Rule\Shoot::apply($shooter, $target);;
         $this->assertIsBool($result);
     }
 
@@ -103,7 +103,7 @@ class FighterShootingTest extends TestCase
             {
             }
         });
-        $result = $shooter->shoot($target, true); // moved=true
+        $result = \Mordheim\Rule\Shoot::apply($shooter, $target, true);; // moved=true
         $this->assertFalse($result, 'MoveOrFire: нельзя стрелять после движения');
     }
 
@@ -119,7 +119,7 @@ class FighterShootingTest extends TestCase
             {
             }
         });
-        $result = $shooter->shoot($target, false); // moved=false
+        $result = \Mordheim\Rule\Shoot::apply($shooter, $target, false);; // moved=false
         $this->assertIsBool($result, 'MoveOrFire: можно стрелять если не двигался');
     }
 
@@ -137,7 +137,7 @@ class FighterShootingTest extends TestCase
             {
             }
         });
-        $result = $shooter->shoot($target, true); // moved=true
+        $result = \Mordheim\Rule\Shoot::apply($shooter, $target, true);; // moved=true
         $this->assertIsBool($result, 'Обычное оружие: можно стрелять после движения');
     }
 }

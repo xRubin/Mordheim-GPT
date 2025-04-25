@@ -24,16 +24,16 @@ abstract class BaseBattleStrategy implements BattleStrategy
         if ($field !== null && method_exists($field, 'getAllies')) {
             $allies = $field->getAllies($self);
             if (method_exists($target, 'causesTerror') && $target->causesTerror()) {
-                return \Mordheim\Psychology::testTerror($self, $allies);
+                return \Mordheim\Rule\Psychology::testTerror($self, $allies);
             } elseif (method_exists($target, 'causesFear') && $target->causesFear()) {
-                return \Mordheim\Psychology::testFear($self, $target, $allies);
+                return \Mordheim\Rule\Psychology::testFear($self, $target, $allies);
             }
         } else {
             // Backward compatibility: no allies context
             if (method_exists($target, 'causesTerror') && $target->causesTerror()) {
-                return \Mordheim\Psychology::testTerror($self);
+                return \Mordheim\Rule\Psychology::testTerror($self);
             } elseif (method_exists($target, 'causesFear') && $target->causesFear()) {
-                return \Mordheim\Psychology::testFear($self, $target);
+                return \Mordheim\Rule\Psychology::testFear($self, $target);
             }
         }
         return true;

@@ -1,10 +1,11 @@
 <?php
-use PHPUnit\Framework\TestCase;
-use Mordheim\Fighter;
+
 use Mordheim\Characteristics;
-use Mordheim\FighterState;
-use Mordheim\Psychology;
 use Mordheim\Dice;
+use Mordheim\Fighter;
+use Mordheim\FighterState;
+use Mordheim\Rule\Psychology;
+use PHPUnit\Framework\TestCase;
 
 class PsychologyExtraTest extends TestCase
 {

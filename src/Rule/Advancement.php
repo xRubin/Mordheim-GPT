@@ -1,5 +1,5 @@
 <?php
-namespace Mordheim;
+namespace Mordheim\Rule;
 
 use Mordheim\Fighter;
 use Mordheim\Skill;

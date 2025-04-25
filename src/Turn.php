@@ -28,7 +28,7 @@ class Turn
             }
         }
         if (!$leader) return false; // все бойцы выбиты
-        return \Mordheim\Psychology::testRout($leader, $warband->fighters);
+        return \Mordheim\Rule\Psychology::testRout($leader, $warband->fighters);
     }
 
     /**
@@ -53,7 +53,7 @@ class Turn
             if (!$fighter->alive) continue;
             // --- PANIC recovery ---
             if ($fighter->state === \Mordheim\FighterState::PANIC) {
-                if (\Mordheim\Psychology::leadershipTest($fighter, $warband->fighters)) {
+                if (\Mordheim\Rule\Psychology::leadershipTest($fighter, $warband->fighters)) {
                     $fighter->state = \Mordheim\FighterState::STANDING;
                     \Mordheim\BattleLogger::add("{$fighter->name} преодолел панику и возвращается в бой!");
                 } else {
@@ -74,7 +74,7 @@ class Turn
                 $closeEnemies = array_filter($enemies, fn($e)=>$fighter->distance($e)<=1.99);
                 $closeAllies = array_filter($allies, fn($a)=>$a!==$fighter && $a->alive && $a->state===\Mordheim\FighterState::STANDING && $fighter->distance($a)<=6);
                 if (count($closeEnemies)>=2 && count($closeAllies)===0) {
-                    if (!\Mordheim\Psychology::allAloneTest($fighter, $enemies, $allies)) {
+                    if (!\Mordheim\Rule\Psychology::allAloneTest($fighter, $enemies, $allies)) {
                         $fighter->state = \Mordheim\FighterState::PANIC;
                         \Mordheim\BattleLogger::add("{$fighter->name} не выдержал одиночества и впадает в панику!");
                     }
@@ -82,7 +82,7 @@ class Turn
             }
             // --- Stupidity ---
             if ($fighter->hasSkill('Stupidity') && $fighter->state === \Mordheim\FighterState::STANDING) {
-                if (!\Mordheim\Psychology::leadershipTest($fighter, $warband->fighters)) {
+                if (!\Mordheim\Rule\Psychology::leadershipTest($fighter, $warband->fighters)) {
                     \Mordheim\BattleLogger::add("{$fighter->name} не прошёл тест тупости и стоит без дела!");
                 } else {
                     \Mordheim\BattleLogger::add("{$fighter->name} прошёл тест тупости и может действовать нормально.");
@@ -99,10 +99,10 @@ class Turn
             }
             foreach ($enemies as $enemy) {
                 if ($enemy->hasSkill('Fear') && $fighter->distance($enemy)<=8) {
-                    \Mordheim\Psychology::testFear($fighter, $enemy, $warband->fighters);
+                    \Mordheim\Rule\Psychology::testFear($fighter, $enemy, $warband->fighters);
                 }
                 if ($enemy->hasSkill('Terror') && $fighter->distance($enemy)<=8) {
-                    \Mordheim\Psychology::testTerror($fighter, $warband->fighters);
+                    \Mordheim\Rule\Psychology::testTerror($fighter, $warband->fighters);
                 }
             }
         }

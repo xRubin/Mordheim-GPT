@@ -1,12 +1,11 @@
 <?php
-use PHPUnit\Framework\TestCase;
-use Mordheim\Fighter;
+
 use Mordheim\Characteristics;
-use Mordheim\Skill;
 use Mordheim\EquipmentManager;
+use Mordheim\Fighter;
+use Mordheim\Rule\Psychology;
 use Mordheim\Strategy\AggressiveStrategy;
-use Mordheim\FighterState;
-use Mordheim\Psychology;
+use PHPUnit\Framework\TestCase;
 
 class PsychologyTest extends TestCase
 {

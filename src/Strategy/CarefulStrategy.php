@@ -2,6 +2,7 @@
 namespace Mordheim\Strategy;
 
 use Mordheim\Fighter;
+use Mordheim\FighterState;
 use Mordheim\GameField;
 
 class CarefulStrategy extends BaseBattleStrategy implements BattleStrategy
@@ -16,22 +17,26 @@ class CarefulStrategy extends BaseBattleStrategy implements BattleStrategy
             \Mordheim\BattleLogger::add("{$self->name} не может действовать из-за состояния {$self->state->value}.");
             return;
         }
+        $movedThisTurn = false;
+        if ($self->state === FighterState::KNOCKED_DOWN) {
+            $movedThisTurn = \Mordheim\Rule\StandUp::apply($self);
+        }
+
         if (empty($enemies)) return;
         $target = $this->getNearestEnemy($self, $enemies);
         if (!$target) return;
         $canAct = $this->canActAgainst($self, $target, $field);
         if (!$canAct) return;
         $ranged = $this->getRangedWeapon($self);
-        $movedThisTurn = false;
         if ($ranged && $self->distance($target) <= $ranged->range && !$self->isAdjacent($target)) {
-            $self->shoot($target, $movedThisTurn);
+            \Mordheim\Rule\Shoot::apply($self, $target, $movedThisTurn);
         } elseif (!$self->isAdjacent($target)) {
             // Двигается так, чтобы держать дистанцию
             $self->moveTowards([$self->position[0]+1, $self->position[1]+1, $self->position[2]], $field);
             $movedThisTurn = true;
             // После движения пробуем стрелять, если в радиусе
             if ($ranged && $self->distance($target) <= $ranged->range && !$self->isAdjacent($target)) {
-                $self->shoot($target, $movedThisTurn);
+                \Mordheim\Rule\Shoot::apply($self, $target, $movedThisTurn);
             }
         }
     }

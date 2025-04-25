@@ -1,7 +1,9 @@
 <?php
+
 namespace Mordheim\Strategy;
 
 use Mordheim\Fighter;
+use Mordheim\FighterState;
 use Mordheim\GameField;
 
 class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
@@ -15,6 +17,10 @@ class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
         ], true)) {
             \Mordheim\BattleLogger::add("{$self->name} не может действовать из-за состояния {$self->state->value}.");
             return;
+        }
+        $movedThisTurn = false;
+        if ($self->state === FighterState::KNOCKED_DOWN) {
+            $movedThisTurn = \Mordheim\Rule\StandUp::apply($self);
         }
         // Ищем лидера в радиусе 6" (Ld bubble)
         $leader = null;
@@ -64,15 +70,14 @@ class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
         } else {
             // Проверяем наличие стрелкового оружия и его дальность
             $ranged = $this->getRangedWeapon($self);
-            $movedThisTurn = false;
             if ($ranged && $self->distance($target) <= $ranged->range) {
-                $self->shoot($target, $movedThisTurn);
+                \Mordheim\Rule\Shoot::apply($self, $target, $movedThisTurn);
             } else if ($ranged) {
                 // Если не в радиусе, двигаемся и пробуем стрелять после движения
                 $self->moveTowards($target->position, $field);
                 $movedThisTurn = true;
                 if ($self->distance($target) <= $ranged->range) {
-                    $self->shoot($target, $movedThisTurn);
+                    \Mordheim\Rule\Shoot::apply($self, $target, $movedThisTurn);
                 }
             }
         }

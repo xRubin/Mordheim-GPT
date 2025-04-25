@@ -1,13 +1,13 @@
 <?php
-use PHPUnit\Framework\TestCase;
-use Mordheim\Fighter;
+
 use Mordheim\Characteristics;
-use Mordheim\Skill;
-use Mordheim\EquipmentManager;
-use Mordheim\Strategy\AggressiveStrategy;
-use Mordheim\FighterState;
-use Mordheim\Psychology;
 use Mordheim\Data\Skills;
+use Mordheim\EquipmentManager;
+use Mordheim\Fighter;
+use Mordheim\FighterState;
+use Mordheim\Rule\Psychology;
+use Mordheim\Strategy\AggressiveStrategy;
+use PHPUnit\Framework\TestCase;
 
 class LeaderRuleTest extends TestCase
 {

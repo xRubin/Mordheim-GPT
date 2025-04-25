@@ -1,6 +1,9 @@
 <?php
 
-namespace Mordheim;
+namespace Mordheim\Rule;
+
+use Mordheim\Dice;
+use Mordheim\Fighter;
 
 /**
  * Класс для проверки психологических эффектов и лидерства по правилам Mordheim
@@ -49,9 +52,6 @@ class Psychology
     }
 
     /**
-     * Проверка страха (Fear): если WS атакующего < WS защищающего, тест на лидерство
-     */
-    /**
      * Тест на страх (Fear) с учётом спецправила Leader
      * @param Fighter $attacker
      * @param Fighter $defender
@@ -69,9 +69,6 @@ class Psychology
     }
 
     /**
-     * Проверка ужаса (Terror): всегда тест на лидерство
-     */
-    /**
      * Тест на ужас (Terror) с учётом спецправила Leader
      * @param Fighter $fighter
      * @param Fighter[] $allies
@@ -84,9 +81,6 @@ class Psychology
         return $res;
     }
 
-    /**
-     * Проверка устойчивости к панике (Rout/Panic): тест на лидерство
-     */
     /**
      * Тест на панику/бегство (Rout/Panic) с учётом спецправила Leader
      * @param Fighter $fighter
