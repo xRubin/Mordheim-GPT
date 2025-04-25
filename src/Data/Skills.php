@@ -26,15 +26,15 @@ class Skills
                 'Jump Up' => new Skill('Jump Up', 'May stand up from knockdown without spending movement.'),
                 'Nimble' => new Skill('Nimble', '+1 Initiative.'),
                 // ... Добавить остальные навыки уровня 1a
-                'Eagle Eyes' => new Skill('Eagle Eyes', ''),
-                'Scale Sheer Surfaces' => new Skill('Scale Sheer Surfaces', ''),
-                'Stealth' => new Skill('Stealth', ''),
-                'Fear' => new Skill('Fear', ''),
-                'Frenzy' => new Skill('Frenzy', ''),
-                'Hard to Kill' => new Skill('Hard to Kill', ''),
+                'Eagle Eyes' => new Skill('Eagle Eyes', '+6" to maximum range of missile weapons.'),
+                'Scale Sheer Surfaces' => new Skill('Scale Sheer Surfaces', 'May climb any vertical surface without penalty.'),
+                'Stealth' => new Skill('Stealth', 'Harder to spot at range; -1 to be hit by shooting if more than 8" away.'),
+                'Fear' => new Skill('Fear', 'Causes fear (enemy must pass Leadership test to charge or fight).'),
+                'Frenzy' => new Skill('Frenzy', 'Must charge if possible, +1 Attack in combat.'),
+                'Hard to Kill' => new Skill('Hard to Kill', 'Only taken Out of Action on a roll of 6 on the injury table.'),
                 'Leader' => new Skill('Leader', '6" leadership bonus.'),
                 'Wealth' => new Skill('Wealth', '+100gc to starting treasury.'),
-                'Stupidity' => new Skill('Stupidity', ''),
+                'Stupidity' => new Skill('Stupidity', 'At the start of turn, must pass Leadership test or do nothing for that turn.'),
             ];
         }
         return self::$cache;

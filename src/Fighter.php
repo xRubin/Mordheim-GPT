@@ -6,6 +6,27 @@ use Mordheim\Strategy\BattleStrategy;
 
 class Fighter
 {
+    /**
+     * Попытка встать с земли (KNOCKED_DOWN)
+     * Если есть Jump Up — встаёт автоматически без траты движения.
+     * Без навыка — тратит всё движение, чтобы встать.
+     * @return bool true если встал, false если не удалось (например, уже стоит)
+     */
+    public function standUp(): bool
+    {
+        if ($this->state !== FighterState::KNOCKED_DOWN) return false;
+        if ($this->hasSkill('Jump Up')) {
+            \Mordheim\BattleLogger::add("{$this->name} использует Jump Up и мгновенно встаёт!");
+            $this->state = FighterState::STANDING;
+            return true;
+        }
+        // Без навыка: встаёт, но тратит всё движение
+        \Mordheim\BattleLogger::add("{$this->name} встаёт с земли, тратя всё движение.");
+        $this->state = FighterState::STANDING;
+        // Можно реализовать флаг "потратил движение" если потребуется
+        return true;
+    }
+
     /** @var int Текущий опыт */
     public int $experience = 0;
     /** @var int Опыт, полученный за бой (для отчёта) */
@@ -136,6 +157,17 @@ class Fighter
             $this->position = $from;
         }
 
+    }
+
+    /**
+     * В начале хода пытается встать, если сбит с ног
+     * (Рекомендуется вызывать в executeTurn стратегии)
+     */
+    public function tryStandUpAtTurnStart(): void
+    {
+        if ($this->state === FighterState::KNOCKED_DOWN) {
+            $this->standUp();
+        }
     }
 
     /**
@@ -317,14 +349,14 @@ class Fighter
         $defenderWS = $target->characteristics->weaponSkill;
         // Диагностика: вывести все оружия у бойца
         $weaponNames = array_map(fn($w) => $w->name, $this->equipmentManager->getWeapons());
-        \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: ".implode(',', $weaponNames));
+        \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: " . implode(',', $weaponNames));
         $toHitMod = $weapon ? $weapon->toHitModifier : 0;
         $numAttacks = $this->getAttacks();
-    \Mordheim\BattleLogger::add("[DEBUG] numAttacks={$numAttacks}");
+        \Mordheim\BattleLogger::add("[DEBUG] numAttacks={$numAttacks}");
 
         $success = false;
         for ($i = 0; $i < $numAttacks; $i++) {
-        \Mordheim\BattleLogger::add("[DEBUG] Атака #".($i+1).": до атаки wounds={$target->characteristics->wounds}, state={$target->state->value}");
+            \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->characteristics->wounds}, state={$target->state->value}");
             // Особые правила для атак по KNOCKED_DOWN/STUNNED
             if ($target->state === FighterState::STUNNED) {
                 \Mordheim\BattleLogger::add("Атака по оглушённому (STUNNED): попадание и ранение автоматически успешны, сейв невозможен.");
@@ -416,9 +448,9 @@ class Fighter
             \Mordheim\BattleLogger::add("{$this->name} бросает на попадание: $hitRoll (нужно $toHit+)");
             $parried = false;
             $defenderWeapon = $target->equipmentManager->getMainWeapon();
-            \Mordheim\BattleLogger::add("[DEBUG][attack] call canBeParried: attackerWeapon=".($weapon?$weapon->name:'NONE').", defenderWeapon=".($defenderWeapon?$defenderWeapon->name:'NONE').", hitRoll=$hitRoll");
-$canBeParried = $this->equipmentManager->canBeParried($weapon, $defenderWeapon, $hitRoll);
-\Mordheim\BattleLogger::add("[DEBUG][attack] canBeParried returned: ".($canBeParried?'true':'false'));
+            \Mordheim\BattleLogger::add("[DEBUG][attack] call canBeParried: attackerWeapon=" . ($weapon ? $weapon->name : 'NONE') . ", defenderWeapon=" . ($defenderWeapon ? $defenderWeapon->name : 'NONE') . ", hitRoll=$hitRoll");
+            $canBeParried = $this->equipmentManager->canBeParried($weapon, $defenderWeapon, $hitRoll);
+            \Mordheim\BattleLogger::add("[DEBUG][attack] canBeParried returned: " . ($canBeParried ? 'true' : 'false'));
 
             if ($canBeParried) {
                 $parryRoll = \Mordheim\Dice::roll(6);
