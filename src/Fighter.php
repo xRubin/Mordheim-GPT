@@ -2,6 +2,7 @@
 
 namespace Mordheim;
 
+use Mordheim\Rule\InjuryRoll;
 use Mordheim\Strategy\BattleStrategy;
 
 class Fighter
@@ -108,7 +109,10 @@ class Fighter
         return $base + $bonus;
     }
 
-    public function getInitiative()
+    /**
+     * Получить итоговую инициативу с учетом навыков
+     */
+    public function getInitiative(): int
     {
         $base = $this->characteristics->initiative;
         $bonus = 0;
@@ -344,28 +348,17 @@ class Fighter
         }
         if (!$this->alive || !$target->alive || !$this->isAdjacent($target)) return false;
         \Mordheim\BattleLogger::add("{$this->name} атакует {$target->name}!");
-        $weapon = $this->equipmentManager->getMainWeapon();
-        $attackerWS = $this->characteristics->weaponSkill;
-        $defenderWS = $target->characteristics->weaponSkill;
         // Диагностика: вывести все оружия у бойца
-        $weaponNames = array_map(fn($w) => $w->name, $this->equipmentManager->getWeapons());
-        \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: " . implode(',', $weaponNames));
-        $toHitMod = $weapon ? $weapon->toHitModifier : 0;
-        $numAttacks = $this->getAttacks();
-        \Mordheim\BattleLogger::add("[DEBUG] numAttacks={$numAttacks}");
+        \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: " . implode(',', array_map(fn($w) => $w->name, $this->equipmentManager->getWeapons())));
 
         $success = false;
-        for ($i = 0; $i < $numAttacks; $i++) {
-            \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->characteristics->wounds}, state={$target->state->value}");
+        for ($i = 0; $i < $this->getAttacks(); $i++) {
+            $weapon = $this->equipmentManager->getWeaponByAttackIdx($i);
+            \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->characteristics->wounds}, state={$target->state->value}, weapon={$weapon?->name}");
             // Особые правила для атак по KNOCKED_DOWN/STUNNED
             if ($target->state === FighterState::STUNNED) {
                 \Mordheim\BattleLogger::add("Атака по оглушённому (STUNNED): попадание и ранение автоматически успешны, сейв невозможен.");
-                $injuryMod = $this->equipmentManager->getInjuryModifier($weapon);
-                $specialRules = $weapon ? $weapon->specialRules : [];
-                $injuryRoll = \Mordheim\Dice::roll(6);
-                \Mordheim\BattleLogger::add("Бросок на травму: $injuryRoll (модификатор: $injuryMod)");
-                $target->rollInjury($weapon ? $weapon->name : '', $injuryMod, $specialRules, $injuryRoll);
-                $success = true;
+                $success = \Mordheim\Rule\InjuryRoll::roll($this, $target, $weapon);
                 continue;
             }
             if ($target->state === FighterState::KNOCKED_DOWN) {
@@ -417,13 +410,8 @@ class Fighter
                         \Mordheim\BattleLogger::add("Сэйв не удался.");
                     }
                 }
-                $injuryMod = $this->equipmentManager->getInjuryModifier($weapon);
-                $specialRules = $weapon ? $weapon->specialRules : [];
-                $injuryRoll = \Mordheim\Dice::roll(6);
-                \Mordheim\BattleLogger::add("Бросок на травму: $injuryRoll (модификатор: $injuryMod)");
-                $target->rollInjury($weapon ? $weapon->name : '', $injuryMod, $specialRules, $injuryRoll);
-                \Mordheim\BattleLogger::add("[DEBUG] result=true (damage inflicted)");
-                $success = true;
+                $success = InjuryRoll::roll($this, $target, $weapon);
+                \Mordheim\BattleLogger::add("[DEBUG] result=" . (string)$success . " (damage inflicted)");
                 // Если rollInjury не перевёл в OUT_OF_ACTION, явно выставить wounds=0
                 if ($target->state !== FighterState::OUT_OF_ACTION) {
                     $target->characteristics->wounds = 0;
@@ -511,35 +499,19 @@ class Fighter
                     \Mordheim\BattleLogger::add("Сэйв не удался.");
                 }
             }
-            $injuryMod = $this->equipmentManager->getInjuryModifier($weapon);
-            $specialRules = $weapon ? $weapon->specialRules : [];
             // Critical: если woundRoll==6, всегда крит (для совместимости с тестом)
             $isCritical = isset($woundRoll) && $woundRoll == 6;
             if ($isCritical) {
-                \Mordheim\BattleLogger::add("Критическое ранение!");
-                $injuryRoll = \Mordheim\Dice::roll(6);
-                $target->rollInjury('CRITICAL', $injuryMod, $specialRules, $injuryRoll);
+                $success = \Mordheim\Rule\InjuryRoll::roll($this, $target, $weapon, true);
             } else {
                 $needsInjury = false;
                 if ($weapon && ($weapon->hasRule(\Mordheim\SpecialRule::CLUB) || $weapon->hasRule(\Mordheim\SpecialRule::CONCUSSION))) {
-                    $needsInjury = true;
                     \Mordheim\BattleLogger::add("Особое правило: дубина/конкашн — всегда injury table");
-                } else if ($target->characteristics->wounds > 1) {
+                    $success = \Mordheim\Rule\InjuryRoll::roll($this, $target, $weapon);
+                } else {
                     $target->characteristics->wounds -= 1;
                     \Mordheim\BattleLogger::add("У {$target->name} осталось {$target->characteristics->wounds} ран(а/ий)");
                     $success = true;
-                } else {
-                    $needsInjury = true;
-                }
-                if ($needsInjury) {
-                    $injuryRoll = \Mordheim\Dice::roll(6);
-                    \Mordheim\BattleLogger::add("Бросок на травму: $injuryRoll (модификатор: $injuryMod)");
-                    $target->rollInjury($weapon ? $weapon->name : '', $injuryMod, $specialRules, $injuryRoll);
-                    $success = true;
-                    // После rollInjury при wounds==1 выставлять wounds=0, если не OUT_OF_ACTION
-                    if ($target->state !== FighterState::OUT_OF_ACTION) {
-                        $target->characteristics->wounds = 0;
-                    }
                 }
             }
             \Mordheim\BattleLogger::add("[DEBUG] После атаки: wounds={$target->characteristics->wounds}, state={$target->state->value}");
@@ -547,52 +519,6 @@ class Fighter
             if ($target->state === FighterState::OUT_OF_ACTION) break;
         }
         return $success;
-    }
-
-    /**
-     * Таблица ранений Mordheim: определяет состояние бойца (knocked down, stunned, out of action)
-     * $special — название оружия (может влиять на результат)
-     * @param string $special
-     * @param int $injuryMod
-     * @param SpecialRule[] $specialRules
-     * @param int|null $injuryRoll
-     */
-    public function rollInjury(string $special = '', int $injuryMod = 0, array $specialRules = [], int $injuryRoll = null): void
-    {
-        if ($injuryRoll === null) {
-            $roll = \Mordheim\Dice::roll(6) + $injuryMod;
-        } else {
-            $roll = $injuryRoll + $injuryMod;
-        }
-        if ($roll < 1) $roll = 1;
-        if ($roll > 6) $roll = 6;
-        // Critical: если woundRoll=6 и есть Critical, сразу OutOfAction
-        if (in_array(\Mordheim\SpecialRule::CRITICAL, $specialRules, true) && $special === 'CRITICAL') {
-            $this->state = FighterState::OUT_OF_ACTION;
-            $this->alive = false;
-            return;
-        }
-        // Club/Mace/Hammer/Concussion: 1 — выбыл, 2 — knockdown, 3-6 — stun
-        if (in_array(\Mordheim\SpecialRule::CLUB, $specialRules, true) || in_array(\Mordheim\SpecialRule::CONCUSSION, $specialRules, true)) {
-            if ($roll == 1) {
-                $this->state = FighterState::OUT_OF_ACTION;
-                $this->alive = false;
-            } elseif ($roll == 2) {
-                $this->state = FighterState::KNOCKED_DOWN;
-            } else {
-                $this->state = $this->tryAvoidStun() ? FighterState::KNOCKED_DOWN : FighterState::STUNNED;
-            }
-            return;
-        }
-        // Обычная таблица
-        if ($roll == 1 || $roll == 2) {
-            $this->state = FighterState::KNOCKED_DOWN;
-        } elseif ($roll == 3 || $roll == 4 || $roll == 5) {
-            $this->state = $this->tryAvoidStun() ? FighterState::KNOCKED_DOWN : FighterState::STUNNED;
-        } else {
-            $this->state = FighterState::OUT_OF_ACTION;
-            $this->alive = false;
-        }
     }
 
     /**

@@ -1,4 +1,5 @@
 <?php
+
 namespace Mordheim;
 
 use Mordheim\SpecialRule;
@@ -35,6 +36,13 @@ class Weapon
     public function hasRule(SpecialRule $specialRule): bool
     {
         return in_array($specialRule, $this->specialRules, true);
+    }
+
+    public function isOneHanded(): bool
+    {
+        return !$this->hasRule(\Mordheim\SpecialRule::DOUBLE_HANDED)
+            && !$this->hasRule(\Mordheim\SpecialRule::TWO_HANDED)
+            && !$this->hasRule(\Mordheim\SpecialRule::PAIR);
     }
 }
 

@@ -67,6 +67,25 @@ class EquipmentManager
     }
 
     /**
+     * Оружие в зависимости от номера атаки
+     */
+    public function getWeaponByAttackIdx(int $i): ?Weapon
+    {
+        if (!count($this->weapons))
+            return null;
+
+        $offset = 0;
+        foreach ($this->weapons as $idx => $weapon) {
+            if (!$weapon->isOneHanded())
+                $offset += 1;
+            if ($idx >= ($i - $offset))
+                return $weapon;
+        }
+
+        return null;
+    }
+
+    /**
      * Все оружие (например, для dual wield)
      */
     public function getWeapons(): array
@@ -83,8 +102,7 @@ class EquipmentManager
         foreach ($this->weapons as $weapon) {
             if (
                 $weapon->damageType === 'Melee'
-                && !$weapon->hasRule(\Mordheim\SpecialRule::DOUBLE_HANDED)
-                && !$weapon->hasRule(\Mordheim\SpecialRule::TWO_HANDED)
+                && $weapon->isOneHanded()
             ) {
                 $count++;
             }
@@ -130,20 +148,22 @@ class EquipmentManager
         return (int)$target->hasSkill('Resilient');
     }
 
-    public function getArmorSaveModifier(Weapon $weapon): int
+    public function getArmorSaveModifier(?Weapon $weapon = null): int
     {
         $mod = 0;
-        if ($weapon->hasRule(\Mordheim\SpecialRule::DOUBLE_HANDED)) {
+        if ($weapon && $weapon->hasRule(\Mordheim\SpecialRule::DOUBLE_HANDED)) {
             $mod += 2; // Double-Handed ухудшает сейв на 2
         }
-        if ($weapon->hasRule(\Mordheim\SpecialRule::ARMOR_PIERCING)) {
+        if ($weapon && $weapon->hasRule(\Mordheim\SpecialRule::ARMOR_PIERCING)) {
             $mod += 1; // Armor-Piercing ухудшает сейв на 1
         }
         return $mod;
     }
 
-    public function getInjuryModifier(Weapon $weapon): int
+    public function getInjuryModifier(?Weapon $weapon = null): int
     {
+        if (null === $weapon)
+            return 0;
         return $weapon->hasRule(\Mordheim\SpecialRule::AXE) ? -1 : 0;
     }
 

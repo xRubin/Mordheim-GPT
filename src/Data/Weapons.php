@@ -2,8 +2,8 @@
 
 namespace Mordheim\Data;
 
-use Mordheim\Weapon;
 use Mordheim\SpecialRule;
+use Mordheim\Weapon;
 
 class Weapons
 {
@@ -37,8 +37,7 @@ class Weapons
                 'Throwing Knives' => new Weapon('Throwing Knives', 'Range 6", strength as user, quick shot.', 0, 0, 0, 6, 'Ranged'),
                 'Sling' => new Weapon('Sling', 'Range 18", strength 3, can shoot twice if not moved.', 3, 0, 0, 18, 'Ranged'),
                 // Экзотика и спец. оружие можно добавить по мере необходимости
-
-                // Warplock Jezzail (Skaven)
+                'Fighting Claws' => new Weapon('Fighting Claws', 'Pair: +1 Attack, Parry, +1 to climb, cannot use other weapons in close combat.', 0, 0, 0, 0, 'Melee', [SpecialRule::PAIR, SpecialRule::PARRY, SpecialRule::CLIMB, SpecialRule::CUMBERSOME]),
                 'Warplock Jezzail' => new Weapon('Warplock Jezzail', 'Range 36", Strength 6, ignores armor save.', 6, 0, 0, 36, 'Ranged', [SpecialRule::IGNORE_ARMOR_SAVE, SpecialRule::MOVE_OR_FIRE]),
 
                 // check

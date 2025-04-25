@@ -8,13 +8,17 @@ use Mordheim\Dice;
 
 class PsychologyExtraTest extends TestCase
 {
-    protected function setUp(): void
+    public function setUp(): void
     {
-        Dice::setTestRolls([]);
+        \Mordheim\Dice::setTestRolls([]);
+        \Mordheim\BattleLogger::clear();
+        \Mordheim\BattleLogger::add("### Test: {$this->name()}");
     }
-    protected function tearDown(): void
+
+    public function tearDown(): void
     {
-        Dice::setTestRolls([]);
+        \Mordheim\Dice::setTestRolls([]);
+        \Mordheim\BattleLogger::print();
     }
     private function makeFighter($name, $ld, $state = FighterState::STANDING, $alive = true, $attacks = 1, $pos = [0,0,0]) {
         $char = new Characteristics(4,4,3,3,2,4,1,$attacks,$ld);
@@ -27,7 +31,6 @@ class PsychologyExtraTest extends TestCase
         $b = $this->makeFighter('B', 6, FighterState::OUT_OF_ACTION, false);
         $warband = [$leader, $a, $b];
         $this->assertTrue(Psychology::routTest($warband, $leader));
-        \Mordheim\BattleLogger::print();
     }
     public function testRoutTestLeaderDown() {
         Dice::setTestRolls([5,4]); // 9 > 6 провал
@@ -36,7 +39,6 @@ class PsychologyExtraTest extends TestCase
         $b = $this->makeFighter('B', 6, FighterState::OUT_OF_ACTION, false);
         $warband = [$leader, $alt, $b];
         $this->assertFalse(Psychology::routTest($warband, $leader));
-        \Mordheim\BattleLogger::print();
     }
     public function testAllAloneTestSuccess() {
         Dice::setTestRolls([4,4]); // 8 <= 9 успех
@@ -44,7 +46,6 @@ class PsychologyExtraTest extends TestCase
         $enemy1 = $this->makeFighter('E1', 6, FighterState::STANDING, true, 1, [1,0,0]);
         $enemy2 = $this->makeFighter('E2', 6, FighterState::STANDING, true, 1, [1,1,0]);
         $this->assertTrue(Psychology::allAloneTest($hero, [$enemy1, $enemy2], []));
-        \Mordheim\BattleLogger::print();
     }
     public function testAllAloneTestFail() {
         Dice::setTestRolls([5,4]); // 9 > 6 провал
@@ -52,13 +53,11 @@ class PsychologyExtraTest extends TestCase
         $enemy1 = $this->makeFighter('E1', 6, FighterState::STANDING, true, 1, [1,0,0]);
         $enemy2 = $this->makeFighter('E2', 6, FighterState::STANDING, true, 1, [1,1,0]);
         $this->assertFalse(Psychology::allAloneTest($hero, [$enemy1, $enemy2], []));
-        \Mordheim\BattleLogger::print();
     }
     public function testFearTest() {
         Dice::setTestRolls([4,4]); // 8 <= 9 успех
         $hero = $this->makeFighter('Hero', 9, FighterState::STANDING, true);
         $this->assertTrue(Psychology::fearTest($hero));
-        \Mordheim\BattleLogger::print();
     }
     public function testFrenzyEffect() {
         $hero = $this->makeFighter('Hero', 9, FighterState::STANDING, true, 2);
@@ -66,7 +65,6 @@ class PsychologyExtraTest extends TestCase
         $result = Psychology::frenzyEffect($hero, [$enemy]);
         $this->assertTrue($result['mustCharge']);
         $this->assertEquals(4, $result['attacks']);
-        \Mordheim\BattleLogger::print();
     }
     public function testHatredEffect() {
         $this->assertTrue(Psychology::hatredEffect(true));
@@ -76,10 +74,8 @@ class PsychologyExtraTest extends TestCase
         Dice::setTestRolls([4,4]); // 8 <= 9 успех
         $hero = $this->makeFighter('Hero', 9, FighterState::STANDING, true);
         $this->assertTrue(Psychology::stupidityTest($hero));
-        \Mordheim\BattleLogger::print();
         Dice::setTestRolls([5,4]); // 9 > 6 провал
         $hero = $this->makeFighter('Hero', 6, FighterState::STANDING, true);
         $this->assertFalse(Psychology::stupidityTest($hero));
-        \Mordheim\BattleLogger::print();
     }
 }

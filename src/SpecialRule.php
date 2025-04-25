@@ -27,5 +27,8 @@ enum SpecialRule: string
     case SAVE = 'Save'; // тяжелая броня даёт базовый сейв 5+
     case MOVEMENT = 'Movement'; // Heavy Armor + Shield: -1 к движению
     case MOVE_OR_FIRE = 'MoveOrFire'; // You may not move and fire in the same turn
+    case PAIR = 'Pair'; // Всегда используются парой, дают +1 атаку
+    case CLIMB = 'Climb'; // Даёт бонус +1 к тесту Initiative на лазание
+    case CUMBERSOME = 'Cumbersome'; // Громоздкое: нельзя использовать с другим оружием в рукопашной
 }
 

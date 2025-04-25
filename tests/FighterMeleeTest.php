@@ -13,8 +13,15 @@ class FighterMeleeTest extends TestCase
 {
     public function setUp(): void
     {
-        // Мокаем Dice::roll для стабильных результатов
-        \Mordheim\Dice::setTestRolls([]); // сбросить моки перед каждым тестом
+        \Mordheim\Dice::setTestRolls([]);
+        \Mordheim\BattleLogger::clear();
+        \Mordheim\BattleLogger::add("### Test: {$this->name()}");
+    }
+
+    public function tearDown(): void
+    {
+        \Mordheim\Dice::setTestRolls([]);
+        \Mordheim\BattleLogger::print();
     }
 
     // Вспомогательный класс для контроля сейва
@@ -24,7 +31,7 @@ class FighterMeleeTest extends TestCase
             4, $ws, 3, $s, 3, $wounds, 4, 1, 7
         );
         $equipment = new EquipmentManager($weapons);
-        return new class($weapons[0]->name . 'Guy', $char, $skills, $equipment, new AggressiveStrategy(), $pos) extends \Mordheim\Fighter {
+        return new class(uniqid() . 'Guy', $char, $skills, $equipment, new AggressiveStrategy(), $pos) extends \Mordheim\Fighter {
             public function __construct($name, $char, $skills, $equipment, $strategy, $pos)
             {
                 parent::__construct($name, $char, $skills, $equipment, $strategy, $pos);
@@ -36,6 +43,28 @@ class FighterMeleeTest extends TestCase
             }
         };
     }
+    private function makeFighter($ws, $s, $skills, $weapons, $wounds = 2, $pos = [0, 0, 0])
+    {
+        $char = new Characteristics(
+            4,        // movement
+            $ws,      // weaponSkill
+            3,        // ballisticSkill
+            $s,       // strength
+            3,        // toughness
+            $wounds,  // wounds
+            4,        // initiative
+            1,        // attacks
+            7         // leadership
+        );
+        return new Fighter(
+            uniqid() . 'Guy',
+            $char,
+            $skills,
+            new EquipmentManager($weapons),
+            new AggressiveStrategy(),
+            $pos
+        );
+    }
 
     public function testBasicHitAndWound()
     {
@@ -44,7 +73,6 @@ class FighterMeleeTest extends TestCase
         $attacker = $this->makeFighter(4, 3, [], [Weapons::getByName('Sword')], 2, [0, 0, 0]);
         $defender = self::makeTestFighter(3, 3, [], [Weapons::getByName('Sword')], 2, [1, 0, 0]);
         $result = $attacker->attack($defender);
-        \Mordheim\BattleLogger::print();
         $this->assertTrue($result);
         $this->assertEquals(1, $defender->characteristics->wounds);
     }
@@ -94,29 +122,6 @@ class FighterMeleeTest extends TestCase
         $this->assertTrue($wounded, 'Resilient skill should make wounding harder but not impossible');
     }
 
-    private function makeFighter($ws, $s, $skills, $weapons, $wounds = 2, $pos = [0, 0, 0])
-    {
-        $char = new Characteristics(
-            4,        // movement
-            $ws,      // weaponSkill
-            3,        // ballisticSkill
-            $s,       // strength
-            3,        // toughness
-            $wounds,  // wounds
-            4,        // initiative
-            1,        // attacks
-            7         // leadership
-        );
-        return new Fighter(
-            $weapons[0]->name . 'Guy',
-            $char,
-            $skills,
-            new EquipmentManager($weapons),
-            new AggressiveStrategy(),
-            $pos
-        );
-    }
-
     public function testDualWieldAttacks()
     {
         // 1. Только один меч — 1 атака
@@ -148,16 +153,15 @@ class FighterMeleeTest extends TestCase
         $attacker = $this->makeFighter(4, 3, [], [Weapons::getByName('Club')], 2, [0, 0, 0], [\Mordheim\SpecialRule::CLUB]);
         $defender = $this->makeFighter(3, 3, [], [Weapons::getByName('Sword')], 2, [1, 0, 0]);
         $attacker->attack($defender);
-        \Mordheim\BattleLogger::print();
         $this->assertFalse($defender->alive, 'Club/Mace/Hammer should put out of action on 1');
     }
 
     public function testDoubleHandedAndArmorPiercingAffectSave()
     {
         \Mordheim\Dice::setTestRolls([4, 1, 4, 5]); // hit, parry, wound, save=5 (обычно спасся бы при save=5, но с модификаторами не спасётся)
-        // Используем "Ogre Club" как пример двуручного оружия с Club и DoubleHanded, либо создаём временное оружие с нужными спецправилами
+        // Используем "Ogre Club" как пример двуручного оружия с Club и DoubleHanded
         $attacker = $this->makeFighter(4, 3, [], [Weapons::getByName('Ogre Club')], 2, [0, 0, 0]);
-        $defender = $this->makeFighter(3, 3, [], [Weapons::getByName('Dragon Sword')], 2, [1, 0, 0]);
+        $defender = $this->makeFighter(3, 3, [], [], 2, [1, 0, 0]);
         $defender->equipmentManager = new \Mordheim\EquipmentManager(
             [Weapons::getByName('Sword')],
             [Armors::getByName('Light Armor')]
@@ -219,7 +223,6 @@ class FighterMeleeTest extends TestCase
         $attacker = $this->makeFighter(4, 3, [], [Weapons::getByName('Sword')], 2, [0, 0, 0], [\Mordheim\SpecialRule::CRITICAL]);
         $defender = self::makeTestFighter(3, 3, [], [Weapons::getByName('Sword')], 2, [1, 0, 0]);
         $attacker->attack($defender);
-        \Mordheim\BattleLogger::print();
         $this->assertEquals(\Mordheim\FighterState::OUT_OF_ACTION, $defender->state, 'Critical should put out of action on 6 to wound');
     }
 }
