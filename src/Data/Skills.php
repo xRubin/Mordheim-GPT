@@ -24,6 +24,7 @@ class Skills
                 'Acrobat' => new Skill('Acrobat', 'Ignores falling damage and dangerous terrain when jumping or falling.'),
                 'Leap' => new Skill('Leap', 'Can jump up to 6\" horizontally (Initiative test required).'),
                 'Jump Up' => new Skill('Jump Up', 'May stand up from knockdown without spending movement.'),
+                'Nimble' => new Skill('Nimble', '+1 Initiative.'),
                 // ... Добавить остальные навыки уровня 1a
                 'Eagle Eyes' => new Skill('Eagle Eyes', ''),
                 'Scale Sheer Surfaces' => new Skill('Scale Sheer Surfaces', ''),

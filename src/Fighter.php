@@ -87,6 +87,16 @@ class Fighter
         return $base + $bonus;
     }
 
+    public function getInitiative()
+    {
+        $base = $this->characteristics->initiative;
+        $bonus = 0;
+        if ($this->hasSkill('Nimble')) {
+            $bonus = 1;
+        }
+        return $base + $bonus;
+    }
+
     /**
      * Расчет весов для алгоритма передвижения
      */
@@ -220,8 +230,8 @@ class Fighter
             if ($cell->water) {
                 $desc .= "Вода: требуется тест Initiative. ";
                 $roll = \Mordheim\Dice::roll(6);
-                \Mordheim\BattleLogger::add("{$this->name} бросает Initiative для воды: $roll против {$this->characteristics->initiative}");
-                if ($roll > $this->characteristics->initiative) {
+                \Mordheim\BattleLogger::add("{$this->name} бросает Initiative для воды: $roll против {$this->getInitiative()}");
+                if ($roll > $this->getInitiative()) {
                     $msg = "Провал Initiative в воде — движение остановлено на клетке ($x,$y,$z)";
                     \Mordheim\BattleLogger::add($msg);
                     $log[] = $msg;
@@ -233,8 +243,8 @@ class Fighter
             if ($cell->dangerousTerrain) {
                 $desc .= "Опасная местность: тест Initiative. ";
                 $roll = \Mordheim\Dice::roll(6);
-                \Mordheim\BattleLogger::add("{$this->name} бросает Initiative на опасной местности: $roll против {$this->characteristics->initiative}");
-                if ($roll > $this->characteristics->initiative) {
+                \Mordheim\BattleLogger::add("{$this->name} бросает Initiative на опасной местности: $roll против {$this->getInitiative()}");
+                if ($roll > $this->getInitiative()) {
                     $msg = "Провал Initiative на опасной клетке ($x,$y,$z) — юнит упал";
                     \Mordheim\BattleLogger::add($msg);
                     $this->position = [$x, $y, $z];
@@ -246,8 +256,8 @@ class Fighter
             if (abs($cell->height - $fromCell->height) > 1) {
                 $desc .= "Прыжок: тест Initiative. ";
                 $roll = \Mordheim\Dice::roll(6);
-                \Mordheim\BattleLogger::add("{$this->name} бросает Initiative для прыжка: $roll против {$this->characteristics->initiative}");
-                if ($roll > $this->characteristics->initiative) {
+                \Mordheim\BattleLogger::add("{$this->name} бросает Initiative для прыжка: $roll против {$this->getInitiative()}");
+                if ($roll > $this->getInitiative()) {
                     $msg = "Провал Initiative при прыжке — юнит падает на ({$x},{$y},{$z})";
                     \Mordheim\BattleLogger::add($msg);
                     $this->position = [$x, $y, $z];
