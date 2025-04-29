@@ -33,7 +33,7 @@ class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategy
                 \Mordheim\Rule\Attack::apply($self, $target);
             } else {
                 // Не прошёл тест страха/ужаса — отступает
-                $self->moveTowards([$self->position[0] + 1, $self->position[1] + 1, $self->position[2]], $field);
+                \Mordheim\Rule\Move::apply($field, $self, [$self->position[0] + 1, $self->position[1] + 1, $self->position[2]]);
             }
         } else {
             // Проверяем наличие стрелкового оружия и его дальность
@@ -42,7 +42,7 @@ class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategy
             if ($ranged && $self->distance($target) <= $ranged->range) {
                 \Mordheim\Rule\Shoot::apply($self, $target, $movedThisTurn);
             } else {
-                $self->moveTowards($target->position, $field);
+                \Mordheim\Rule\Move::apply($field, $self, $target->position);
                 $movedThisTurn = true;
                 // После движения пробуем стрелять, если в радиусе
                 if ($ranged && $self->distance($target) <= $ranged->range) {

@@ -44,7 +44,7 @@ class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
                 }
             }
             if ($nearest) {
-                $self->moveTowards($nearest->position, $field);
+                \Mordheim\Rule\Move::apply($field, $self, $nearest->position, [], true);
                 return;
             }
         }
@@ -74,7 +74,7 @@ class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
                 \Mordheim\Rule\Shoot::apply($self, $target, $movedThisTurn);
             } else if ($ranged) {
                 // Если не в радиусе, двигаемся и пробуем стрелять после движения
-                $self->moveTowards($target->position, $field);
+                \Mordheim\Rule\Move::apply($field, $self, $target->position, [], true);
                 $movedThisTurn = true;
                 if ($self->distance($target) <= $ranged->range) {
                     \Mordheim\Rule\Shoot::apply($self, $target, $movedThisTurn);

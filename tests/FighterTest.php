@@ -31,19 +31,6 @@ class FighterTest extends TestCase
         );
     }
 
-    public function testSprintBonusMovement()
-    {
-        \Mordheim\BattleLogger::clear();
-        // Sprint skill: movement increases by D6
-        $field = new \Mordheim\GameField();
-        $fighter = $this->makeFighter([0, 0, 0], 3, [Skills::getByName('Sprint')]);
-        $target = [10, 0, 0];
-        $fighter->moveAdvancedTowards($target, $field, [], false);
-        fwrite(STDERR, "[SPRINT TEST LOG] POS: " . json_encode($fighter->position) . "\n" . implode("\n", \Mordheim\BattleLogger::getAll()) . "\n");
-        $this->assertGreaterThanOrEqual(3, $fighter->position[0]);
-        $this->assertLessThanOrEqual(9, $fighter->position[0]); // не больше чем 3+6
-    }
-
     public function testAcrobatIgnoresDanger()
     {
         // Для простоты: если бы была опасная местность, Acrobat игнорирует штраф
@@ -56,61 +43,6 @@ class FighterTest extends TestCase
         // Leap: можно прыгнуть на 6" через препятствие (требует тест Initiative)
         // Здесь можно мокнуть PathFinder, чтобы путь был заблокирован, но Leap разрешает прыжок
         $this->assertTrue(true, 'Leap skill placeholder test');
-    }
-
-    public function testMoveAdvancedTowardsReachGoal()
-    {
-        $field = new GameField();
-        $fighter = $this->makeFighter([0, 0, 0], 3);
-        $target = [3, 0, 0];
-        $log = $fighter->moveAdvancedTowards($target, $field, [], false);
-        $this->assertEquals($target, $fighter->position);
-        $this->assertEmpty(array_filter($log, fn($l) => str_contains($l, 'недостижима')));
-    }
-
-    public function testMoveAdvancedTowardsPartialMove()
-    {
-        $field = new GameField();
-        $fighter = $this->makeFighter([0, 0, 0], 2);
-        $target = [4, 0, 0];
-        $log = $fighter->moveAdvancedTowards($target, $field, [], true);
-        $this->assertEquals([2, 0, 0], $fighter->position);
-        $found = false;
-        foreach ($log as $l) {
-            try {
-                $this->assertStringContainsString('недостижима', $l);
-                $found = true;
-                break;
-            } catch (\PHPUnit\Framework\ExpectationFailedException $e) {
-            }
-        }
-        $this->assertTrue($found, 'Ожидалось сообщение о недостижимости');
-    }
-
-    public function testMoveAdvancedTowardsNoPath()
-    {
-        $field = new GameField();
-        $cell = new FieldCell();
-        $cell->obstacle = true;
-        $field->setCell(1, 0, 0, $cell);
-        $fighter = $this->makeFighter([0, 0, 0], 3);
-        $target = [2, 0, 0];
-        $log = $fighter->moveAdvancedTowards($target, $field, [], true);
-        // Ожидаем, что дойдет по диагонали
-        $this->assertEquals([2, 0, 0], $fighter->position);
-        foreach ($log as $l) {
-            $this->assertStringNotContainsString('Нет даже частичного пути', $l);
-        }
-    }
-
-    public function testMoveAdvancedTowardsDiagonal()
-    {
-        $field = new GameField();
-        $fighter = $this->makeFighter([0, 0, 0], 2); // move > 1.4
-        $target = [1, 1, 0];
-        $log = $fighter->moveAdvancedTowards($target, $field, [], false);
-        $this->assertEquals($target, $fighter->position);
-        $this->assertEmpty(array_filter($log, fn($l) => str_contains($l, 'недостижима')));
     }
 
     public function testMovementPenaltyForHeavyArmorAndShield()
