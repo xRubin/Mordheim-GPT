@@ -8,7 +8,7 @@ use Mordheim\GameField;
 
 class CarefulStrategy extends BaseBattleStrategy implements BattleStrategy
 {
-    public function executeTurn(Fighter $self, array $enemies, GameField $field): void
+    public function movePhase(Fighter $self, array $enemies, GameField $field): void
     {
         if (in_array($self->state, [
             \Mordheim\FighterState::PANIC,
@@ -28,17 +28,34 @@ class CarefulStrategy extends BaseBattleStrategy implements BattleStrategy
         if (!$target) return;
         $canAct = $this->canActAgainst($self, $target, $field);
         if (!$canAct) return;
-        $ranged = $this->getRangedWeapon($self);
-        if ($ranged && $self->distance($target) <= $ranged->range && !$self->isAdjacent($target)) {
-            \Mordheim\Rule\Shoot::apply($self, $target, $movedThisTurn);
-        } elseif (!$self->isAdjacent($target)) {
-            // Двигается так, чтобы держать дистанцию
+        if (!$self->isAdjacent($target)) {
+            // Держит дистанцию
             \Mordheim\Rule\Move::apply($field, $self, [$self->position[0] + 1, $self->position[1] + 1, $self->position[2]], [], true);
-            $movedThisTurn = true;
-            // После движения пробуем стрелять, если в радиусе
-            if ($ranged && $self->distance($target) <= $ranged->range && !$self->isAdjacent($target)) {
-                \Mordheim\Rule\Shoot::apply($self, $target, $movedThisTurn);
-            }
+        }
+    }
+
+    public function shootPhase(Fighter $self, array $enemies, GameField $field): void
+    {
+        if (empty($enemies)) return;
+        $target = $this->getNearestEnemy($self, $enemies);
+        $ranged = $this->getRangedWeapon($self);
+        if ($ranged && $target && $self->distance($target) <= $ranged->range && !$self->isAdjacent($target)) {
+            \Mordheim\Rule\Shoot::apply($self, $target, false);
+        }
+    }
+
+    public function magicPhase(Fighter $self, array $enemies, GameField $field): void
+    {
+        // TODO: реализовать заклинания
+    }
+
+    public function closeCombatPhase(Fighter $self, array $enemies, GameField $field): void
+    {
+        if (empty($enemies)) return;
+        $target = $this->getNearestEnemy($self, $enemies);
+        $canAct = $this->canActAgainst($self, $target, $field);
+        if ($target && $self->isAdjacent($target) && $canAct) {
+            \Mordheim\Rule\Attack::apply($self, $target);
         }
     }
 }

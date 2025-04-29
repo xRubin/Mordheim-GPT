@@ -6,6 +6,11 @@ use Mordheim\Strategy\BattleStrategy;
 
 class Fighter
 {
+    /**
+     * @var \Mordheim\CloseCombat|null
+     */
+    protected ?\Mordheim\CloseCombat $currentCombat = null;
+
     /** @var int Текущий опыт */
     public int $experience = 0;
     /** @var int Опыт, полученный за бой (для отчёта) */
@@ -115,11 +120,46 @@ class Fighter
     }
 
     /**
+     * Charge mechanic (инициация ближнего боя с разбега)
+     */
+    public function chargeTo(Fighter $target, \Mordheim\GameField $field, array $otherUnits = []): ?\Mordheim\CloseCombat
+    {
+        $combat = \Mordheim\Rule\Charge::attempt($field, $this, $target, $otherUnits);
+        if ($combat) {
+            $this->engageInCombat($combat);
+            $target->engageInCombat($combat);
+        }
+        return $combat;
+    }
+
+    public function engageInCombat(\Mordheim\CloseCombat $combat): void
+    {
+        $this->currentCombat = $combat;
+    }
+
+    public function leaveCombat(): void
+    {
+        $this->currentCombat = null;
+    }
+
+    public function getCurrentCombat(): ?\Mordheim\CloseCombat
+    {
+        return $this->currentCombat;
+    }
+
+    /**
      * Расчёт сейва с учётом всей экипировки через менеджер
      */
     public function getArmorSave(?Weapon $attackerWeapon): int
     {
         return $this->equipmentManager->getArmorSave($attackerWeapon);
+    }
+
+    public function attack(Fighter $target): bool
+    {
+        // Передаём текущий объект CloseCombat, если есть
+        $combat = $this->getCurrentCombat();
+        return \Mordheim\Rule\Attack::apply($this, $target, $combat);
     }
 
     public function isAdjacent(Fighter $other): bool

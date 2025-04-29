@@ -8,7 +8,7 @@ use Mordheim\GameField;
 
 class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
 {
-    public function executeTurn(Fighter $self, array $enemies, GameField $field): void
+    public function movePhase(Fighter $self, array $enemies, GameField $field): void
     {
         if (in_array($self->state, [
             \Mordheim\FighterState::PANIC,
@@ -58,7 +58,9 @@ class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
         }
         if ($self->distance($target) < 4) {
             // Уходит от врага
-            [$fx, $fy, $fz] = $self->position;
+            [$fx, $fy, $fz] = $self->position; // остальная логика ниже
+        }
+    }
             [$tx, $ty, $tz] = $target->position;
             $dx = $fx - $tx;
             $dy = $fy - $ty;
@@ -81,5 +83,25 @@ class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
                 }
             }
         }
+    }
+
+    public function shootPhase(Fighter $self, array $enemies, GameField $field): void
+    {
+        if (empty($enemies)) return;
+        $target = $this->getNearestEnemy($self, $enemies);
+        $ranged = $this->getRangedWeapon($self);
+        if ($ranged && $target && $self->distance($target) > 6) {
+            \Mordheim\Rule\Shoot::apply($self, $target, false);
+        }
+    }
+
+    public function magicPhase(Fighter $self, array $enemies, GameField $field): void
+    {
+        // TODO: реализовать заклинания
+    }
+
+    public function closeCombatPhase(Fighter $self, array $enemies, GameField $field): void
+    {
+        // Обычно не атакует в рукопашную, если только не окружён
     }
 }

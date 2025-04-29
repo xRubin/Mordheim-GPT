@@ -7,10 +7,19 @@ use Mordheim\GameField;
 interface BattleStrategy
 {
     /**
-     * Выполнить ход бойца согласно стратегии
-     * @param Fighter $self
-     * @param Fighter[] $enemies
-     * @param GameField $field
+     * Фаза движения
      */
-    public function executeTurn(Fighter $self, array $enemies, GameField $field): void;
+    public function movePhase(Fighter $self, array $enemies, GameField $field): void;
+    /**
+     * Фаза стрельбы
+     */
+    public function shootPhase(Fighter $self, array $enemies, GameField $field): void;
+    /**
+     * Фаза магии
+     */
+    public function magicPhase(Fighter $self, array $enemies, GameField $field): void;
+    /**
+     * Фаза рукопашного боя
+     */
+    public function closeCombatPhase(Fighter $self, array $enemies, GameField $field): void;
 }

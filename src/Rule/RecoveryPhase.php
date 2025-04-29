@@ -1,44 +1,19 @@
 <?php
-namespace Mordheim;
 
-class Turn
+namespace Mordheim\Rule;
+
+use Mordheim\Warband;
+
+class RecoveryPhase
 {
-    /**
-     * Проверка на бегство (Rout test) по правилам Mordheim
-     * @param Warband $warband
-     * @return bool true если тест пройден или не требуется, false если провален
-     */
-    public static function routTest(Warband $warband): bool
-    {
-        $total = count($warband->fighters);
-        $ooa = 0;
-        foreach ($warband->fighters as $f) {
-            if ($f->state === \Mordheim\FighterState::OUT_OF_ACTION) $ooa++;
-        }
-        if ($total === 0 || $ooa / $total < 0.25) return true; // тест не требуется
-        // Классические правила: тест при >= 25% OOA
-        if ($ooa / $total < 0.25) return true; // тест не требуется
-        // Если OOA >= 25%, требуется тест
-        // По правилам бросает лидер (первый живой)
-        $leader = null;
-        foreach ($warband->fighters as $f) {
-            if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
-                $leader = $f;
-                break;
-            }
-        }
-        if (!$leader) return false; // все бойцы выбиты
-        return \Mordheim\Rule\Psychology::testRout($leader, $warband->fighters);
-    }
-
     /**
      * Восстановление психологических состояний для бойцов активной банды
      * @param Warband $warband
      * @param Warband[] $warbands
      */
-    public static function recoverPsychologyState(Warband $warband, array $warbands): void
+    public static function apply(Warband $warband, array $warbands): void
     {
-        if (!self::routTest($warband)) {
+        if (!RoutTest::apply($warband)) {
             // Если банда не прошла тест на бегство, все бойцы в PANIC
             foreach ($warband->fighters as $f) {
                 if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {

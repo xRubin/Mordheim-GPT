@@ -16,7 +16,14 @@ class Attack
      * @param Fighter $target
      * @return bool true если нанесён урон, false если промах/парирование/сейв
      */
-    public static function apply(Fighter $source, Fighter $target): bool
+    /**
+     * Выполнить ближний бой по Mordheim 1999 с поддержкой charge и CloseCombat
+     * @param Fighter $source
+     * @param Fighter $target
+     * @param \Mordheim\CloseCombat|null $combat
+     * @return bool
+     */
+    public static function apply(Fighter $source, Fighter $target, ?\Mordheim\CloseCombat $combat = null): bool
     {
         // Учет психологических и физических состояний
         $invalidStates = [
@@ -39,6 +46,12 @@ class Attack
         \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: " . implode(',', array_map(fn($w) => $w->name, $source->equipmentManager->getWeapons())));
 
         $success = false;
+        // Charge bonus: +1 to hit in first round if source charged (Mordheim 1999)
+        $chargeBonus = 0;
+        if ($combat && $combat->isCharged($source) && $combat->rounds === 1) {
+            $chargeBonus = 1;
+            \Mordheim\BattleLogger::add("{$source->name} получает +1 к попаданию за charge (только в первом раунде боя)");
+        }
         for ($i = 0; $i < $source->getAttacks(); $i++) {
             $weapon = $source->equipmentManager->getWeaponByAttackIdx($i);
             \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->characteristics->wounds}, state={$target->state->value}, weapon={$weapon?->name}");
@@ -117,8 +130,8 @@ class Attack
             if ($attackerWS >= 2 * $defenderWS) $toHit = 2;
             if ($attackerWS < $defenderWS) $toHit = 5;
             if ($attackerWS * 2 <= $defenderWS) $toHit = 6;
-            $toHit += $toHitMod;
-            \Mordheim\BattleLogger::add("WS атакующего: $attackerWS, WS защищающегося: $defenderWS, модификаторы: Weapon {$toHitMod}, итоговое значение для попадания: $toHit+");
+            $toHit += $toHitMod + $chargeBonus;
+            \Mordheim\BattleLogger::add("WS атакующего: $attackerWS, WS защищающегося: $defenderWS, модификаторы: Weapon {$toHitMod}, charge {$chargeBonus}, итоговое значение для попадания: $toHit+");
             $hitRoll = \Mordheim\Dice::roll(6);
             \Mordheim\BattleLogger::add("{$source->name} бросает на попадание: $hitRoll (нужно $toHit+)");
             $parried = false;
