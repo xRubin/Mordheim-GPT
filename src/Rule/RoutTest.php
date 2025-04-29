@@ -1,10 +1,15 @@
 <?php
+
 namespace Mordheim\Rule;
 
+use Mordheim\Exceptions\RoutTestLeaderNotFoundException;
+use Mordheim\Fighter;
 use Mordheim\Warband;
 
 class RoutTest
 {
+    private const OOA_LIMIT = 0.25; // 25%
+
     /**
      * Проверка на бегство (Rout test) по правилам Mordheim
      * @param Warband $warband
@@ -13,23 +18,44 @@ class RoutTest
     public static function apply(Warband $warband): bool
     {
         $total = count($warband->fighters);
+        if ($total === 0) return true; // тест не требуется
+        if (self::countOOA($warband) / $total < self::OOA_LIMIT) return true; // тест не требуется
+        // Если OOA >= OOA_LIMIT, требуется тест
+        try {
+            // По правилам бросает лидер (первый живой)
+            return \Mordheim\Rule\Psychology::testRout(self::findLeader($warband), $warband->fighters);
+        } catch (RoutTestLeaderNotFoundException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Подсчет выведенных из строя бойцов
+     * @param Warband $warband
+     * @return int
+     */
+    private static function countOOA(Warband $warband): int
+    {
         $ooa = 0;
         foreach ($warband->fighters as $f) {
             if ($f->state === \Mordheim\FighterState::OUT_OF_ACTION) $ooa++;
         }
-        if ($total === 0 || $ooa / $total < 0.25) return true; // тест не требуется
-        // Классические правила: тест при >= 25% OOA
-        if ($ooa / $total < 0.25) return true; // тест не требуется
-        // Если OOA >= 25%, требуется тест
-        // По правилам бросает лидер (первый живой)
-        $leader = null;
+        return $ooa;
+    }
+
+    /**
+     * TODO
+     * По правилам бросает лидер (первый живой)
+     * @param Warband $warband
+     * @return Fighter
+     */
+    private static function findLeader(Warband $warband): Fighter
+    {
         foreach ($warband->fighters as $f) {
             if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
-                $leader = $f;
-                break;
+                return $f;
             }
         }
-        if (!$leader) return false; // все бойцы выбиты
-        return \Mordheim\Rule\Psychology::testRout($leader, $warband->fighters);
+        throw new RoutTestLeaderNotFoundException();
     }
 }
