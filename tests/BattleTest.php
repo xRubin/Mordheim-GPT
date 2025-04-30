@@ -26,13 +26,7 @@ class BattleTest extends TestCase
     public function testTurnOrderAndPhases()
     {
         $this->assertEquals(1, $this->battle->getTurn());
-        $this->assertSame($this->warband1, $this->battle->getActiveWarband());
         $this->battle->playTurn();
-        $this->battle->nextWarband();
-        $this->assertSame($this->warband2, $this->battle->getActiveWarband());
-        $this->battle->playTurn();
-        $this->battle->nextWarband();
-        $this->assertSame($this->warband1, $this->battle->getActiveWarband());
         $this->assertEquals(2, $this->battle->getTurn());
     }
 

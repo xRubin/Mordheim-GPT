@@ -42,25 +42,6 @@ class Battle
     }
 
     /**
-     * Получить активную банду
-     */
-    public function getActiveWarband(): Warband
-    {
-        return $this->warbands[$this->activeWarbandIndex];
-    }
-
-    /**
-     * Перейти к следующей банде (по очереди)
-     */
-    public function nextWarband(): void
-    {
-        $this->activeWarbandIndex = ($this->activeWarbandIndex + 1) % count($this->warbands);
-        if ($this->activeWarbandIndex === 0) {
-            $this->turn++;
-        }
-    }
-
-    /**
      * Добавить активный рукопашный бой
      */
     public function addCombat(CloseCombat $combat): void
@@ -90,13 +71,23 @@ class Battle
      */
     public function playTurn(): void
     {
-        $warband = $this->getActiveWarband();
-        \Mordheim\BattleLogger::add("Ход #{$this->turn}, активная банда: {$warband->name}");
-        \Mordheim\Rule\RecoveryPhase::apply($warband, $this->warbands);
-        $this->phaseMove($warband);
-        $this->phaseShoot($warband);
-        $this->phaseMagic($warband);
+        \Mordheim\BattleLogger::add("Ход #{$this->turn}");
+
+        foreach ($this->warbands as $warband)
+            \Mordheim\Rule\RecoveryPhase::apply($warband, $this->warbands);
+
+        foreach ($this->warbands as $warband)
+            $this->phaseMove($warband);
+
+        foreach ($this->warbands as $warband)
+            $this->phaseShoot($warband);
+
+        foreach ($this->warbands as $warband)
+            $this->phaseMagic($warband);
+
         $this->phaseCloseCombat();
+
+        $this->turn++;
     }
 
     /**

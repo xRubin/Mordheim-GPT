@@ -54,5 +54,4 @@ for ($turn = 1; $turn <= 6; ++$turn) {
     BattleLogger::clear();
     $battle->playTurn();
     BattleLogger::print();
-    $battle->nextWarband();
 }
