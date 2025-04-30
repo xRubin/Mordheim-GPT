@@ -2,6 +2,8 @@
 
 namespace Mordheim;
 
+use Mordheim\Exceptions\CloseCombatOutOfBoundsException;
+
 /**
  * Класс для хранения информации о рукопашной схватке между двумя бойцами
  * Хранит ссылки на бойцов, бонусы (charge, парирование и др.), счетчик раундов и статусы
@@ -9,29 +11,22 @@ namespace Mordheim;
 class CloseCombat
 {
     /** @var Fighter */
-    public Fighter $attacker;
-    /** @var Fighter */
-    public Fighter $defender;
-    /** @var bool */
-    public bool $attackerCharged = false;
-    /** @var bool */
-    public bool $defenderCharged = false;
+    /** @var Fighter[] */
+    public array $fighters;
     /** @var int */
     public int $rounds = 0;
-    /** @var array */
+    /** @var array<string, array> */
     public array $bonuses = [];
 
-    public function __construct(Fighter $attacker, Fighter $defender, bool $attackerCharged = false, bool $defenderCharged = false)
+    /**
+     * @param Fighter $fighter1
+     * @param Fighter $fighter2
+     */
+    public function __construct(Fighter $fighter1, Fighter $fighter2)
     {
-        $this->attacker = $attacker;
-        $this->defender = $defender;
-        $this->attackerCharged = $attackerCharged;
-        $this->defenderCharged = $defenderCharged;
+        $this->fighters = [$fighter1, $fighter2];
         $this->rounds = 1;
-        $this->bonuses = [
-            $attacker->name => [],
-            $defender->name => [],
-        ];
+        $this->addBonus($fighter1, 'toHitMod', 1);
     }
 
     /**
@@ -39,15 +34,17 @@ class CloseCombat
      */
     public function nextRound(): void
     {
+        $this->bonuses = [];
         $this->rounds++;
     }
 
     /**
      * Добавить бонус бойцу (например, за charge)
      */
-    public function addBonus(Fighter $fighter, string $bonus, $value = true): void
+    public function addBonus(Fighter $fighter, string $bonus, $value = true): static
     {
-        $this->bonuses[$fighter->name][$bonus] = $value;
+        $this->bonuses[$this->getIndex($fighter)][$bonus] = $value;
+        return $this;
     }
 
     /**
@@ -55,16 +52,17 @@ class CloseCombat
      */
     public function getBonuses(Fighter $fighter): array
     {
-        return $this->bonuses[$fighter->name] ?? [];
+        return $this->bonuses[$this->getIndex($fighter)] ?? [];
     }
 
     /**
-     * Проверить, был ли charge у бойца
+     * Получить индекс бойца
      */
-    public function isCharged(Fighter $fighter): bool
+    public function getIndex(Fighter $fighter): int
     {
-        if ($this->attacker === $fighter) return $this->attackerCharged;
-        if ($this->defender === $fighter) return $this->defenderCharged;
-        return false;
+        $result = array_search($fighter, $this->fighters);
+        if (false === $result)
+            throw new CloseCombatOutOfBoundsException();
+        return $result;
     }
 }

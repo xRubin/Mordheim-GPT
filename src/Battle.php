@@ -1,6 +1,8 @@
 <?php
 namespace Mordheim;
 
+use Mordheim\CloseCombatCollection;
+
 /**
  * Класс для управления боем по правилам Mordheim 1999
  */
@@ -12,8 +14,8 @@ class Battle
     protected array $fighters = [];
     /** @var int */
     protected int $turn = 1;
-    /** @var CloseCombat[] */
-    protected array $activeCombats = [];
+    /** @var CloseCombatCollection */
+    protected CloseCombatCollection $activeCombats;
     /** @var Warband[] */
     protected array $warbands = [];
     /** @var int Индекс активной банды */
@@ -23,6 +25,7 @@ class Battle
     {
         $this->field = $field;
         $this->warbands = $warbands;
+        $this->activeCombats = new CloseCombatCollection();
         foreach ($warbands as $wb) {
             foreach ($wb->fighters as $f) {
                 $this->fighters[] = $f;
@@ -62,7 +65,7 @@ class Battle
      */
     public function addCombat(CloseCombat $combat): void
     {
-        $this->activeCombats[] = $combat;
+        $this->activeCombats->add($combat);
     }
 
     /**
@@ -70,12 +73,7 @@ class Battle
      */
     public function removeCombat(CloseCombat $combat): void
     {
-        foreach ($this->activeCombats as $k => $c) {
-            if ($c === $combat) {
-                unset($this->activeCombats[$k]);
-            }
-        }
-        $this->activeCombats = array_values($this->activeCombats);
+        $this->activeCombats->remove($combat);
     }
 
     /**
@@ -83,7 +81,7 @@ class Battle
      */
     public function getActiveCombats(): array
     {
-        return $this->activeCombats;
+        return $this->activeCombats->getAll();
     }
 
     /**
@@ -149,11 +147,11 @@ class Battle
     protected function phaseCloseCombat(): void
     {
         \Mordheim\BattleLogger::add("Фаза рукопашного боя");
-        foreach ($this->warbands as $warband) {
-            foreach ($warband->fighters as $f) {
-                if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
-                    $enemies = $this->getEnemiesFor($f);
-                    $f->battleStrategy->closeCombatPhase($f, $enemies, $this->field);
+        foreach ($this->activeCombats->getAll() as $combat) {
+            foreach ($combat->fighters as $fighter) {
+                if ($fighter->alive && $fighter->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
+                    $enemies = $this->getEnemiesFor($fighter);
+                    $fighter->battleStrategy->closeCombatPhase($fighter, $enemies, $this->field);
                 }
             }
         }

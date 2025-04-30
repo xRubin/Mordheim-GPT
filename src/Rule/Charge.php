@@ -50,10 +50,7 @@ class Charge
         // Переместить бойца
         $attacker->position = $targetPos;
         \Mordheim\BattleLogger::add("{$attacker->name} совершает charge на {$defender->name}! Перемещён на [".implode(',', $targetPos)."]");
-        // Создать объект CloseCombat
-        $combat = new CloseCombat($attacker, $defender, true, false);
-        $combat->addBonus($attacker, 'charge', true);
-        return $combat;
+        return new CloseCombat($attacker, $defender);
     }
 
     /**

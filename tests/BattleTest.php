@@ -38,7 +38,7 @@ class BattleTest extends TestCase
 
     public function testAddAndRemoveCombat()
     {
-        $combat = new CloseCombat($this->f1, $this->f2, true, false);
+        $combat = new CloseCombat($this->f1, $this->f2);
         $this->battle->addCombat($combat);
         $this->assertCount(1, $this->battle->getActiveCombats());
         $this->battle->removeCombat($combat);

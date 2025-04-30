@@ -46,14 +46,9 @@ class Attack
         \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: " . implode(',', array_map(fn($w) => $w->name, $source->equipmentManager->getWeapons())));
 
         $success = false;
-        // Charge bonus: +1 to hit in first round if source charged (Mordheim 1999)
-        $chargeBonus = 0;
-        if ($combat && $combat->isCharged($source) && $combat->rounds === 1) {
-            $chargeBonus = 1;
-            \Mordheim\BattleLogger::add("{$source->name} получает +1 к попаданию за charge (только в первом раунде боя)");
-        }
         for ($i = 0; $i < $source->getAttacks(); $i++) {
             $weapon = $source->equipmentManager->getWeaponByAttackIdx($i);
+            $bonuses = ($combat && ($combat->rounds === 1) && ($i === 0)) ? $combat->getBonuses($source) : [];
             \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->characteristics->wounds}, state={$target->state->value}, weapon={$weapon?->name}");
             // Особые правила для атак по KNOCKED_DOWN/STUNNED
             if ($target->state === FighterState::STUNNED) {
@@ -130,8 +125,8 @@ class Attack
             if ($attackerWS >= 2 * $defenderWS) $toHit = 2;
             if ($attackerWS < $defenderWS) $toHit = 5;
             if ($attackerWS * 2 <= $defenderWS) $toHit = 6;
-            $toHit += $toHitMod + $chargeBonus;
-            \Mordheim\BattleLogger::add("WS атакующего: $attackerWS, WS защищающегося: $defenderWS, модификаторы: Weapon {$toHitMod}, charge {$chargeBonus}, итоговое значение для попадания: $toHit+");
+            $toHit += $toHitMod + $bonuses['toHitMod'] ?? 0;
+            \Mordheim\BattleLogger::add("WS атакующего: $attackerWS, WS защищающегося: $defenderWS, модификаторы: Weapon {$toHitMod}, close combat {$bonuses['toHitMod']}, итоговое значение для попадания: $toHit+");
             $hitRoll = \Mordheim\Dice::roll(6);
             \Mordheim\BattleLogger::add("{$source->name} бросает на попадание: $hitRoll (нужно $toHit+)");
             $parried = false;
