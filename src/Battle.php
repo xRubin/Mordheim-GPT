@@ -1,7 +1,6 @@
 <?php
-namespace Mordheim;
 
-use Mordheim\CloseCombatCollection;
+namespace Mordheim;
 
 /**
  * Класс для управления боем по правилам Mordheim 1999
@@ -99,7 +98,7 @@ class Battle
         foreach ($warband->fighters as $f) {
             if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
                 $enemies = $this->getEnemiesFor($f);
-                $f->battleStrategy->movePhase($f, $enemies, $this->field);
+                $f->battleStrategy->movePhase($this, $f, $enemies, $this->field);
             }
         }
     }
@@ -113,7 +112,7 @@ class Battle
         foreach ($warband->fighters as $f) {
             if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
                 $enemies = $this->getEnemiesFor($f);
-                $f->battleStrategy->shootPhase($f, $enemies, $this->field);
+                $f->battleStrategy->shootPhase($this, $f, $enemies, $this->field);
             }
         }
     }
@@ -127,7 +126,7 @@ class Battle
         foreach ($warband->fighters as $f) {
             if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
                 $enemies = $this->getEnemiesFor($f);
-                $f->battleStrategy->magicPhase($f, $enemies, $this->field);
+                $f->battleStrategy->magicPhase($this, $f, $enemies, $this->field);
             }
         }
     }
@@ -142,7 +141,7 @@ class Battle
             foreach ($combat->fighters as $fighter) {
                 if ($fighter->alive && $fighter->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
                     $enemies = $this->getEnemiesFor($fighter);
-                    $fighter->battleStrategy->closeCombatPhase($fighter, $enemies, $this->field);
+                    $fighter->battleStrategy->closeCombatPhase($this, $fighter, $enemies, $this->field);
                 }
             }
         }
@@ -167,7 +166,7 @@ class Battle
     /**
      * Получить врагов для бойца
      */
-    protected function getEnemiesFor(Fighter $self): array
+    public function getEnemiesFor(Fighter $self): array
     {
         $enemies = [];
         foreach ($this->warbands as $wb) {
@@ -178,6 +177,19 @@ class Battle
             }
         }
         return $enemies;
+    }
+
+    public function getAlliesFor(Fighter $self): array
+    {
+        $allies = [];
+        foreach ($this->warbands as $wb) {
+            foreach ($wb->fighters as $f) {
+                if ($f !== $self && $f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION && $this->isAlly($self, $f)) {
+                    $allies[] = $f;
+                }
+            }
+        }
+        return $allies;
     }
 
     /**

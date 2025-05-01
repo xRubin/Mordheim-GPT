@@ -2,6 +2,7 @@
 
 namespace Mordheim\Rule;
 
+use Mordheim\CloseCombat;
 use Mordheim\Fighter;
 use Mordheim\FighterState;
 
@@ -48,7 +49,6 @@ class Attack
         $success = false;
         for ($i = 0; $i < $source->getAttacks(); $i++) {
             $weapon = $source->equipmentManager->getWeaponByAttackIdx($i);
-            $bonuses = ($combat && ($combat->rounds === 1) && ($i === 0)) ? $combat->getBonuses($source) : [];
             \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->characteristics->wounds}, state={$target->state->value}, weapon={$weapon?->name}");
             // Особые правила для атак по KNOCKED_DOWN/STUNNED
             if ($target->state === FighterState::STUNNED) {
@@ -125,8 +125,9 @@ class Attack
             if ($attackerWS >= 2 * $defenderWS) $toHit = 2;
             if ($attackerWS < $defenderWS) $toHit = 5;
             if ($attackerWS * 2 <= $defenderWS) $toHit = 6;
-            $toHit += $toHitMod + $bonuses['toHitMod'] ?? 0;
-            \Mordheim\BattleLogger::add("WS атакующего: $attackerWS, WS защищающегося: $defenderWS, модификаторы: Weapon {$toHitMod}, close combat {$bonuses['toHitMod']}, итоговое значение для попадания: $toHit+");
+            $toHitBonus = ($combat && ($i === 0)) ? $combat->getBonus($source, CloseCombat::BONUS_TO_HIT) : 0;
+            $toHit += $toHitMod + $toHitBonus;
+            \Mordheim\BattleLogger::add("WS атакующего: $attackerWS, WS защищающегося: $defenderWS, модификаторы: Weapon {$toHitMod}, close combat {$toHitBonus}, итоговое значение для попадания: $toHit+");
             $hitRoll = \Mordheim\Dice::roll(6);
             \Mordheim\BattleLogger::add("{$source->name} бросает на попадание: $hitRoll (нужно $toHit+)");
             $parried = false;

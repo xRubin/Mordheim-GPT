@@ -10,7 +10,9 @@ use Mordheim\Exceptions\CloseCombatOutOfBoundsException;
  */
 class CloseCombat
 {
-    /** @var Fighter */
+    const BONUS_TO_HIT = 'toHit';
+    const BONUS_CHARGED = 'charged';
+
     /** @var Fighter[] */
     public array $fighters;
     /** @var int */
@@ -26,7 +28,8 @@ class CloseCombat
     {
         $this->fighters = [$fighter1, $fighter2];
         $this->rounds = 1;
-        $this->addBonus($fighter1, 'toHitMod', 1);
+        $this->addBonus($fighter1, self::BONUS_TO_HIT, 1);
+        $this->addBonus($fighter1, self::BONUS_CHARGED);
     }
 
     /**
@@ -53,6 +56,14 @@ class CloseCombat
     public function getBonuses(Fighter $fighter): array
     {
         return $this->bonuses[$this->getIndex($fighter)] ?? [];
+    }
+
+    /**
+     * Получить указанный бонус бойца
+     */
+    public function getBonus(Fighter $fighter, string $bonusName): mixed
+    {
+        return $this->getBonuses($fighter)[$bonusName] ?? null;
     }
 
     /**
