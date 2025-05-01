@@ -16,8 +16,8 @@ class BattleTest extends TestCase
         $this->warband1 = new Warband('WB1');
         $this->warband2 = new Warband('WB2');
         $char = new \Mordheim\Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7);
-        $this->f1 = new Fighter('A', $char, [], new \Mordheim\EquipmentManager(), $this->createMock(\Mordheim\Strategy\BattleStrategy::class), [0,0,0]);
-        $this->f2 = new Fighter('B', $char, [], new \Mordheim\EquipmentManager(), $this->createMock(\Mordheim\Strategy\BattleStrategy::class), [2,2,0]);
+        $this->f1 = new Fighter('A', $char, [], new \Mordheim\EquipmentManager(), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class), [0,0,0]);
+        $this->f2 = new Fighter('B', $char, [], new \Mordheim\EquipmentManager(), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class), [2,2,0]);
         $this->warband1->fighters[] = $this->f1;
         $this->warband2->fighters[] = $this->f2;
         $this->battle = new Battle($this->field, [$this->warband1, $this->warband2]);
@@ -33,9 +33,9 @@ class BattleTest extends TestCase
     public function testAddAndRemoveCombat()
     {
         $combat = new CloseCombat($this->f1, $this->f2);
-        $this->battle->addCombat($combat);
-        $this->assertCount(1, $this->battle->getActiveCombats());
-        $this->battle->removeCombat($combat);
-        $this->assertCount(0, $this->battle->getActiveCombats());
+        $this->battle->getActiveCombats()->add($combat);
+        $this->assertCount(1, $this->battle->getActiveCombats()->getAll());
+        $this->battle->getActiveCombats()->remove($combat);
+        $this->assertCount(0, $this->battle->getActiveCombats()->getAll());
     }
 }

@@ -40,28 +40,22 @@ class Battle
         return $this->turn;
     }
 
-    /**
-     * Добавить активный рукопашный бой
-     */
-    public function addCombat(CloseCombat $combat): void
+    public function nextTurn(): int
     {
-        $this->activeCombats->add($combat);
-    }
+        foreach ($this->fighters as $fighter) {
+            $fighter->battleStrategy->resetOnTurn();
+        }
 
-    /**
-     * Удалить завершённый рукопашный бой
-     */
-    public function removeCombat(CloseCombat $combat): void
-    {
-        $this->activeCombats->remove($combat);
+        $this->turn++;
+        return $this->turn;
     }
 
     /**
      * Получить список активных рукопашных боёв
      */
-    public function getActiveCombats(): array
+    public function getActiveCombats(): CloseCombatCollection
     {
-        return $this->activeCombats->getAll();
+        return $this->activeCombats;
     }
 
     /**
@@ -86,7 +80,7 @@ class Battle
 
         $this->phaseCloseCombat();
 
-        $this->turn++;
+        $this->nextTurn();
     }
 
     /**
@@ -98,7 +92,7 @@ class Battle
         foreach ($warband->fighters as $f) {
             if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
                 $enemies = $this->getEnemiesFor($f);
-                $f->battleStrategy->movePhase($this, $f, $enemies, $this->field);
+                $f->battleStrategy->movePhase($this, $f, $enemies);
             }
         }
     }
@@ -112,7 +106,7 @@ class Battle
         foreach ($warband->fighters as $f) {
             if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
                 $enemies = $this->getEnemiesFor($f);
-                $f->battleStrategy->shootPhase($this, $f, $enemies, $this->field);
+                $f->battleStrategy->shootPhase($this, $f, $enemies);
             }
         }
     }
@@ -126,7 +120,7 @@ class Battle
         foreach ($warband->fighters as $f) {
             if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
                 $enemies = $this->getEnemiesFor($f);
-                $f->battleStrategy->magicPhase($this, $f, $enemies, $this->field);
+                $f->battleStrategy->magicPhase($this, $f, $enemies);
             }
         }
     }
@@ -141,7 +135,7 @@ class Battle
             foreach ($combat->fighters as $fighter) {
                 if ($fighter->alive && $fighter->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
                     $enemies = $this->getEnemiesFor($fighter);
-                    $fighter->battleStrategy->closeCombatPhase($this, $fighter, $enemies, $this->field);
+                    $fighter->battleStrategy->closeCombatPhase($this, $fighter, $enemies);
                 }
             }
         }
@@ -165,13 +159,14 @@ class Battle
 
     /**
      * Получить врагов для бойца
+     * @return Fighter[]
      */
-    public function getEnemiesFor(Fighter $self): array
+    public function getEnemiesFor(Fighter $fighter): array
     {
         $enemies = [];
         foreach ($this->warbands as $wb) {
             foreach ($wb->fighters as $f) {
-                if ($f !== $self && $f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION && !$this->isAlly($self, $f)) {
+                if ($f !== $fighter && $f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION && !$this->isAlly($fighter, $f)) {
                     $enemies[] = $f;
                 }
             }
@@ -179,12 +174,17 @@ class Battle
         return $enemies;
     }
 
-    public function getAlliesFor(Fighter $self): array
+    /**
+     * Получить союзников для бойца
+     * @param Fighter $fighter
+     * @return Fighter[]
+     */
+    public function getAlliesFor(Fighter $fighter): array
     {
         $allies = [];
         foreach ($this->warbands as $wb) {
             foreach ($wb->fighters as $f) {
-                if ($f !== $self && $f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION && $this->isAlly($self, $f)) {
+                if ($f !== $fighter && $f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION && $this->isAlly($fighter, $f)) {
                     $allies[] = $f;
                 }
             }
@@ -203,5 +203,14 @@ class Battle
             }
         }
         return false;
+    }
+
+    public function killFighter(Fighter $fighter): void
+    {
+        $fighter->state = FighterState::OUT_OF_ACTION;
+        $fighter->alive = false;
+        $fighter->characteristics->wounds = 0;
+        foreach ($this->getActiveCombats()->getByFighter($fighter) as $combat)
+            $this->getActiveCombats()->remove($combat);
     }
 }

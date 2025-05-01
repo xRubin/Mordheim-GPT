@@ -5,20 +5,21 @@ namespace Mordheim\Rule;
 use Mordheim\Exceptions\PathfinderInitiativeRollFailedException;
 use Mordheim\Exceptions\PathfinderTargetUnreachableException;
 use Mordheim\Fighter;
+use Mordheim\Battle;
 
 class Move
 {
     /**
      * Продвинутое движение по правилам Mordheim: поверхность, труднопроходимость, опасность, прыжки, вода, лестницы, высота
      * Возвращает подробный лог хода
-     * @param \Mordheim\GameField $field
+     * @param Battle $battle
      * @param Fighter $fighter
      * @param array $target
      * @param array $otherUnits
      * @param bool $partialMove Если true — двигаться максимально в направлении цели, даже если не хватает очков движения
      * @return void
      */
-    public static function apply(\Mordheim\GameField $field, Fighter $fighter, array $target, array $otherUnits = [], bool $partialMove = false): void
+    public static function apply(Battle $battle, Fighter $fighter, array $target, array $otherUnits = [], bool $partialMove = false): void
     {
         $blockers = [];
         foreach ($otherUnits as $unit) {
@@ -36,7 +37,7 @@ class Move
         }
         \Mordheim\BattleLogger::add("{$fighter->name}: movePoints = $movePoints (base: {$fighter->characteristics->movement}, sprintBonus: $sprintBonus)");
         // Получаем полный путь до цели
-        $path = \Mordheim\PathFinder::findPath($field, $fighter->position, $target, $fighter->getMovementWeights(), $blockers);
+        $path = \Mordheim\PathFinder::findPath($battle->getField(), $fighter->position, $target, $fighter->getMovementWeights(), $blockers);
         if (!$path || count($path) < 2)
             throw new PathfinderTargetUnreachableException();
 
@@ -76,8 +77,8 @@ class Move
         $stepsTaken = 0;
         for ($i = 1; $i < count($path) && $movePoints > 0; $i++) {
             [$x, $y, $z] = $path[$i]['pos'];
-            $cell = $field->getCell($x, $y, $z);
-            $fromCell = $field->getCell($cur[0], $cur[1], $cur[2]);
+            $cell = $battle->getField()->getCell($x, $y, $z);
+            $fromCell = $battle->getField()->getCell($cur[0], $cur[1], $cur[2]);
             $cost = 1;
             $desc = "";
             // Difficult terrain: double cost

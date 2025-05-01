@@ -2,6 +2,7 @@
 
 namespace Mordheim\Rule;
 
+use Mordheim\Battle;
 use Mordheim\Fighter;
 
 class Shoot
@@ -10,7 +11,7 @@ class Shoot
      * Стрельба по другому бойцу по правилам Mordheim
      * Учитывает Ballistic Skill, модификаторы (дальность, движение, укрытие, размер цели и т.д.)
      */
-    public static function apply(Fighter $source, Fighter $target, bool $moved = false, bool $targetInCover = false, bool $targetIsLarge = false, int $shots = 1): bool
+    public static function apply(Battle $battle, Fighter $source, Fighter $target, bool $moved = false, bool $targetInCover = false): bool
     {
         if (!$source->alive || !$target->alive) return false;
         $ranged = null;
@@ -34,6 +35,9 @@ class Shoot
         if ($toHitBase < 2) $toHitBase = 2;
         if ($toHitBase > 6) $toHitBase = 6;
 
+        // Навык Quick Shot: если есть, стреляет дважды, если не двигался
+        $shots = ($source->hasSkill('Quick Shot') && !$moved) ? 2 : 1;
+
         // Модификаторы
         $mod = 0;
         // Дальний выстрел (больше половины дистанции)
@@ -42,10 +46,8 @@ class Shoot
         if ($moved) $mod += 1;
         // Цель в укрытии
         if ($targetInCover) $mod += 1;
-        // Множественный выстрел
-        if ($shots > 1) $mod += 1;
         // Большая цель
-        if ($targetIsLarge) $mod -= 1;
+        if ($target->hasSkill('Large Target')) $mod -= 1;
         // Модификатор оружия
         $mod += $ranged->toHitModifier;
 
@@ -79,14 +81,11 @@ class Shoot
                     $target->characteristics->wounds -= 1;
                     if ($target->characteristics->wounds <= 0) {
                         $target->alive = false;
+                        foreach ($battle->getActiveCombats()->getByFighter($target) as $combat)
+                            $battle->getActiveCombats()->remove($combat);
                     }
                     $hit = true;
                 }
-            }
-            // Навык Quick Shot: если есть, стреляет дважды, если не двигался
-            $hasQuickShot = $source->hasSkill('Quick Shot');
-            if ($hasQuickShot && $shots == 1 && !$moved) {
-                $shots = 2;
             }
         }
         return $hit;

@@ -2,6 +2,7 @@
 
 namespace Mordheim\Rule;
 
+use Mordheim\Battle;
 use Mordheim\CloseCombat;
 use Mordheim\Fighter;
 use Mordheim\FighterState;
@@ -9,22 +10,14 @@ use Mordheim\FighterState;
 class Attack
 {
     /**
-     * Ближний бой по правилам Mordheim (https://mordheimer.net/docs/rules/close-combat)
-     * Учитывает WS, силу, брони, оружие, навыки, эффекты (оглушение, выбивание, крит, дубины, топоры и др.)
-     * Возвращает true если нанесён урон, false если нет
-     * Выполняет атаку по правилам Mordheim с учётом спецправил оружия и навыков.
-     * @param Fighter $source
-     * @param Fighter $target
-     * @return bool true если нанесён урон, false если промах/парирование/сейв
-     */
-    /**
      * Выполнить ближний бой по Mordheim 1999 с поддержкой charge и CloseCombat
+     * @param Battle $battle
      * @param Fighter $source
      * @param Fighter $target
      * @param \Mordheim\CloseCombat|null $combat
-     * @return bool
+     * @return bool true если нанесён урон, false если промах/парирование/сейв
      */
-    public static function apply(Fighter $source, Fighter $target, ?\Mordheim\CloseCombat $combat = null): bool
+    public static function apply(Battle $battle, Fighter $source, Fighter $target, ?\Mordheim\CloseCombat $combat = null): bool
     {
         // Учет психологических и физических состояний
         $invalidStates = [
@@ -53,7 +46,7 @@ class Attack
             // Особые правила для атак по KNOCKED_DOWN/STUNNED
             if ($target->state === FighterState::STUNNED) {
                 \Mordheim\BattleLogger::add("Атака по оглушённому (STUNNED): попадание и ранение автоматически успешны, сейв невозможен.");
-                $success = \Mordheim\Rule\InjuryRoll::roll($source, $target, $weapon);
+                $success = InjuryRoll::roll($battle, $source, $target, $weapon);
                 continue;
             }
             if ($target->state === FighterState::KNOCKED_DOWN) {
@@ -105,7 +98,7 @@ class Attack
                         \Mordheim\BattleLogger::add("Сэйв не удался.");
                     }
                 }
-                $success = InjuryRoll::roll($source, $target, $weapon);
+                $success = InjuryRoll::roll($battle, $source, $target, $weapon);
                 \Mordheim\BattleLogger::add("[DEBUG] result=" . (string)$success . " (damage inflicted)");
                 // Если rollInjury не перевёл в OUT_OF_ACTION, явно выставить wounds=0
                 if ($target->state !== FighterState::OUT_OF_ACTION) {
@@ -198,11 +191,11 @@ class Attack
             // Critical: если woundRoll==6, всегда крит (для совместимости с тестом)
             $isCritical = isset($woundRoll) && $woundRoll == 6;
             if ($isCritical) {
-                $success = \Mordheim\Rule\InjuryRoll::roll($source, $target, $weapon, true);
+                $success = InjuryRoll::roll($battle, $source, $target, $weapon, true);
             } else {
                 if ($weapon && ($weapon->hasRule(\Mordheim\SpecialRule::CLUB) || $weapon->hasRule(\Mordheim\SpecialRule::CONCUSSION))) {
                     \Mordheim\BattleLogger::add("Особое правило: дубина/конкашн — всегда injury table");
-                    $success = \Mordheim\Rule\InjuryRoll::roll($source, $target, $weapon);
+                    $success = InjuryRoll::roll($battle, $source, $target, $weapon);
                 } else {
                     $target->characteristics->wounds -= 1;
                     \Mordheim\BattleLogger::add("У {$target->name} осталось {$target->characteristics->wounds} ран(а/ий)");

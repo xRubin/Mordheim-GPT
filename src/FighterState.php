@@ -11,7 +11,7 @@ enum FighterState: string
     case OUT_OF_ACTION = 'out_of_action';
     case PANIC = 'panic';
 
-    public function validate(): bool
+    public function canAct(): bool
     {
         return match ($this) {
             self::STANDING => true,

@@ -3,80 +3,52 @@
 namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
-use Mordheim\Exceptions\FighterAbnormalStateException;
 use Mordheim\Fighter;
-use Mordheim\FighterState;
-use Mordheim\GameField;
+use Mordheim\Rule\Charge;
 
-class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategy
+class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategyInterface
 {
-    public function movePhase(Battle $battle, Fighter $fighter, array $enemies, GameField $field): void
+    protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->validate();
-        } catch (FighterAbnormalStateException $e) {
-            if ($e->getState() === FighterState::KNOCKED_DOWN) {
-                $this->movedThisTurn = \Mordheim\Rule\StandUp::apply($fighter);
-            } else {
-                \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
-                return;
-            }
-        }
-
         if (empty($enemies)) return;
+
         $target = $this->getNearestEnemy($fighter, $enemies);
 
         if (!$fighter->isAdjacent($target)) {
-            if ($closeCombat = \Mordheim\Rule\Charge::attempt($field, $fighter, $target)) {
-                $battle->addCombat($closeCombat);
+            if (!$this->spentCharge && ($closeCombat = Charge::attempt($battle, $fighter, $target))) {
+                $battle->getActiveCombats()->add($closeCombat);
+                $this->spentCharge = true;
+                $this->spentShoot = true;
+                $this->spentMagic = true;
             } else {
-                \Mordheim\Rule\Move::apply($field, $fighter, $target->position);
-                $this->movedThisTurn = true;
+                \Mordheim\Rule\Move::apply($battle, $fighter, $target->position);
             }
         }
     }
 
-    public function shootPhase(Battle $battle, Fighter $fighter, array $enemies, GameField $field): void
+    protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->validate();
-        } catch (FighterAbnormalStateException $e) {
-            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
-            return;
-        }
         $ranged = $this->getRangedWeapon($fighter);
         if (!$ranged || empty($enemies)) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
         if ($target && $fighter->distance($target) <= $ranged->range) {
-            \Mordheim\Rule\Shoot::apply($fighter, $target, false);
+            \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, false);
         }
     }
 
-    public function magicPhase(Battle $battle, Fighter $fighter, array $enemies, GameField $field): void
+    protected function onMagicPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->validate();
-        } catch (FighterAbnormalStateException $e) {
-            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
-            return;
-        }
         // TODO: реализовать заклинания
     }
 
-    public function closeCombatPhase(Battle $battle, Fighter $fighter, array $enemies, GameField $field): void
+    protected function onCloseCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->validate();
-        } catch (FighterAbnormalStateException $e) {
-            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
-            return;
-        }
         if (empty($enemies)) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
         if ($target && $fighter->isAdjacent($target)) {
-            $canAttack = $this->canActAgainst($fighter, $target, $field);
+            $canAttack = $this->canActAgainst($battle, $fighter, $target);
             if ($canAttack) {
-                \Mordheim\Rule\Attack::apply($fighter, $target);
+                \Mordheim\Rule\Attack::apply($battle, $fighter, $target);
             }
         }
     }

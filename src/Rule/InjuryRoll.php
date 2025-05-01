@@ -2,6 +2,7 @@
 
 namespace Mordheim\Rule;
 
+use Mordheim\Battle;
 use Mordheim\Fighter;
 use Mordheim\FighterState;
 use Mordheim\Weapon;
@@ -10,13 +11,14 @@ class InjuryRoll
 {
     /**
      * Таблица ранений Mordheim
+     * @param Battle $battle
      * @param Fighter $source
      * @param Fighter $target
      * @param Weapon|null $weapon
      * @param bool $isCritical
      * @return bool
      */
-    public static function roll(Fighter $source, Fighter $target, ?Weapon $weapon = null, bool $isCritical = false): bool
+    public static function roll(Battle $battle, Fighter $source, Fighter $target, ?Weapon $weapon = null, bool $isCritical = false): bool
     {
         $injuryRoll = \Mordheim\Dice::roll(6);
         $injuryMod = $source->equipmentManager->getInjuryModifier($weapon);
@@ -26,17 +28,13 @@ class InjuryRoll
         if ($roll > 6) $roll = 6;
         // Critical: если woundRoll=6 и есть Critical, сразу OutOfAction
         if ($weapon && $isCritical) {
-            $target->state = FighterState::OUT_OF_ACTION;
-            $target->alive = false;
-            $target->characteristics->wounds = 0;
+            $battle->killFighter($target);
             return true;
         }
         // Club/Mace/Hammer/Concussion: 1 — выбыл, 2 — knockdown, 3-6 — stun
         if ($weapon && $weapon->hasRule(\Mordheim\SpecialRule::CLUB) || $weapon->hasRule(\Mordheim\SpecialRule::CONCUSSION)) {
             if ($roll == 1) {
-                $target->state = FighterState::OUT_OF_ACTION;
-                $target->alive = false;
-                $target->characteristics->wounds = 0;
+                $battle->killFighter($target);
             } elseif ($roll == 2) {
                 $target->state = FighterState::KNOCKED_DOWN;
             } else {
@@ -50,9 +48,7 @@ class InjuryRoll
         } elseif ($roll == 3 || $roll == 4 || $roll == 5) {
             $target->state = $target->tryAvoidStun() ? FighterState::KNOCKED_DOWN : FighterState::STUNNED;
         } else {
-            $target->state = FighterState::OUT_OF_ACTION;
-            $target->alive = false;
-            $target->characteristics->wounds = 0;
+            $battle->killFighter($target);
         }
         return true;
     }

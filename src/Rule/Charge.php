@@ -5,25 +5,60 @@ namespace Mordheim\Rule;
 use Mordheim\CloseCombat;
 use Mordheim\Fighter;
 use Mordheim\GameField;
+use Mordheim\Battle;
 
 class Charge
 {
     /**
      * Выполнить попытку charge (атаки с разбега) по правилам Mordheim 1999
      * Возвращает объект CloseCombat при успехе
-     * @param GameField $field
+     * @param Battle $battle
      * @param Fighter $attacker
      * @param Fighter $defender
      * @param array $otherUnits
      * @return CloseCombat|null
      */
-    public static function attempt(GameField $field, Fighter $attacker, Fighter $defender, array $otherUnits = []): ?CloseCombat
+    public static function attempt(Battle $battle, Fighter $attacker, Fighter $defender, array $otherUnits = []): ?CloseCombat
     {
         // Charge запрещён, если атакующий уже вовлечён в ближний бой
-        if (self::isEngaged($attacker, $otherUnits)) {
+        if ($battle->getActiveCombats()->isFighterInCombat($attacker)) {
             \Mordheim\BattleLogger::add("{$attacker->name} не может объявить charge: уже вовлечён в ближний бой.");
             return null;
         }
+
+        $targetPos = self::getNearestChargePosition($battle, $attacker, $defender);
+        if (null === $targetPos) {
+            \Mordheim\BattleLogger::add("{$attacker->name} не может совершить charge: зона вокруг с целью заблокирована.");
+            return null;
+        }
+
+        // Проверить, хватает ли движения
+        $movePoints = $attacker->getMovement() * 2;
+        $path = \Mordheim\PathFinder::findPath($battle->getField(), $attacker->position, $targetPos, $attacker->getMovementWeights(), array_map(fn($u) => $u->position, $otherUnits));
+        if (!$path || count($path) < 2) {
+            \Mordheim\BattleLogger::add("{$attacker->name} не может совершить charge: путь к цели заблокирован.");
+            return null;
+        }
+        $cost = $path[count($path)-1]['cost'];
+        if ($cost > $movePoints) {
+            \Mordheim\BattleLogger::add("{$attacker->name} не может совершить charge: не хватает движения (нужно $cost, есть $movePoints).");
+            return null;
+        }
+        // Переместить бойца
+        $attacker->position = $targetPos;
+        \Mordheim\BattleLogger::add("{$attacker->name} совершает charge на {$defender->name}! Перемещён на [".implode(',', $targetPos)."]");
+        return new CloseCombat($attacker, $defender);
+    }
+
+    /**
+     * TODO: obstacles
+     * @param Battle $battle
+     * @param Fighter $attacker
+     * @param Fighter $defender
+     * @return array|null
+     */
+    protected static function getNearestChargePosition(Battle $battle, Fighter $attacker, Fighter $defender): ?array
+    {
         // Определить клетки adjacent к цели
         $adjacent = self::getAdjacentPositions($defender->position);
         $minDist = INF;
@@ -35,41 +70,13 @@ class Charge
                 $targetPos = $pos;
             }
         }
-        // Проверить, хватает ли движения (без Sprint!)
-        $movePoints = $attacker->getMovement();
-        $path = \Mordheim\PathFinder::findPath($field, $attacker->position, $targetPos, $attacker->getMovementWeights(), array_map(fn($u) => $u->position, $otherUnits));
-        if (!$path || count($path) < 2) {
-            \Mordheim\BattleLogger::add("{$attacker->name} не может совершить charge: путь к цели заблокирован.");
-            return null;
-        }
-        $cost = $path[count($path)-1]['cost'];
-        if ($cost > $movePoints + 1e-6) {
-            \Mordheim\BattleLogger::add("{$attacker->name} не может совершить charge: не хватает движения (нужно $cost, есть $movePoints).");
-            return null;
-        }
-        // Переместить бойца
-        $attacker->position = $targetPos;
-        \Mordheim\BattleLogger::add("{$attacker->name} совершает charge на {$defender->name}! Перемещён на [".implode(',', $targetPos)."]");
-        return new CloseCombat($attacker, $defender);
-    }
-
-    /**
-     * Проверить, вовлечён ли боец в рукопашную (есть ли adjacent враги)
-     */
-    public static function isEngaged(Fighter $fighter, array $otherUnits): bool
-    {
-        foreach ($otherUnits as $unit) {
-            if ($unit !== $fighter && $unit->alive && $fighter->isAdjacent($unit)) {
-                return true;
-            }
-        }
-        return false;
+        return $targetPos;
     }
 
     /**
      * Получить список позиций, смежных с данной
      */
-    public static function getAdjacentPositions(array $position): array
+    protected static function getAdjacentPositions(array $position): array
     {
         $adj = [];
         for ($dx = -1; $dx <= 1; $dx++) {
@@ -83,7 +90,7 @@ class Charge
         return $adj;
     }
 
-    public static function distance(array $a, array $b): float
+    protected static function distance(array $a, array $b): float
     {
         return sqrt(pow($a[0]-$b[0],2)+pow($a[1]-$b[1],2)+pow($a[2]-$b[2],2));
     }

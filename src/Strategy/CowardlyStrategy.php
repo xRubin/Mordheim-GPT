@@ -3,30 +3,19 @@
 namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
-use Mordheim\Exceptions\FighterAbnormalStateException;
 use Mordheim\Fighter;
-use Mordheim\FighterState;
-use Mordheim\GameField;
 
-class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
+class CowardlyStrategy extends BaseBattleStrategy
 {
-    public function movePhase(Battle $battle, Fighter $fighter, array $enemies, GameField $field): void
+    protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->validate();
-        } catch (FighterAbnormalStateException $e) {
-            if ($e->getState() === FighterState::KNOCKED_DOWN) {
-                $this->movedThisTurn = \Mordheim\Rule\StandUp::apply($fighter);
-            } else {
-                \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
-                return;
-            }
-        }
+        if ($battle->getActiveCombats()->isFighterInCombat($fighter))
+            return;
 
         // Ищем лидера в радиусе 6" (Ld bubble)
         $leader = null;
         foreach ($battle->getAlliesFor($fighter) as $ally) {
-            if (method_exists($ally, 'isLeader') && $ally->isLeader() && $fighter->distance($ally) <= 6) {
+            if ($ally->hasSkill('Leader') && $fighter->distance($ally) <= 6) {
                 $leader = $ally;
                 break;
             }
@@ -36,7 +25,7 @@ class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
             $nearest = null;
             $minDist = PHP_INT_MAX;
             foreach ($battle->getAlliesFor($fighter) as $ally) {
-                if (method_exists($ally, 'isLeader') && $ally->isLeader()) {
+                if ($ally->hasSkill('Leader')) {
                     $dist = $fighter->distance($ally);
                     if ($dist < $minDist) {
                         $minDist = $dist;
@@ -45,14 +34,14 @@ class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
                 }
             }
             if ($nearest) {
-                \Mordheim\Rule\Move::apply($field, $fighter, $nearest->position, [], true);
+                \Mordheim\Rule\Move::apply($battle, $fighter, $nearest->position, [], true);
                 return;
             }
         }
         if (empty($enemies)) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
         if (!$target) return;
-        $canAct = $this->canActAgainst($fighter, $target);
+        $canAct = $this->canActAgainst($battle, $fighter, $target);
         if (!$canAct) {
             // Не прошёл тест — не действует
             return;
@@ -65,7 +54,7 @@ class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
             $dy = $fy - $ty;
             $dz = $fz - $tz;
             $move = [$fx + ($dx !== 0 ? ($dx > 0 ? 1 : -1) : 0), $fy + ($dy !== 0 ? ($dy > 0 ? 1 : -1) : 0), $fz + ($dz !== 0 ? ($dz > 0 ? 1 : -1) : 0)];
-            if ($move[0] >= 0 && $move[1] >= 0 && $move[2] >= 0 && $move[0] < 64 && $move[1] < 64 && $move[2] < 4 && !$field->getCell($move[0], $move[1], $move[2])->obstacle) {
+            if ($move[0] >= 0 && $move[1] >= 0 && $move[2] >= 0 && $move[0] < 64 && $move[1] < 64 && $move[2] < 4 && !$battle->getField()->getCell($move[0], $move[1], $move[2])->obstacle) {
                 $fighter->position = $move;
             }
         } else {
@@ -73,47 +62,28 @@ class CowardlyStrategy extends BaseBattleStrategy implements BattleStrategy
             $ranged = $this->getRangedWeapon($fighter);
             if ($ranged && $fighter->distance($target) > $ranged->range) {
                 // Если не в радиусе, двигаемся к цели
-                \Mordheim\Rule\Move::apply($field, $fighter, $target->position, [], true);
-                $this->movedThisTurn = true;
+                \Mordheim\Rule\Move::apply($battle, $fighter, $target->position, [], true);
             }
         }
     }
 
-    public function shootPhase(Battle $battle, Fighter $fighter, array $enemies, GameField $field): void
+    protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->validate();
-        } catch (FighterAbnormalStateException $e) {
-            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
-            return;
-        }
         if (empty($enemies)) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
         $ranged = $this->getRangedWeapon($fighter);
         if ($ranged && $target && $fighter->distance($target) > 6) {
-            \Mordheim\Rule\Shoot::apply($fighter, $target, false);
+            \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, false);
         }
     }
 
-    public function magicPhase(Battle $battle, Fighter $fighter, array $enemies, GameField $field): void
+    protected function onMagicPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->validate();
-        } catch (FighterAbnormalStateException $e) {
-            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
-            return;
-        }
         // TODO: реализовать заклинания
     }
 
-    public function closeCombatPhase(Battle $battle, Fighter $fighter, array $enemies, GameField $field): void
+    protected function onCloseCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->validate();
-        } catch (FighterAbnormalStateException $e) {
-            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
-            return;
-        }
         // Обычно не атакует в рукопашную, если только не окружён
     }
 }

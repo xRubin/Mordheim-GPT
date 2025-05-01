@@ -1,18 +1,29 @@
 <?php
+
 namespace Mordheim\Strategy;
 
+use Mordheim\Battle;
+use Mordheim\Exceptions\FighterAbnormalStateException;
 use Mordheim\Fighter;
 use Mordheim\FighterState;
 use Mordheim\GameField;
 
-abstract class BaseBattleStrategy implements BattleStrategy
+abstract class BaseBattleStrategy implements BattleStrategyInterface
 {
-    public $movedThisTurn = false;
+    public $spentMove = false;
+    public $spentCharge = false;
+    public $spentShoot = false;
+    public $spentMagic = false;
+    public $spentCloseCombat = false;
 
 
     public function resetOnTurn(): static
     {
-        $this->movedThisTurn = false;
+        $this->spentMove = false;
+        $this->spentCharge = false;
+        $this->spentShoot = false;
+        $this->spentMagic = false;
+        $this->spentCloseCombat = false;
         return $this;
     }
 
@@ -29,23 +40,13 @@ abstract class BaseBattleStrategy implements BattleStrategy
     /**
      * Проверить страх/ужас. Вернёт true если можно действовать
      */
-    protected function canActAgainst(Fighter $fighter, Fighter $target, GameField $field = null): bool
+    protected function canActAgainst(Battle $battle, Fighter $fighter, Fighter $target): bool
     {
-        if ($field !== null && method_exists($field, 'getAllies')) {
-            $allies = $field->getAllies($fighter);
-            if (method_exists($target, 'causesTerror') && $target->causesTerror()) {
-                return \Mordheim\Rule\Psychology::testTerror($fighter, $allies);
-            } elseif (method_exists($target, 'causesFear') && $target->causesFear()) {
-                return \Mordheim\Rule\Psychology::testFear($fighter, $target, $allies);
-            }
-        } else {
-            // Backward compatibility: no allies context
-            if (method_exists($target, 'causesTerror') && $target->causesTerror()) {
-                return \Mordheim\Rule\Psychology::testTerror($fighter);
-            } elseif (method_exists($target, 'causesFear') && $target->causesFear()) {
-                return \Mordheim\Rule\Psychology::testFear($fighter, $target);
-            }
-        }
+        $allies = $battle->getAlliesFor($fighter);
+        if ($target->hasSkill('Terror'))
+            return \Mordheim\Rule\Psychology::testTerror($fighter, $allies);
+        if ($target->hasSkill('Fear'))
+            return \Mordheim\Rule\Psychology::testFear($fighter, $target, $allies);
         return true;
     }
 
@@ -61,4 +62,83 @@ abstract class BaseBattleStrategy implements BattleStrategy
         }
         return null;
     }
+
+    public function movePhase(Battle $battle, Fighter $fighter, array $enemies): void
+    {
+        try {
+            $fighter->state->canAct();
+        } catch (FighterAbnormalStateException $e) {
+            if ($e->getState() === FighterState::KNOCKED_DOWN) {
+                if ($this->spentMove = \Mordheim\Rule\StandUp::apply($fighter)) {
+                    // потратили вставание по общим правилам
+                    $this->spentCharge = true;
+                    $this->spentCloseCombat = true;
+                }
+            } else {
+                \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
+                return;
+            }
+        }
+
+        if ($battle->getActiveCombats()->isFighterInCombat($fighter))
+            return;
+
+        if (!$this->spentMove)
+            $this->onMovePhase($battle, $fighter, $enemies);
+
+        $this->spentMove = true;
+    }
+
+    public function shootPhase(Battle $battle, Fighter $fighter, array $enemies): void
+    {
+        try {
+            $fighter->state->canAct();
+        } catch (FighterAbnormalStateException $e) {
+            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
+            return;
+        }
+
+        if ($battle->getActiveCombats()->isFighterInCombat($fighter))
+            return;
+
+        if (!$this->spentShoot)
+            $this->onShootPhase($battle, $fighter, $enemies);
+
+        $this->spentShoot = true;
+    }
+
+    public function magicPhase(Battle $battle, Fighter $fighter, array $enemies): void
+    {
+        try {
+            $fighter->state->canAct();
+        } catch (FighterAbnormalStateException $e) {
+            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
+            return;
+        }
+
+        if (!$this->spentMagic)
+            $this->onMagicPhase($battle, $fighter, $enemies);
+
+        $this->spentMagic = true;
+    }
+
+    public function closeCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void
+    {
+        try {
+            $fighter->state->canAct();
+        } catch (FighterAbnormalStateException $e) {
+            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
+            return;
+        }
+
+        if (!$this->spentCloseCombat)
+            $this->onCloseCombatPhase($battle, $fighter, $enemies);
+
+        $this->spentCloseCombat = true;
+    }
+
+    abstract protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void;
+    abstract protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void;
+    abstract protected function onMagicPhase(Battle $battle, Fighter $fighter, array $enemies): void;
+    abstract protected function onCloseCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void;
 }

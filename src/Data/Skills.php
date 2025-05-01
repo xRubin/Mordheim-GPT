@@ -35,6 +35,7 @@ class Skills
                 'Leader' => new Skill('Leader', '6" leadership bonus.'),
                 'Wealth' => new Skill('Wealth', '+100gc to starting treasury.'),
                 'Stupidity' => new Skill('Stupidity', 'At the start of turn, must pass Leadership test or do nothing for that turn.'),
+                'Large Target' => new Skill('Large Target', 'Large Targets as defined in the shooting rules.'),
             ];
         }
         return self::$cache;

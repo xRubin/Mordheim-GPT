@@ -6,7 +6,7 @@ use Mordheim\CloseCombatCollection;
 use Mordheim\EquipmentManager;
 use Mordheim\Exceptions\CloseCombatCollectionOutOfBoundsException;
 use Mordheim\Fighter;
-use Mordheim\Strategy\BattleStrategy;
+use Mordheim\Strategy\BattleStrategyInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -26,7 +26,7 @@ class CloseCombatCollectionTest extends TestCase
 
         // Создаем тестовых бойцов
         $char = new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7);
-        $strategy = $this->createMock(BattleStrategy::class);
+        $strategy = $this->createMock(BattleStrategyInterface::class);
         $this->fighter1 = new Fighter('Fighter1', $char, [], new EquipmentManager(), $strategy, [0, 0, 0]);
         $this->fighter2 = new Fighter('Fighter2', $char, [], new EquipmentManager(), $strategy, [1, 0, 0]);
         $this->fighter3 = new Fighter('Fighter3', $char, [], new EquipmentManager(), $strategy, [2, 0, 0]);
