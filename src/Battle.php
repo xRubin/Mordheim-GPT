@@ -132,11 +132,31 @@ class Battle
     {
         \Mordheim\BattleLogger::add("Фаза рукопашного боя");
         foreach ($this->activeCombats->getAll() as $combat) {
-            foreach ($combat->fighters as $fighter) {
-                if ($fighter->alive && $fighter->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
-                    $enemies = $this->getEnemiesFor($fighter);
-                    $fighter->battleStrategy->closeCombatPhase($this, $fighter, $enemies);
+            $fighters = $combat->fighters;
+            usort($fighters, function(Fighter $a, Fighter $b) use ($combat) {
+                if ($combat->getBonus($a, CloseCombat::BONUS_CHARGED))
+                    return -1;
+                if ($combat->getBonus($b, CloseCombat::BONUS_CHARGED))
+                    return -1;
+                if ($a->getInitiative() === $b->getInitiative())
+                    return mt_rand(0,1) ? 1 : -1;
+                return $b->getInitiative() - $a->getInitiative();
+            });
+
+            foreach ($fighters as $fighter) {
+                if ($fighter->alive && $fighter->state === \Mordheim\FighterState::STANDING) {
+                    foreach ($fighters as $target) {
+                        if ($fighter !== $target)
+                            $fighter->battleStrategy->closeCombatPhase($this, $fighter, [$target]);
+                    }
                 }
+            }
+        }
+
+        foreach ($this->getFighters() as $fighter) {
+            if ($fighter->alive && $fighter->state === \Mordheim\FighterState::STANDING) {
+                $enemies = $this->getEnemiesFor($fighter);
+                $fighter->battleStrategy->closeCombatPhase($this, $fighter, $enemies);
             }
         }
     }

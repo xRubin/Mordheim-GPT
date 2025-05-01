@@ -80,6 +80,9 @@ class Fighter
     {
         $base = $this->characteristics->attacks;
         $bonus = 0;
+        if ($this->hasSkill('Frenzy')) {
+            $base *= 2;
+        }
         if ($this->equipmentManager->countOneHandedMeleeWeapons() >= 2) {
             $bonus = 1;
         }

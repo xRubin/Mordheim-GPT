@@ -42,11 +42,15 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
      */
     protected function canActAgainst(Battle $battle, Fighter $fighter, Fighter $target): bool
     {
-        $allies = $battle->getAlliesFor($fighter);
-        if ($target->hasSkill('Terror'))
-            return \Mordheim\Rule\Psychology::testTerror($fighter, $allies);
-        if ($target->hasSkill('Fear'))
-            return \Mordheim\Rule\Psychology::testFear($fighter, $target, $allies);
+        if ($fighter->hasSkill('Frenzy') && ($fighter->distance($target) < $fighter->getMovement() * 2)) {
+            return true;
+        } else {
+            $allies = $battle->getAlliesFor($fighter);
+            if ($target->hasSkill('Terror'))
+                return \Mordheim\Rule\Psychology::testTerror($fighter, $allies);
+            if ($target->hasSkill('Fear'))
+                return \Mordheim\Rule\Psychology::testFear($fighter, $target, $allies);
+        }
         return true;
     }
 
@@ -98,6 +102,9 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
             return;
         }
 
+        if (0 === $fighter->equipmentManager->countRangedWeapons())
+            return;
+
         if ($battle->getActiveCombats()->isFighterInCombat($fighter))
             return;
 
@@ -130,6 +137,9 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
             \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
             return;
         }
+
+        if (0 === $fighter->equipmentManager->countMeleeWeapons())
+            return;
 
         if (!$this->spentCloseCombat)
             $this->onCloseCombatPhase($battle, $fighter, $enemies);

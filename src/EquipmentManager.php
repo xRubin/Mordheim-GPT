@@ -110,6 +110,38 @@ class EquipmentManager
         return $count;
     }
 
+    /**
+     * Возвращает количество оружия ближнего боя
+     */
+    public function countMeleeWeapons(): int
+    {
+        $count = 0;
+        foreach ($this->weapons as $weapon) {
+            if (
+                $weapon->damageType === 'Melee'
+            ) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
+    /**
+     * Возвращает количество оружия дальнего боя
+     */
+    public function countRangedWeapons(): int
+    {
+        $count = 0;
+        foreach ($this->weapons as $weapon) {
+            if (
+                $weapon->damageType === 'Ranged'
+            ) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
     public function getMovementPenalty(): int
     {
         // Heavy Armor и Shield вместе дают -1 к движению, иначе штрафа нет
