@@ -33,7 +33,9 @@ class Charge
         }
 
         // Проверить, хватает ли движения
-        $movePoints = $attacker->getMovement() * 2;
+        $moveMultiplier = $attacker->hasSkill('Sprint') ? 3 : 2;
+        $movePoints = $attacker->getMovement() * $moveMultiplier;
+        \Mordheim\BattleLogger::add("{$attacker->name} может бежать на: $movePoints, множитель: $moveMultiplier");
         $path = \Mordheim\PathFinder::findPath($battle->getField(), $attacker->position, $targetPos, $attacker->getMovementWeights(), array_map(fn($u) => $u->position, $otherUnits));
         if (!$path || count($path) < 2) {
             \Mordheim\BattleLogger::add("{$attacker->name} не может совершить charge: путь к цели заблокирован.");

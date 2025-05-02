@@ -36,6 +36,7 @@ class Skills
                 'Wealth' => new Skill('Wealth', '+100gc to starting treasury.'),
                 'Stupidity' => new Skill('Stupidity', 'At the start of turn, must pass Leadership test or do nothing for that turn.'),
                 'Large Target' => new Skill('Large Target', 'Large Targets as defined in the shooting rules.'),
+                'Lightning Reflexes' => new Skill('Lightning Reflexes', 'If the warrior is charged he will ‘strike first’ against those that charged that turn.'),
             ];
         }
         return self::$cache;

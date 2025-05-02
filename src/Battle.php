@@ -135,11 +135,14 @@ class Battle
             $fighters = $combat->fighters;
             usort($fighters, function(Fighter $a, Fighter $b) use ($combat) {
                 if ($combat->getBonus($a, CloseCombat::BONUS_CHARGED))
-                    return -1;
+                    return ($b->hasSkill('Lightning Reflexes')&& !$a->hasSkill('Lightning Reflexes')) ? 1 : -1;
+
                 if ($combat->getBonus($b, CloseCombat::BONUS_CHARGED))
-                    return -1;
+                    return ($a->hasSkill('Lightning Reflexes')&& !$b->hasSkill('Lightning Reflexes')) ? -1 : 1;
+
                 if ($a->getInitiative() === $b->getInitiative())
                     return mt_rand(0,1) ? 1 : -1;
+
                 return $b->getInitiative() - $a->getInitiative();
             });
 
