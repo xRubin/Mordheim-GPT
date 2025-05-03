@@ -6,7 +6,7 @@ use Mordheim\Battle;
 use Mordheim\Exceptions\FighterAbnormalStateException;
 use Mordheim\Fighter;
 use Mordheim\FighterState;
-use Mordheim\GameField;
+use Mordheim\Ruler;
 
 abstract class BaseBattleStrategy implements BattleStrategyInterface
 {
@@ -33,7 +33,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
     protected function getNearestEnemy(Fighter $fighter, array $enemies): ?Fighter
     {
         if (empty($enemies)) return null;
-        usort($enemies, fn($a, $b) => $fighter->distance($a) <=> $fighter->distance($b));
+        usort($enemies, fn($a, $b) => Ruler::distance($fighter->position, $a->position) <=> Ruler::distance($fighter->position, $b->position));
         return $enemies[0];
     }
 
@@ -42,7 +42,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
      */
     protected function canActAgainst(Battle $battle, Fighter $fighter, Fighter $target): bool
     {
-        if ($fighter->hasSkill('Frenzy') && ($fighter->distance($target) < $fighter->getMovement() * 2)) {
+        if ($fighter->hasSkill('Frenzy') && (Ruler::distance($fighter->position, $target->position) < $fighter->getMovement() * 2)) {
             return true;
         } else {
             $allies = $battle->getAlliesFor($fighter);
@@ -148,7 +148,10 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
     }
 
     abstract protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void;
+
     abstract protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void;
+
     abstract protected function onMagicPhase(Battle $battle, Fighter $fighter, array $enemies): void;
+
     abstract protected function onCloseCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void;
 }

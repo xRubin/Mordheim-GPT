@@ -3,8 +3,10 @@
 namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
+use Mordheim\Exceptions\ChargeFailedException;
 use Mordheim\Fighter;
 use Mordheim\Rule\Charge;
+use Mordheim\Ruler;
 
 class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategyInterface
 {
@@ -14,16 +16,22 @@ class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategyInt
 
         $target = $this->getNearestEnemy($fighter, $enemies);
 
-        if (!$fighter->isAdjacent($target)) {
-            if (!$this->spentCharge && ($closeCombat = Charge::attempt($battle, $fighter, $target))) {
-                $battle->getActiveCombats()->add($closeCombat);
+        if ($fighter->isAdjacent($target))
+            return;
+
+        if (!$this->spentCharge) {
+            try {
+                $battle->getActiveCombats()->add(
+                    Charge::attempt($battle, $fighter, $target)
+                );
                 $this->spentCharge = true;
                 $this->spentShoot = true;
                 $this->spentMagic = true;
-            } else {
-                \Mordheim\Rule\Move::apply($battle, $fighter, $target->position);
+                return;
+            } catch (ChargeFailedException $e) {
             }
         }
+        \Mordheim\Rule\Move::apply($battle, $fighter, $target->position);
     }
 
     protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void
@@ -31,7 +39,7 @@ class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategyInt
         $ranged = $this->getRangedWeapon($fighter);
         if (!$ranged || empty($enemies)) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
-        if ($target && $fighter->distance($target) <= $ranged->range) {
+        if ($target && Ruler::distance($fighter->position, $target->position) <= $ranged->range) {
             \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, false);
         }
     }

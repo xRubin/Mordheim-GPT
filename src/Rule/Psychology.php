@@ -4,6 +4,7 @@ namespace Mordheim\Rule;
 
 use Mordheim\Dice;
 use Mordheim\Fighter;
+use Mordheim\Ruler;
 
 /**
  * Класс для проверки психологических эффектов и лидерства по правилам Mordheim
@@ -34,7 +35,7 @@ class Psychology
                     \Mordheim\FighterState::KNOCKED_DOWN
                 ], true)
             ) {
-                if ($fighter->distance($ally) <= 6) {
+                if (Ruler::distance($fighter->position, $ally->position) <= 6) {
                     if ($ally->characteristics->leadership > $usedLd) {
                         $usedLd = $ally->characteristics->leadership;
                         $usedLeader = $ally;
@@ -130,9 +131,9 @@ class Psychology
      */
     public static function allAloneTest(Fighter $fighter, array $enemies, array $allies): bool
     {
-        $closeEnemies = array_filter($enemies, fn($e) => $fighter->distance($e) <= 1.99);
+        $closeEnemies = array_filter($enemies, fn($enemy) => Ruler::distance($fighter->position, $enemy->position) <= 1.99);
         if (count($closeEnemies) < 2) return true;
-        $closeAllies = array_filter($allies, fn($a) => $a !== $fighter && $a->alive && $a->state === \Mordheim\FighterState::STANDING && $fighter->distance($a) <= 6);
+        $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->alive && $ally->state === \Mordheim\FighterState::STANDING && Ruler::distance($fighter->position, $ally->position) <= 6);
         if (count($closeAllies) > 0) return true;
         $roll = \Mordheim\Dice::roll(6) + \Mordheim\Dice::roll(6);
         $success = $roll <= $fighter->characteristics->leadership;
@@ -163,7 +164,7 @@ class Psychology
      */
     public static function frenzyEffect(Fighter $fighter, array $enemies): array
     {
-        $inRange = array_filter($enemies, fn($e) => $fighter->distance($e) <= $fighter->chargeRange());
+        $inRange = array_filter($enemies, fn($enemy) => Ruler::distance($fighter->position, $enemy->position) <= $fighter->getChargeRange());
         $mustCharge = count($inRange) > 0;
         $attacks = $fighter->characteristics->attacks * 2;
         \Mordheim\BattleLogger::add("DEBUG: FrenzyEffect baseAttacks={$fighter->characteristics->attacks}, resultAttacks=$attacks");

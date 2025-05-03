@@ -1,4 +1,5 @@
 <?php
+
 namespace Mordheim;
 
 class PathFinder
@@ -17,15 +18,15 @@ class PathFinder
         // Приоритетная очередь: массив из [стоимость, путь]
         $queue = new \SplPriorityQueue();
         // SplPriorityQueue извлекает элементы с наибольшим приоритетом, поэтому используем отрицательную стоимость
-        $queue->insert([['pos'=>$start,'cost'=>0.0]], 0);
+        $queue->insert([['pos' => $start, 'cost' => 0.0]], 0);
         $costSoFar = [];
         $costSoFar[implode(',', $start)] = 0.0;
         $blockSet = array_map(fn($b) => implode(',', $b), $blockers);
         // 8 направлений по горизонтали + вертикаль
         $dirs = [
-            [1,0,0], [-1,0,0], [0,1,0], [0,-1,0],
-            [1,1,0], [1,-1,0], [-1,1,0], [-1,-1,0], // диагонали
-            [0,0,1], [0,0,-1] // этажи
+            [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0],
+            [1, 1, 0], [1, -1, 0], [-1, 1, 0], [-1, -1, 0], // диагонали
+            [0, 0, 1], [0, 0, -1] // этажи
         ];
         while (!$queue->isEmpty()) {
             $path = $queue->extract();
@@ -38,7 +39,9 @@ class PathFinder
             }
             [$x, $y, $z] = $pos;
             foreach ($dirs as [$dx, $dy, $dz]) {
-                $nx = $x + $dx; $ny = $y + $dy; $nz = $z + $dz;
+                $nx = $x + $dx;
+                $ny = $y + $dy;
+                $nz = $z + $dz;
                 if ($nx < 0 || $ny < 0 || $nz < 0 || $nx >= 64 || $ny >= 64 || $nz >= 4) continue;
                 $key = "$nx,$ny,$nz";
                 if (in_array($key, $blockSet)) continue;

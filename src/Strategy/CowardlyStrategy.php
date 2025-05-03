@@ -4,6 +4,7 @@ namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
 use Mordheim\Fighter;
+use Mordheim\Ruler;
 
 class CowardlyStrategy extends BaseBattleStrategy
 {
@@ -15,7 +16,7 @@ class CowardlyStrategy extends BaseBattleStrategy
         // Ищем лидера в радиусе 6" (Ld bubble)
         $leader = null;
         foreach ($battle->getAlliesFor($fighter) as $ally) {
-            if ($ally->hasSkill('Leader') && $fighter->distance($ally) <= 6) {
+            if ($ally->hasSkill('Leader') && Ruler::distance($fighter->position, $ally->position) <= 6) {
                 $leader = $ally;
                 break;
             }
@@ -26,7 +27,7 @@ class CowardlyStrategy extends BaseBattleStrategy
             $minDist = PHP_INT_MAX;
             foreach ($battle->getAlliesFor($fighter) as $ally) {
                 if ($ally->hasSkill('Leader')) {
-                    $dist = $fighter->distance($ally);
+                    $dist = Ruler::distance($fighter->position, $ally->position);
                     if ($dist < $minDist) {
                         $minDist = $dist;
                         $nearest = $ally;
@@ -46,7 +47,7 @@ class CowardlyStrategy extends BaseBattleStrategy
             // Не прошёл тест — не действует
             return;
         }
-        if ($fighter->distance($target) < 4) {
+        if (Ruler::distance($fighter->position, $target->position) < 4) {
             // Уходит от врага
             [$fx, $fy, $fz] = $fighter->position; // остальная логика ниже
             [$tx, $ty, $tz] = $target->position;
@@ -60,7 +61,7 @@ class CowardlyStrategy extends BaseBattleStrategy
         } else {
             // Проверяем наличие стрелкового оружия и его дальность
             $ranged = $this->getRangedWeapon($fighter);
-            if ($ranged && $fighter->distance($target) > $ranged->range) {
+            if ($ranged && Ruler::distance($fighter->position, $target->position) > $ranged->range) {
                 // Если не в радиусе, двигаемся к цели
                 \Mordheim\Rule\Move::apply($battle, $fighter, $target->position, [], true);
             }
@@ -72,7 +73,7 @@ class CowardlyStrategy extends BaseBattleStrategy
         if (empty($enemies)) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
         $ranged = $this->getRangedWeapon($fighter);
-        if ($ranged && $target && $fighter->distance($target) > 6) {
+        if ($ranged && $target && Ruler::distance($fighter->position, $target->position) > 6) {
             \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, false);
         }
     }

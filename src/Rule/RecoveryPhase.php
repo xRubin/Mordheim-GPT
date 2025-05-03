@@ -2,6 +2,7 @@
 
 namespace Mordheim\Rule;
 
+use Mordheim\Ruler;
 use Mordheim\Warband;
 
 class RecoveryPhase
@@ -46,9 +47,9 @@ class RecoveryPhase
                         }
                     }
                 }
-                $closeEnemies = array_filter($enemies, fn($e)=>$fighter->distance($e)<=1.99);
-                $closeAllies = array_filter($allies, fn($a)=>$a!==$fighter && $a->alive && $a->state===\Mordheim\FighterState::STANDING && $fighter->distance($a)<=6);
-                if (count($closeEnemies)>=2 && count($closeAllies)===0) {
+                $closeEnemies = array_filter($enemies, fn($enemy) => Ruler::distance($fighter->position, $enemy->position) <= 1.99);
+                $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->alive && $ally->state === \Mordheim\FighterState::STANDING && Ruler::distance($fighter->position, $ally->position) <= 6);
+                if (count($closeEnemies) >= 2 && count($closeAllies) === 0) {
                     if (!\Mordheim\Rule\Psychology::allAloneTest($fighter, $enemies, $allies)) {
                         $fighter->state = \Mordheim\FighterState::PANIC;
                         \Mordheim\BattleLogger::add("{$fighter->name} не выдержал одиночества и впадает в панику!");
@@ -73,10 +74,10 @@ class RecoveryPhase
                 }
             }
             foreach ($enemies as $enemy) {
-                if ($enemy->hasSkill('Fear') && $fighter->distance($enemy)<=8) {
+                if ($enemy->hasSkill('Fear') && Ruler::distance($fighter->position, $enemy->position) <= 8) {
                     \Mordheim\Rule\Psychology::testFear($fighter, $enemy, $warband->fighters);
                 }
-                if ($enemy->hasSkill('Terror') && $fighter->distance($enemy)<=8) {
+                if ($enemy->hasSkill('Terror') && Ruler::distance($fighter->position, $enemy->position) <= 8) {
                     \Mordheim\Rule\Psychology::testTerror($fighter, $warband->fighters);
                 }
             }

@@ -4,6 +4,7 @@ namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
 use Mordheim\Fighter;
+use Mordheim\Ruler;
 
 class CarefulStrategy extends BaseBattleStrategy implements BattleStrategyInterface
 {
@@ -29,7 +30,7 @@ class CarefulStrategy extends BaseBattleStrategy implements BattleStrategyInterf
         if (empty($enemies)) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
         $ranged = $this->getRangedWeapon($fighter);
-        if ($ranged && $target && $fighter->distance($target) <= $ranged->range && !$fighter->isAdjacent($target)) {
+        if ($ranged && $target && Ruler::distance($fighter->position, $target->position) <= $ranged->range && !$fighter->isAdjacent($target)) {
             \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, false);
         }
     }

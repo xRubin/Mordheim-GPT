@@ -4,6 +4,7 @@ namespace Mordheim\Rule;
 
 use Mordheim\Battle;
 use Mordheim\Fighter;
+use Mordheim\Ruler;
 
 class Shoot
 {
@@ -11,7 +12,7 @@ class Shoot
      * Стрельба по другому бойцу по правилам Mordheim
      * Учитывает Ballistic Skill, модификаторы (дальность, движение, укрытие, размер цели и т.д.)
      */
-    public static function apply(Battle $battle, Fighter $source, Fighter $target, bool $moved = false, bool $targetInCover = false): bool
+    public static function apply(Battle $battle, Fighter $source, Fighter $target, bool $moved = false): bool
     {
         if (!$source->alive || !$target->alive) return false;
         $ranged = null;
@@ -22,7 +23,7 @@ class Shoot
             }
         }
         if (!$ranged) return false;
-        if ($source->distance($target) > $ranged->range) return false;
+        if (Ruler::distance($source->position, $target->position) > $ranged->range) return false;
         // Move Or Fire: если оружие содержит спецправило, нельзя стрелять после движения
         if ($moved && $ranged->hasRule(\Mordheim\SpecialRule::MOVE_OR_FIRE)) {
             \Mordheim\BattleLogger::add("{$source->name} не может стрелять из {$ranged->name} после движения (Move or Fire).");
@@ -41,11 +42,11 @@ class Shoot
         // Модификаторы
         $mod = 0;
         // Дальний выстрел (больше половины дистанции)
-        if ($source->distance($target) > $ranged->range / 2) $mod += 1;
+        if (Ruler::distance($source->position, $target->position) > $ranged->range / 2) $mod += 1;
         // Двигался
         if ($moved) $mod += 1;
         // Цель в укрытии
-        if ($targetInCover) $mod += 1;
+        if (Ruler::hasObstacleBetween($battle, $source->position, $target->position)) $mod += 1;
         // Большая цель
         if ($target->hasSkill('Large Target')) $mod -= 1;
         // Модификатор оружия

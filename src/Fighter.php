@@ -132,13 +132,6 @@ class Fighter
         return abs($x1 - $x2) <= 1 && abs($y1 - $y2) <= 1 && abs($z1 - $z2) <= 1;
     }
 
-    public function distance(Fighter $other): float
-    {
-        [$x1, $y1, $z1] = $this->position;
-        [$x2, $y2, $z2] = $other->position;
-        return sqrt(pow($x1 - $x2, 2) + pow($y1 - $y2, 2) + pow($z1 - $z2, 2));
-    }
-
     /**
      * Добавить опыт бойцу
      */
@@ -191,9 +184,12 @@ class Fighter
      * Базовая дистанция заряда (charge) для Mordheim — 8 дюймов
      * @return int
      */
-    public function chargeRange(): int
+    public function getChargeRange(): int
     {
-        return 8;
+        $moveMultiplier = $this->hasSkill('Sprint') ? 3 : 2;
+        $movePoints = $this->getMovement() * $moveMultiplier;
+        \Mordheim\BattleLogger::add("{$this->name} может бежать на: $movePoints, множитель: $moveMultiplier");
+        return $movePoints;
     }
 
     /**

@@ -58,7 +58,7 @@ class FighterShootingTest extends TestCase
         $shooter = new Fighter('Shooter', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [Skills::getByName('Quick Shot')], new EquipmentManager([Weapons::getByName('Sling')]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
         $target = new Fighter('Target', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
         $battle = $this->makeClearBattle([$shooter], [$target]);
-        $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target, false, false);
+        $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target, false);
         $this->assertIsBool($result);
     }
 
