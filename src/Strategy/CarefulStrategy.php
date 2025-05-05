@@ -8,6 +8,7 @@ use Mordheim\Ruler;
 
 class CarefulStrategy extends BaseBattleStrategy implements BattleStrategyInterface
 {
+    public float $aggressiveness = 0.8;
     protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if (empty($enemies)) return;
@@ -21,7 +22,7 @@ class CarefulStrategy extends BaseBattleStrategy implements BattleStrategyInterf
         if (!$canAct) return;
         if (!$fighter->isAdjacent($target)) {
             // Держит дистанцию
-            \Mordheim\Rule\Move::apply($battle, $fighter, [$fighter->position[0] + 1, $fighter->position[1] + 1, $fighter->position[2]], [], true);
+            \Mordheim\Rule\Move::apply($battle, $fighter, [$fighter->position[0] + 1, $fighter->position[1] + 1, $fighter->position[2]], $this->aggressiveness, [], true);
         }
     }
 

@@ -8,6 +8,7 @@ use Mordheim\Ruler;
 
 class CowardlyStrategy extends BaseBattleStrategy
 {
+    public float $aggressiveness = 0.6;
     protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if ($battle->getActiveCombats()->isFighterInCombat($fighter))
@@ -35,7 +36,7 @@ class CowardlyStrategy extends BaseBattleStrategy
                 }
             }
             if ($nearest) {
-                \Mordheim\Rule\Move::apply($battle, $fighter, $nearest->position, [], true);
+                \Mordheim\Rule\Move::apply($battle, $fighter, $nearest->position, $this->aggressiveness, [], true);
                 return;
             }
         }
@@ -63,7 +64,7 @@ class CowardlyStrategy extends BaseBattleStrategy
             $ranged = $this->getRangedWeapon($fighter);
             if ($ranged && Ruler::distance($fighter->position, $target->position) > $ranged->range) {
                 // Если не в радиусе, двигаемся к цели
-                \Mordheim\Rule\Move::apply($battle, $fighter, $target->position, [], true);
+                \Mordheim\Rule\Move::apply($battle, $fighter, $target->position, $this->aggressiveness, [], true);
             }
         }
     }

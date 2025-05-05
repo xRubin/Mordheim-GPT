@@ -10,6 +10,8 @@ use Mordheim\Ruler;
 
 class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategyInterface
 {
+    public float $aggressiveness = 1.0;
+
     protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if (empty($enemies)) return;
@@ -22,7 +24,7 @@ class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategyInt
         if (!$this->spentCharge) {
             try {
                 $battle->getActiveCombats()->add(
-                    Charge::attempt($battle, $fighter, $target)
+                    Charge::attempt($battle, $fighter, $target, $this->aggressiveness)
                 );
                 $this->spentCharge = true;
                 $this->spentShoot = true;
@@ -31,7 +33,7 @@ class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategyInt
             } catch (ChargeFailedException $e) {
             }
         }
-        \Mordheim\Rule\Move::apply($battle, $fighter, $target->position);
+        \Mordheim\Rule\Move::apply($battle, $fighter, $target->position, $this->aggressiveness);
     }
 
     protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void

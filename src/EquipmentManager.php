@@ -339,4 +339,23 @@ class EquipmentManager
         }
         return false;
     }
+
+    /**
+     * @param SpecialRule $specialRule
+     * @return bool
+     */
+    public function hasSpecialRule(SpecialRule $specialRule): bool
+    {
+        foreach ($this->weapons as $i => $weapon) {
+            if ($weapon->hasRule($specialRule))
+                return true;
+        }
+
+        foreach ($this->armors as $i => $armor) {
+            if ($armor->hasRule($specialRule))
+                return true;
+        }
+
+        return false;
+    }
 }

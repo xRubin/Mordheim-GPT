@@ -16,11 +16,12 @@ class Charge
      * @param Battle $battle
      * @param Fighter $attacker
      * @param Fighter $defender
+     * @param float $aggressiveness
      * @param array $otherUnits
      * @return CloseCombat|null
      * @throws ChargeFailedException
      */
-    public static function attempt(Battle $battle, Fighter $attacker, Fighter $defender, array $otherUnits = []): ?CloseCombat
+    public static function attempt(Battle $battle, Fighter $attacker, Fighter $defender, float $aggressiveness, array $otherUnits = []): ?CloseCombat
     {
         // Charge запрещён, если атакующий уже вовлечён в ближний бой
         if ($battle->getActiveCombats()->isFighterInCombat($attacker)) {
@@ -36,7 +37,7 @@ class Charge
 
         // Проверить, хватает ли движения
         $movePoints = $attacker->getChargeRange();
-        $path = \Mordheim\PathFinder::findPath($battle->getField(), $attacker->position, $targetPos, $attacker->getMovementWeights(), array_map(fn($u) => $u->position, $otherUnits));
+        $path = \Mordheim\PathFinder::findPath($battle->getField(), $attacker->position, $targetPos, $attacker->getMovementWeights(), array_map(fn($u) => $u->position, $aggressiveness, $otherUnits));
         if (!$path || count($path) < 2) {
             \Mordheim\BattleLogger::add("{$attacker->name} не может совершить charge: путь к цели заблокирован.");
             throw new ChargeFailedException();

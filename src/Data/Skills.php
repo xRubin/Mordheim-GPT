@@ -24,7 +24,7 @@ class Skills
                 'Acrobat' => new Skill('Acrobat', 'Ignores falling damage and dangerous terrain when jumping or falling.'),
                 'Leap' => new Skill('Leap', 'Can jump up to 6\" horizontally (Initiative test required).'),
                 'Jump Up' => new Skill('Jump Up', 'May stand up from knockdown without spending movement.'),
-                'Nimble' => new Skill('Nimble', '+1 Initiative.'),
+                'Nimble' => new Skill('Nimble', '+1 Initiative.'), // TODO: check rules
                 // ... Добавить остальные навыки уровня 1a
                 'Eagle Eyes' => new Skill('Eagle Eyes', '+6" to maximum range of missile weapons.'),
                 'Scale Sheer Surfaces' => new Skill('Scale Sheer Surfaces', 'May climb any vertical surface without penalty.'),

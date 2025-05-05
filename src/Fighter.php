@@ -102,6 +102,16 @@ class Fighter
         return $base + $bonus;
     }
 
+    public function getClimbInitiative(): int
+    {
+        $base = $this->characteristics->initiative;
+        $bonus = 0;
+        if ($this->equipmentManager->hasSpecialRule(SpecialRule::CLIMB)) {
+            $bonus = 1;
+        }
+        return $base + $bonus;
+    }
+
     /**
      * Расчет весов для алгоритма передвижения
      */

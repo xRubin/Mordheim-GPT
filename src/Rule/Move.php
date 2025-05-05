@@ -6,6 +6,7 @@ use Mordheim\Exceptions\PathfinderInitiativeRollFailedException;
 use Mordheim\Exceptions\PathfinderTargetUnreachableException;
 use Mordheim\Fighter;
 use Mordheim\Battle;
+use Mordheim\SpecialRule;
 
 class Move
 {
@@ -15,11 +16,12 @@ class Move
      * @param Battle $battle
      * @param Fighter $fighter
      * @param array $target
+     * @param float $aggressiveness
      * @param array $otherUnits
      * @param bool $partialMove Если true — двигаться максимально в направлении цели, даже если не хватает очков движения
      * @return void
      */
-    public static function apply(Battle $battle, Fighter $fighter, array $target, array $otherUnits = [], bool $partialMove = false): void
+    public static function apply(Battle $battle, Fighter $fighter, array $target, float $aggressiveness, array $otherUnits = [], bool $partialMove = false): void
     {
         $blockers = [];
         foreach ($otherUnits as $unit) {
@@ -37,7 +39,7 @@ class Move
         }
         \Mordheim\BattleLogger::add("{$fighter->name}: movePoints = $movePoints (base: {$fighter->characteristics->movement}, sprintBonus: $sprintBonus)");
         // Получаем полный путь до цели
-        $path = \Mordheim\PathFinder::findPath($battle->getField(), $fighter->position, $target, $fighter->getMovementWeights(), $blockers);
+        $path = \Mordheim\PathFinder::findPath($battle->getField(), $fighter->position, $target, $fighter->getMovementWeights(), $aggressiveness, $blockers);
         if (!$path || count($path) < 2)
             throw new PathfinderTargetUnreachableException();
 
@@ -123,6 +125,17 @@ class Move
             // Лестница: можно двигаться по вертикали
             if ($cell->ladder || $fromCell->ladder) {
                 $desc .= "Лестница: разрешено движение по вертикали. ";
+            } else {
+                if ($z > $cur[2] && abs($x - $cur[0]) + abs($y - $cur[1]) == 1) {
+                    $desc .= "Лазание: тест Initiative. ";
+                    $roll = \Mordheim\Dice::roll(6);
+                    \Mordheim\BattleLogger::add("{$fighter->name} бросает Initiative для лазания: $roll против {$fighter->getClimbInitiative()}");
+                    if ($roll > $fighter->getClimbInitiative()) {
+                        $fighter->position = [$x, $y, $z];
+                        \Mordheim\BattleLogger::add("Провал Initiative при прыжке — юнит падает на ({$x},{$y},{$z})");
+                        throw (new PathfinderInitiativeRollFailedException())->setField($cell);
+                    }
+                }
             }
             if ($cost > $movePoints) {
                 \Mordheim\BattleLogger::add("Недостаточно очков движения для клетки ($x,$y,$z)");

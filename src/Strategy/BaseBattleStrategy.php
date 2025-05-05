@@ -16,6 +16,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
     public $spentMagic = false;
     public $spentCloseCombat = false;
 
+    public float $aggressiveness = 0.6;
 
     public function resetOnTurn(): static
     {
