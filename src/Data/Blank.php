@@ -6,6 +6,7 @@ use Mordheim\Armor;
 use Mordheim\BlankInterface;
 use Mordheim\Characteristics;
 use Mordheim\EquipmentListInterface;
+use Mordheim\WarbandInterface;
 use Mordheim\Weapon;
 
 enum Blank: int implements BlankInterface
@@ -47,7 +48,7 @@ enum Blank: int implements BlankInterface
             self::MIDDENHEIM_YOUNGBLOOD,
             self::MIDDENHEIM_WARRIOR,
             self::MIDDENHEIM_MARKSMAN,
-            self::MIDDENHEIM_SWORDSMAN => Warband::REIKLAND,
+            self::MIDDENHEIM_SWORDSMAN => Warband::MIDDENHEIM,
 
             self::MARIENBURG_MERCENARY_CAPTAIN,
             self::MARIENBURG_CHAMPION,
@@ -215,8 +216,8 @@ enum Blank: int implements BlankInterface
             self::REIKLAND_MERCENARY_CAPTAIN => new Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8),
             self::REIKLAND_CHAMPION => new Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7),
             self::REIKLAND_YOUNGBLOOD => new Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6),
-            self::REIKLAND_WARRIOR=> new Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7),
-            self::REIKLAND_MARKSMAN=> new Characteristics(4, 3, 4, 3, 3, 1, 3, 1, 7),
+            self::REIKLAND_WARRIOR => new Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7),
+            self::REIKLAND_MARKSMAN => new Characteristics(4, 3, 4, 3, 3, 1, 3, 1, 7),
             self::REIKLAND_SWORDSMAN => new Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7),
 
             self::MIDDENHEIM_MERCENARY_CAPTAIN => new Characteristics(4, 4, 4, 4, 3, 1, 4, 1, 8),
@@ -279,15 +280,15 @@ enum Blank: int implements BlankInterface
         return match ($this) {
             self::REIKLAND_MERCENARY_CAPTAIN => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::ACADEMIC, SkillGroup::STRENGTH, SkillGroup::SPEED],
             self::REIKLAND_CHAMPION => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::STRENGTH],
-            self::REIKLAND_YOUNGBLOOD =>  [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::SPEED],
+            self::REIKLAND_YOUNGBLOOD => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::SPEED],
 
             self::MIDDENHEIM_MERCENARY_CAPTAIN => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::ACADEMIC, SkillGroup::STRENGTH, SkillGroup::SPEED],
             self::MIDDENHEIM_CHAMPION => [SkillGroup::COMBAT, SkillGroup::STRENGTH, SkillGroup::SPEED],
-            self::MIDDENHEIM_YOUNGBLOOD =>  [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::SPEED],
+            self::MIDDENHEIM_YOUNGBLOOD => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::SPEED],
 
             self::MARIENBURG_MERCENARY_CAPTAIN => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::ACADEMIC, SkillGroup::STRENGTH, SkillGroup::SPEED],
             self::MARIENBURG_CHAMPION => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::SPEED],
-            self::MARIENBURG_YOUNGBLOOD =>  [SkillGroup::COMBAT, SkillGroup::STRENGTH, SkillGroup::SPEED],
+            self::MARIENBURG_YOUNGBLOOD => [SkillGroup::COMBAT, SkillGroup::STRENGTH, SkillGroup::SPEED],
 
             default => [],
         };
