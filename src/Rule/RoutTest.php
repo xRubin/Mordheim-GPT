@@ -3,7 +3,7 @@
 namespace Mordheim\Rule;
 
 use Mordheim\Exceptions\RoutTestLeaderNotFoundException;
-use Mordheim\Fighter;
+use Mordheim\FighterInterface;
 use Mordheim\Warband;
 
 class RoutTest
@@ -37,23 +37,22 @@ class RoutTest
     private static function countOOA(Warband $warband): int
     {
         $ooa = 0;
-        foreach ($warband->fighters as $f) {
-            if ($f->state === \Mordheim\FighterState::OUT_OF_ACTION) $ooa++;
+        foreach ($warband->fighters as $fighter) {
+            if (!$fighter->getState()->getStatus()->isAlive()) $ooa++;
         }
         return $ooa;
     }
 
     /**
-     * TODO
      * По правилам бросает лидер (первый живой)
      * @param Warband $warband
-     * @return Fighter
+     * @return FighterInterface
      */
-    private static function findLeader(Warband $warband): Fighter
+    private static function findLeader(Warband $warband): FighterInterface
     {
-        foreach ($warband->fighters as $f) {
-            if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
-                return $f;
+        foreach ($warband->fighters as $fighter) {
+            if ($fighter->getState()->getStatus()->canAct() && $fighter->hasSkill('Leader')) {
+                return $fighter;
             }
         }
         throw new RoutTestLeaderNotFoundException();

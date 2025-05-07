@@ -2,65 +2,39 @@
 
 namespace Mordheim;
 
-use Mordheim\Strategy\BattleStrategyInterface;
-
-class Fighter
+class Fighter implements FighterInterface
 {
-    /** @var int Текущий опыт */
-    public int $experience = 0;
-    /** @var int Опыт, полученный за бой (для отчёта) */
-    public int $battleExperience = 0;
-    /** @var int Максимальное количество навыков (по правилам) */
-    public int $maxSkills = 6;
-
-    public string $name;
-    public Characteristics $characteristics;
-    /** @var Skill[] */
-    public array $skills = [];
-    public EquipmentManager $equipmentManager;
-    public BattleStrategyInterface $battleStrategy;
-    public array $position = [0, 0, 0]; // [x, y, z]
-    public bool $alive = true;
-    /**
-     * Состояние бойца (enum FighterState)
-     */
-    public FighterState $state = FighterState::STANDING;
+    private string $name = '';
 
     public function __construct(
-        string                  $name,
-        Characteristics         $characteristics,
-        array                   $skills,
-        EquipmentManager        $equipmentManager,
-        BattleStrategyInterface $battleStrategy,
-        array                   $position = [0, 0, 0],
-        FighterState            $state = FighterState::STANDING,
-        int                     $experience = 0,
+        private readonly BlankInterface       $blank,
+        private readonly AdvancementInterface $advancement,
+        private readonly EquipmentManager     $equipmentManager,
+        private ?FighterStateInterface        $fighterState = null,
     )
     {
-        $this->name = $name;
-        $this->characteristics = $characteristics;
-        $this->skills = $skills;
-        $this->equipmentManager = $equipmentManager;
-        $this->battleStrategy = $battleStrategy;
-        $this->position = $position;
-        $this->state = $state;
-        $this->experience = $experience;
+        $this->name = uniqid();
     }
 
-    /**
-     * Попытка избежать стана с помощью шлема (Avoid stun, 4+)
-     * @return bool true — спасся (stun превращается в knockdown), false — не спасся
-     */
-    public function tryAvoidStun(): bool
+    public function getName(): string
     {
-        if ($this->equipmentManager->hasHelmetProtection()) {
-            $roll = \Mordheim\Dice::roll(6);
-            if ($roll >= 4) {
-                \Mordheim\BattleLogger::add("{$this->name} спасся от стана шлемом (бросок $roll)");
-                return true;
-            }
-        }
-        return false;
+        return $this->name;
+    }
+
+    public function getEquipmentManager(): EquipmentManager
+    {
+        return $this->equipmentManager;
+    }
+
+    public function getState(): FighterStateInterface
+    {
+        return $this->fighterState;
+    }
+
+    public function setFighterState(?FighterStateInterface $fighterState): static
+    {
+        $this->fighterState = $fighterState;
+        return $this;
     }
 
     /**
@@ -68,9 +42,36 @@ class Fighter
      */
     public function getMovement(): int
     {
-        $base = $this->characteristics->movement;
+        $base = $this->blank->getCharacteristics()->movement + $this->advancement->getCharacteristics()->movement;
         $penalty = $this->equipmentManager->getMovementPenalty();
         return max(1, $base + $penalty); // движение не может быть меньше 1
+    }
+
+    public function getStrength(?Weapon $weapon = null): int
+    {
+        return $this->blank->getCharacteristics()->strength
+            + $this->advancement->getCharacteristics()->strength
+            + ($weapon ? $weapon->strength : 0);
+    }
+
+    public function getWeaponSkill(): int
+    {
+        return $this->blank->getCharacteristics()->weaponSkill + $this->advancement->getCharacteristics()->weaponSkill;
+    }
+
+    public function getBallisticSkill(): int
+    {
+        return $this->blank->getCharacteristics()->ballisticSkill + $this->advancement->getCharacteristics()->ballisticSkill;
+    }
+
+    public function getToughness(): int
+    {
+        return $this->blank->getCharacteristics()->toughness + $this->advancement->getCharacteristics()->toughness;
+    }
+
+    public function getLeadership(): int
+    {
+        return $this->blank->getCharacteristics()->leadership + $this->advancement->getCharacteristics()->leadership;
     }
 
     /**
@@ -78,7 +79,7 @@ class Fighter
      */
     public function getAttacks(): int
     {
-        $base = $this->characteristics->attacks;
+        $base = $this->blank->getCharacteristics()->attacks + $this->advancement->getCharacteristics()->attacks;
         $bonus = 0;
         if ($this->hasSkill('Frenzy')) {
             $base *= 2;
@@ -94,9 +95,9 @@ class Fighter
      */
     public function getInitiative(): int
     {
-        $base = $this->characteristics->initiative;
+        $base = $this->blank->getCharacteristics()->initiative + $this->advancement->getCharacteristics()->initiative;
         $bonus = 0;
-        if ($this->hasSkill('Nimble')) {
+        if ($this->hasSkill('Nimble')) { // TODO: check
             $bonus = 1;
         }
         return $base + $bonus;
@@ -104,7 +105,7 @@ class Fighter
 
     public function getClimbInitiative(): int
     {
-        $base = $this->characteristics->initiative;
+        $base = $this->blank->getCharacteristics()->initiative + $this->advancement->getCharacteristics()->initiative;
         $bonus = 0;
         if ($this->equipmentManager->hasSpecialRule(SpecialRule::CLIMB)) {
             $bonus = 1;
@@ -119,11 +120,11 @@ class Fighter
     {
         return function ($dx, $dy, $dz) {
             if ($dz !== 0) {
-                if ($this->hasSkill('Scale Sheer Surfaces')) return 1.0;
-                return 2.0;
+                if ($this->hasSkill('Scale Sheer Surfaces')) return abs(1.0 * $dz);
+                return abs(2.0 * $dz);
             }
-            if ($dx !== 0 && $dy !== 0) return 1.4;
-            return 1.0;
+            if ($dx !== 0 && $dy !== 0) return 0.7 * (abs($dx) + abs($dy));
+            return abs($dx) + abs($dy) + abs($dz);
         };
     }
 
@@ -135,70 +136,27 @@ class Fighter
         return $this->equipmentManager->getArmorSave($attackerWeapon);
     }
 
-    public function isAdjacent(Fighter $other): bool
-    {
-        [$x1, $y1, $z1] = $this->position;
-        [$x2, $y2, $z2] = $other->position;
-        return abs($x1 - $x2) <= 1 && abs($y1 - $y2) <= 1 && abs($z1 - $z2) <= 1;
-    }
-
     /**
-     * Добавить опыт бойцу
+     * Максимальная диистанция для бега
+     * @return int
      */
-    public function addExperience(int $amount): void
+    public function getRunRange(): int
     {
-        $this->experience += $amount;
-        $this->battleExperience += $amount;
+        $moveMultiplier = 2;
+        $movePoints = $this->getMovement() * $moveMultiplier;
+        \Mordheim\BattleLogger::add("{$this->getName()} может бежать на: $movePoints, множитель: $moveMultiplier");
+        return $movePoints;
     }
 
     /**
-     * Проверить, может ли боец повыситься (по таблице опыта)
-     */
-    public function canAdvance(): bool
-    {
-        $levels = [2, 4, 6, 8, 10, 12, 14, 16]; // стандартные пороги опыта
-        foreach ($levels as $lvl) {
-            if ($this->experience === $lvl) return true;
-        }
-        return false;
-    }
-
-    /**
-     * Получить текущий уровень по опыту (0 = стартовый)
-     */
-    public function getExperienceLevel(): int
-    {
-        $levels = [2, 4, 6, 8, 10, 12, 14, 16];
-        $level = 0;
-        foreach ($levels as $lvl) {
-            if ($this->experience >= $lvl) $level++;
-        }
-        return $level;
-    }
-
-
-    /**
-     * Добавить навык бойцу (если не превышен лимит)
-     */
-    public function addSkill(Skill $skill): bool
-    {
-        if (count($this->skills) >= $this->maxSkills) return false;
-        foreach ($this->skills as $s) {
-            if ($s->name === $skill->name) return false;
-        }
-        $this->skills[] = $skill;
-        return true;
-    }
-
-    /**
-     * Базовая дистанция заряда (charge) для Mordheim — 8 дюймов
+     * Максимальная дистанция для Charge
      * @return int
      */
     public function getChargeRange(): int
     {
         $moveMultiplier = $this->hasSkill('Sprint') ? 3 : 2;
         $movePoints = $this->getMovement() * $moveMultiplier;
-        \Mordheim\BattleLogger::add("{$this->name} может бежать на: $movePoints, множитель: $moveMultiplier");
+        \Mordheim\BattleLogger::add("{$this->getName()} может Charge на: $movePoints, множитель: $moveMultiplier");
         return $movePoints;
     }
 
@@ -208,10 +166,23 @@ class Fighter
      */
     public function hasSkill(string $skillName): bool
     {
-        foreach ($this->skills as $s) {
+        foreach ($this->blank->getSpecialRules() as $s) {
+            if ($s->name === $skillName) return true;
+        }
+        foreach ($this->advancement->getSpecialRules() as $s) {
             if ($s->name === $skillName) return true;
         }
         return false;
+    }
+
+    public function isAdjacent(FighterInterface $target): bool
+    {
+        return Ruler::isAdjacent($this->getState()->getPosition(), $target->getState()->getPosition());
+    }
+
+    public function getDistance(FighterInterface $fighter): bool
+    {
+        return Ruler::distance($this->getState()->getPosition(), $fighter->getState()->getPosition());
     }
 }
 

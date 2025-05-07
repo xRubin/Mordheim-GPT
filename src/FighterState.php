@@ -1,21 +1,72 @@
 <?php
+
 namespace Mordheim;
 
-use Mordheim\Exceptions\FighterAbnormalStateException;
+use Mordheim\Strategy\BattleStrategyInterface;
 
-enum FighterState: string
+class FighterState implements FighterStateInterface
 {
-    case STANDING = 'standing';
-    case KNOCKED_DOWN = 'knocked_down';
-    case STUNNED = 'stunned';
-    case OUT_OF_ACTION = 'out_of_action';
-    case PANIC = 'panic';
-
-    public function canAct(): bool
+    public function __construct(
+        private array                   $position,
+        private BattleStrategyInterface $battleStrategy,
+        private int                     $wounds,
+        private Status                  $status = Status::STANDING,
+    )
     {
-        return match ($this) {
-            self::STANDING => true,
-            default => throw (new FighterAbnormalStateException())->setState($this),
-        };
+
+    }
+
+    public function getPosition(): array
+    {
+        return $this->position;
+    }
+
+    public function setPosition(array $position): static
+    {
+        $this->position = $position;
+        return $this;
+    }
+
+    public function getBattleStrategy(): BattleStrategyInterface
+    {
+        return $this->battleStrategy;
+    }
+
+    public function setBattleStrategy(BattleStrategyInterface $battleStrategy): static
+    {
+        $this->battleStrategy = $battleStrategy;
+        return $this;
+    }
+
+    public function getStatus(): Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(Status $status): static
+    {
+        $this->status = $status;
+        if ($status == Status::OUT_OF_ACTION) {
+            $this->wounds = 0;
+        }
+        return $this;
+    }
+
+    public function isAlive(): bool
+    {
+        return $this->getStatus() !== Status::OUT_OF_ACTION;
+    }
+
+    public function getWounds(): int
+    {
+        if (!$this->isAlive())
+            return 0;
+        return $this->wounds;
+    }
+
+    public function decreaseWounds(int $step = 1): static
+    {
+        $this->wounds -= $step;
+        return $this;
     }
 }

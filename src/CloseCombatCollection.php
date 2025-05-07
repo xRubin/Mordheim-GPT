@@ -42,10 +42,10 @@ class CloseCombatCollection
 
     /**
      * Получить все схватки для бойца
-     * @param Fighter $fighter
+     * @param FighterInterface $fighter
      * @return CloseCombat[]
      */
-    public function getByFighter(Fighter $fighter): array
+    public function getByFighter(FighterInterface $fighter): array
     {
         return array_values(
             array_filter(
@@ -73,10 +73,10 @@ class CloseCombatCollection
 
     /**
      * Проверить, участвует ли боец в какой-либо схватке
-     * @param Fighter $fighter
+     * @param FighterInterface $fighter
      * @return bool
      */
-    public function isFighterInCombat(Fighter $fighter): bool
+    public function isFighterInCombat(FighterInterface $fighter): bool
     {
         return !empty($this->getByFighter($fighter));
     }

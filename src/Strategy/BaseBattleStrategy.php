@@ -3,10 +3,8 @@
 namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
-use Mordheim\Exceptions\FighterAbnormalStateException;
-use Mordheim\Fighter;
-use Mordheim\FighterState;
-use Mordheim\Ruler;
+use Mordheim\FighterInterface;
+use Mordheim\Status;
 
 abstract class BaseBattleStrategy implements BattleStrategyInterface
 {
@@ -31,19 +29,19 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
     /**
      * Найти ближайшего врага
      */
-    protected function getNearestEnemy(Fighter $fighter, array $enemies): ?Fighter
+    protected function getNearestEnemy(FighterInterface $fighter, array $enemies): ?FighterInterface
     {
         if (empty($enemies)) return null;
-        usort($enemies, fn($a, $b) => Ruler::distance($fighter->position, $a->position) <=> Ruler::distance($fighter->position, $b->position));
+        usort($enemies, fn($a, $b) => $fighter->getDistance($a) <=> $fighter->getDistance($b));
         return $enemies[0];
     }
 
     /**
      * Проверить страх/ужас. Вернёт true если можно действовать
      */
-    protected function canActAgainst(Battle $battle, Fighter $fighter, Fighter $target): bool
+    protected function canActAgainst(Battle $battle, FighterInterface $fighter, FighterInterface $target): bool
     {
-        if ($fighter->hasSkill('Frenzy') && (Ruler::distance($fighter->position, $target->position) < $fighter->getMovement() * 2)) {
+        if ($fighter->hasSkill('Frenzy') && ($fighter->getDistance($target) < $fighter->getMovement() * 2)) {
             return true;
         } else {
             $allies = $battle->getAlliesFor($fighter);
@@ -58,9 +56,9 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
     /**
      * Получить стрелковое оружие и его радиус
      */
-    protected function getRangedWeapon(Fighter $fighter): ?\Mordheim\Weapon
+    protected function getRangedWeapon(FighterInterface $fighter): ?\Mordheim\Weapon
     {
-        foreach ($fighter->equipmentManager->getWeapons() as $weapon) {
+        foreach ($fighter->getEquipmentManager()->getWeapons() as $weapon) {
             if ($weapon->damageType === 'Ranged') {
                 return $weapon;
             }
@@ -68,21 +66,19 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         return null;
     }
 
-    public function movePhase(Battle $battle, Fighter $fighter, array $enemies): void
+    public function movePhase(Battle $battle, FighterInterface $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->canAct();
-        } catch (FighterAbnormalStateException $e) {
-            if ($e->getState() === FighterState::KNOCKED_DOWN) {
-                if ($this->spentMove = \Mordheim\Rule\StandUp::apply($fighter)) {
-                    // потратили вставание по общим правилам
-                    $this->spentCharge = true;
-                    $this->spentCloseCombat = true;
-                }
-            } else {
-                \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
-                return;
+        if ($fighter->getState()->getStatus() === Status::KNOCKED_DOWN) {
+            if ($this->spentMove = \Mordheim\Rule\StandUp::apply($fighter)) {
+                // потратили вставание по общим правилам
+                $this->spentCharge = true;
+                $this->spentCloseCombat = true;
             }
+        }
+
+        if (!$fighter->getState()->getStatus()->canAct()) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может действовать из-за состояния {$fighter->getState()->getStatus()->value}.");
+            return;
         }
 
         if ($battle->getActiveCombats()->isFighterInCombat($fighter))
@@ -94,16 +90,14 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         $this->spentMove = true;
     }
 
-    public function shootPhase(Battle $battle, Fighter $fighter, array $enemies): void
+    public function shootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->canAct();
-        } catch (FighterAbnormalStateException $e) {
-            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
+        if (!$fighter->getState()->getStatus()->canAct()) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может действовать из-за состояния {$fighter->getState()->getStatus()->value}.");
             return;
         }
 
-        if (0 === $fighter->equipmentManager->countRangedWeapons())
+        if (0 === $fighter->getEquipmentManager()->countRangedWeapons())
             return;
 
         if ($battle->getActiveCombats()->isFighterInCombat($fighter))
@@ -115,12 +109,10 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         $this->spentShoot = true;
     }
 
-    public function magicPhase(Battle $battle, Fighter $fighter, array $enemies): void
+    public function magicPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->canAct();
-        } catch (FighterAbnormalStateException $e) {
-            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
+        if (!$fighter->getState()->getStatus()->canAct()) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может действовать из-за состояния {$fighter->getState()->getStatus()->value}.");
             return;
         }
 
@@ -130,16 +122,14 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         $this->spentMagic = true;
     }
 
-    public function closeCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void
+    public function closeCombatPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
     {
-        try {
-            $fighter->state->canAct();
-        } catch (FighterAbnormalStateException $e) {
-            \Mordheim\BattleLogger::add("{$fighter->name} не может действовать из-за состояния {$fighter->state->value}.");
+        if (!$fighter->getState()->getStatus()->canAct()) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может действовать из-за состояния {$fighter->getState()->getStatus()->value}.");
             return;
         }
 
-        if (0 === $fighter->equipmentManager->countMeleeWeapons())
+        if (0 === $fighter->getEquipmentManager()->countMeleeWeapons())
             return;
 
         if (!$this->spentCloseCombat)
@@ -148,11 +138,11 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         $this->spentCloseCombat = true;
     }
 
-    abstract protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void;
+    abstract protected function onMovePhase(Battle $battle, FighterInterface $fighter, array $enemies): void;
 
-    abstract protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void;
+    abstract protected function onShootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void;
 
-    abstract protected function onMagicPhase(Battle $battle, Fighter $fighter, array $enemies): void;
+    abstract protected function onMagicPhase(Battle $battle, FighterInterface $fighter, array $enemies): void;
 
-    abstract protected function onCloseCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void;
+    abstract protected function onCloseCombatPhase(Battle $battle, FighterInterface $fighter, array $enemies): void;
 }

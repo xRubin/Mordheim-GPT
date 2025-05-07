@@ -175,7 +175,7 @@ class EquipmentManager
         return $defenderCanParry && $hitRoll >= 4 && !$attackerHasFlail;
     }
 
-    public function getResilientModifier(Fighter $target): int
+    public function getResilientModifier(FighterInterface $target): int
     {
         return (int)$target->hasSkill('Resilient');
     }

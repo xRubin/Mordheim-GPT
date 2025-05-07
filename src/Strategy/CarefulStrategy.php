@@ -3,13 +3,13 @@
 namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
-use Mordheim\Fighter;
-use Mordheim\Ruler;
+use Mordheim\FighterInterface;
 
 class CarefulStrategy extends BaseBattleStrategy implements BattleStrategyInterface
 {
     public float $aggressiveness = 0.8;
-    protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void
+
+    protected function onMovePhase(Battle $battle, FighterInterface $fighter, array $enemies): void
     {
         if (empty($enemies)) return;
 
@@ -22,26 +22,26 @@ class CarefulStrategy extends BaseBattleStrategy implements BattleStrategyInterf
         if (!$canAct) return;
         if (!$fighter->isAdjacent($target)) {
             // Держит дистанцию
-            \Mordheim\Rule\Move::apply($battle, $fighter, [$fighter->position[0] + 1, $fighter->position[1] + 1, $fighter->position[2]], $this->aggressiveness, [], true);
+            \Mordheim\Rule\Move::apply($battle, $fighter, [$fighter->getState()->getPosition()[0] + 1, $fighter->getState()->getPosition()[1] + 1, $fighter->getState()->getPosition()[2]], $this->aggressiveness, [], true);
         }
     }
 
-    protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void
+    protected function onShootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
     {
         if (empty($enemies)) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
         $ranged = $this->getRangedWeapon($fighter);
-        if ($ranged && $target && Ruler::distance($fighter->position, $target->position) <= $ranged->range && !$fighter->isAdjacent($target)) {
-            \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, false);
+        if ($ranged && $target && $fighter->getDistance($target) <= $ranged->range && !$fighter->isAdjacent($target)) {
+            \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, $this->spentMove);
         }
     }
 
-    protected function onMagicPhase(Battle $battle, Fighter $fighter, array $enemies): void
+    protected function onMagicPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
     {
         // TODO: реализовать заклинания
     }
 
-    protected function onCloseCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void
+    protected function onCloseCombatPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
     {
         if (empty($enemies)) return;
         $target = $this->getNearestEnemy($fighter, $enemies);

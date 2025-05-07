@@ -27,4 +27,13 @@ class Characteristics
         $this->attacks = $attacks;
         $this->leadership = $leadership;
     }
+
+    /**
+     * Пустышка
+     * @return static
+     */
+    public static function empty(): static
+    {
+        return new static(0,0,0,0,0,0,0,0,0);
+    }
 }

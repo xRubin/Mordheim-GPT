@@ -13,7 +13,7 @@ class CloseCombat
     const BONUS_TO_HIT = 'toHit';
     const BONUS_CHARGED = 'charged';
 
-    /** @var Fighter[] */
+    /** @var FighterInterface[] */
     public array $fighters;
     /** @var int */
     public int $rounds = 0;
@@ -21,10 +21,10 @@ class CloseCombat
     public array $bonuses = [];
 
     /**
-     * @param Fighter $fighter1
-     * @param Fighter $fighter2
+     * @param FighterInterface $fighter1
+     * @param FighterInterface $fighter2
      */
-    public function __construct(Fighter $fighter1, Fighter $fighter2)
+    public function __construct(FighterInterface $fighter1, FighterInterface $fighter2)
     {
         $this->fighters = [$fighter1, $fighter2];
         $this->rounds = 1;
@@ -44,7 +44,7 @@ class CloseCombat
     /**
      * Добавить бонус бойцу (например, за charge)
      */
-    public function addBonus(Fighter $fighter, string $bonus, $value = true): static
+    public function addBonus(FighterInterface $fighter, string $bonus, $value = true): static
     {
         $this->bonuses[$this->getIndex($fighter)][$bonus] = $value;
         return $this;
@@ -53,7 +53,7 @@ class CloseCombat
     /**
      * Получить бонусы бойца
      */
-    public function getBonuses(Fighter $fighter): array
+    public function getBonuses(FighterInterface $fighter): array
     {
         return $this->bonuses[$this->getIndex($fighter)] ?? [];
     }
@@ -61,7 +61,7 @@ class CloseCombat
     /**
      * Получить указанный бонус бойца
      */
-    public function getBonus(Fighter $fighter, string $bonusName): mixed
+    public function getBonus(FighterInterface $fighter, string $bonusName): mixed
     {
         return $this->getBonuses($fighter)[$bonusName] ?? null;
     }
@@ -69,7 +69,7 @@ class CloseCombat
     /**
      * Получить индекс бойца
      */
-    public function getIndex(Fighter $fighter): int
+    public function getIndex(FighterInterface $fighter): int
     {
         $result = array_search($fighter, $this->fighters);
         if (false === $result)

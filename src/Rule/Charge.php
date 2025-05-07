@@ -5,7 +5,7 @@ namespace Mordheim\Rule;
 use Mordheim\Battle;
 use Mordheim\CloseCombat;
 use Mordheim\Exceptions\ChargeFailedException;
-use Mordheim\Fighter;
+use Mordheim\FighterInterface;
 use Mordheim\Ruler;
 
 class Charge
@@ -14,72 +14,72 @@ class Charge
      * Выполнить попытку charge (атаки с разбега) по правилам Mordheim 1999
      * Возвращает объект CloseCombat при успехе
      * @param Battle $battle
-     * @param Fighter $attacker
-     * @param Fighter $defender
+     * @param FighterInterface $attacker
+     * @param FighterInterface $defender
      * @param float $aggressiveness
      * @param array $otherUnits
      * @return CloseCombat|null
      * @throws ChargeFailedException
      */
-    public static function attempt(Battle $battle, Fighter $attacker, Fighter $defender, float $aggressiveness, array $otherUnits = []): ?CloseCombat
+    public static function attempt(Battle $battle, FighterInterface $attacker, FighterInterface $defender, float $aggressiveness, array $otherUnits = []): ?CloseCombat
     {
         // Charge запрещён, если атакующий уже вовлечён в ближний бой
         if ($battle->getActiveCombats()->isFighterInCombat($attacker)) {
-            \Mordheim\BattleLogger::add("{$attacker->name} не может объявить charge: уже вовлечён в ближний бой.");
+            \Mordheim\BattleLogger::add("{$attacker->getName()} не может объявить charge: уже вовлечён в ближний бой.");
             throw new ChargeFailedException();
         }
 
         $targetPos = self::getNearestChargePosition($battle, $attacker, $defender);
         if (null === $targetPos) {
-            \Mordheim\BattleLogger::add("{$attacker->name} не может совершить charge: зона вокруг с целью заблокирована.");
+            \Mordheim\BattleLogger::add("{$attacker->getName()} не может совершить charge: зона вокруг с целью заблокирована.");
             throw new ChargeFailedException();
         }
 
         // Проверить, хватает ли движения
         $movePoints = $attacker->getChargeRange();
-        $path = \Mordheim\PathFinder::findPath($battle->getField(), $attacker->position, $targetPos, $attacker->getMovementWeights(), array_map(fn($u) => $u->position, $aggressiveness, $otherUnits));
+        $path = \Mordheim\PathFinder::findPath($battle->getField(), $attacker->getState()->getPosition(), $targetPos, $attacker->getMovementWeights(), $aggressiveness, array_map(fn($u) => $u->position, $otherUnits));
         if (!$path || count($path) < 2) {
-            \Mordheim\BattleLogger::add("{$attacker->name} не может совершить charge: путь к цели заблокирован.");
+            \Mordheim\BattleLogger::add("{$attacker->getName()} не может совершить charge: путь к цели заблокирован.");
             throw new ChargeFailedException();
         }
         $cost = $path[count($path) - 1]['cost'];
         if ($cost > $movePoints) {
-            \Mordheim\BattleLogger::add("{$attacker->name} не может совершить charge: не хватает движения (нужно $cost, есть $movePoints).");
+            \Mordheim\BattleLogger::add("{$attacker->getName()} не может совершить charge: не хватает движения (нужно $cost, есть $movePoints).");
             throw new ChargeFailedException();
         }
 
         // Проверка инициативы для скрытой цели
-        if (Ruler::distance($attacker->position, $defender->position) && Ruler::hasObstacleBetween($battle, $attacker->position, $defender->position)) {
+        if ($attacker->getDistance($defender) && $battle->hasObstacleBetween($attacker->getState()->getPosition(), $defender->getState()->getPosition())) {
             $roll = \Mordheim\Dice::roll(6);
-            \Mordheim\BattleLogger::add("{$attacker->name} бросает Initiative для hidden цели: $roll против {$defender->getInitiative()}");
+            \Mordheim\BattleLogger::add("{$attacker->getName()} бросает Initiative для hidden цели: $roll против {$defender->getInitiative()}");
             if ($roll <= $defender->getInitiative()) {
-                \Mordheim\BattleLogger::add("{$attacker->name} не может совершить charge: не прошёл проверку инициативы для атаки на скрытую цель.");
+                \Mordheim\BattleLogger::add("{$attacker->getName()} не может совершить charge: не прошёл проверку инициативы для атаки на скрытую цель.");
                 throw new ChargeFailedException();
             }
-            \Mordheim\BattleLogger::add("{$attacker->name} прошёл проверку инициативы для атаки на скрытую цель.");
+            \Mordheim\BattleLogger::add("{$attacker->getName()} прошёл проверку инициативы для атаки на скрытую цель.");
         }
 
         // Переместить бойца
-        $attacker->position = $targetPos;
-        \Mordheim\BattleLogger::add("{$attacker->name} совершает charge на {$defender->name}! Перемещён на [" . implode(',', $targetPos) . "]");
+        $attacker->getState()->setPosition($targetPos);
+        \Mordheim\BattleLogger::add("{$attacker->getName()} совершает charge на {$defender->getName()}! Перемещён на [" . implode(',', $targetPos) . "]");
         return new CloseCombat($attacker, $defender);
     }
 
     /**
      * TODO: obstacles
      * @param Battle $battle
-     * @param Fighter $attacker
-     * @param Fighter $defender
+     * @param FighterInterface $attacker
+     * @param FighterInterface $defender
      * @return array|null
      */
-    protected static function getNearestChargePosition(Battle $battle, Fighter $attacker, Fighter $defender): ?array
+    protected static function getNearestChargePosition(Battle $battle, FighterInterface $attacker, FighterInterface $defender): ?array
     {
         // Определить клетки adjacent к цели
-        $adjacent = self::getAdjacentPositions($battle, $defender->position);
+        $adjacent = self::getAdjacentPositions($battle, $defender->getState()->getPosition());
         $minDist = INF;
         $targetPos = null;
         foreach ($adjacent as $pos) {
-            $dist = Ruler::distance($attacker->position, $pos);
+            $dist = Ruler::distance($attacker->getState()->getPosition(), $pos);
             if ($dist < $minDist) {
                 $minDist = $dist;
                 $targetPos = $pos;

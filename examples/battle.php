@@ -6,47 +6,80 @@
 
 use Mordheim\Battle;
 use Mordheim\BattleLogger;
-use Mordheim\Characteristics;
 use Mordheim\Data\Armors;
 use Mordheim\Data\Weapons;
 use Mordheim\EquipmentManager;
-use Mordheim\Fighter;
 use Mordheim\GameField;
 use Mordheim\Strategy\AggressiveStrategy;
 use Mordheim\Warband;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-function createFighter($name, $pos, $weapons = [], $armors = [])
-{
-    $char = new Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7);
-    return new Fighter($name, $char, [], new EquipmentManager($weapons, $armors), new AggressiveStrategy(), $pos);
-}
-
-function findEnemies($fighter, $warbands)
-{
-    $enemies = [];
-    foreach ($warbands as $wb) {
-        if (!in_array($fighter, $wb->fighters, true)) {
-            foreach ($wb->fighters as $f) {
-                if ($f->alive) $enemies[] = $f;
-            }
-        }
-    }
-    return $enemies;
-}
-
 $field = new GameField();
 $battle = new Battle($field, [
-    new Warband('Red', [
-        createFighter('Red1', [0, 0, 0], [Weapons::getByName('Sword')], [Armors::getByName('Light Armor')]),
-        createFighter('Red2', [0, 2, 0], [Weapons::getByName('Axe')], [Armors::getByName('Heavy Armor')]),
-        createFighter('Red3', [0, 4, 0], [Weapons::getByName('Bow')]),
+    new Warband('MARIENBURG', [
+        new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_MERCENARY_CAPTAIN,
+            \Mordheim\FighterAdvancement::empty(),
+            new EquipmentManager([Weapons::getByName('Sword')], [Armors::getByName('Light Armor')]),
+            new \Mordheim\FighterState(
+                [0, 0, 0],
+                new AggressiveStrategy(),
+                \Mordheim\Data\Blank::MARIENBURG_MERCENARY_CAPTAIN->getCharacteristics()->wounds
+            )
+        ),
+        new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_YOUNGBLOOD,
+            \Mordheim\FighterAdvancement::empty(),
+            new EquipmentManager([Weapons::getByName('Axe')], [Armors::getByName('Heavy Armor')]),
+            new \Mordheim\FighterState(
+                [0, 2, 0],
+                new AggressiveStrategy(),
+                \Mordheim\Data\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->wounds
+            )
+        ),
+        new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_MARKSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new EquipmentManager([Weapons::getByName('Bow')]),
+            new \Mordheim\FighterState(
+                [0, 4, 0],
+                new AggressiveStrategy(),
+                \Mordheim\Data\Blank::MARIENBURG_MARKSMAN->getCharacteristics()->wounds
+            )
+        ),
     ]),
-    new Warband('Blue', [
-        createFighter('Blue1', [7, 0, 0], [Weapons::getByName('Sword')], [Armors::getByName('Shield')]),
-        createFighter('Blue2', [7, 2, 0], [Weapons::getByName('Axe')], [Armors::getByName('Heavy Armor')]),
-        createFighter('Blue3', [7, 4, 0], [Weapons::getByName('Club')]),
+    new Warband('MIDDENHEIM', [
+        new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MIDDENHEIM_MERCENARY_CAPTAIN,
+            \Mordheim\FighterAdvancement::empty(),
+            new EquipmentManager([Weapons::getByName('Sword')], [Armors::getByName('Shield')]),
+            new \Mordheim\FighterState(
+                [7, 0, 0],
+                new AggressiveStrategy(),
+                \Mordheim\Data\Blank::MIDDENHEIM_MERCENARY_CAPTAIN->getCharacteristics()->wounds
+            )
+        ),
+        new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MIDDENHEIM_YOUNGBLOOD,
+            \Mordheim\FighterAdvancement::empty(),
+            new EquipmentManager([Weapons::getByName('Axe')], [Armors::getByName('Heavy Armor')]),
+            new \Mordheim\FighterState(
+                [7, 2, 0],
+                new AggressiveStrategy(),
+                \Mordheim\Data\Blank::MIDDENHEIM_YOUNGBLOOD->getCharacteristics()->wounds
+            )
+        ),
+        new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MIDDENHEIM_WARRIOR,
+            \Mordheim\FighterAdvancement::empty(),
+            new EquipmentManager([Weapons::getByName('Club')]),
+            new \Mordheim\FighterState(
+                [7, 4, 0],
+                new AggressiveStrategy(),
+                \Mordheim\Data\Blank::MIDDENHEIM_WARRIOR->getCharacteristics()->wounds
+            )
+        ),
     ])
 ]);
 

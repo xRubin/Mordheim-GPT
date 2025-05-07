@@ -4,8 +4,6 @@ use Mordheim\Battle;
 use Mordheim\Characteristics;
 use Mordheim\Data\Skills;
 use Mordheim\Data\Weapons;
-use Mordheim\EquipmentManager;
-use Mordheim\Fighter;
 use Mordheim\GameField;
 use Mordheim\Warband;
 use PHPUnit\Framework\TestCase;
@@ -26,8 +24,28 @@ class FighterShootingTest extends TestCase
 
     public function testBasicHitAndMiss()
     {
-        $shooter = new Fighter('Shooter', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([Weapons::getByName('Bow')]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
-        $target = new Fighter('Target', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
+        $shooter = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager([Weapons::getByName('Bow')]),
+            new \Mordheim\FighterState(
+                [0, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
+        $target = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [2, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
         $battle = $this->makeClearBattle([$shooter], [$target]);
         $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target);
         $this->assertIsBool($result);
@@ -38,16 +56,33 @@ class FighterShootingTest extends TestCase
      */
     public function testCriticalHitIgnoresSave()
     {
-        $shooter = new Fighter('Shooter', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([Weapons::getByName('Bow')]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
-        $target = new Fighter('Target', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
-        // Мокаем Dice чтобы выдать 6
         $this->assertTrue(true); // Здесь должен быть мок Dice::roll, но для примера — всегда true
     }
 
     public function testDodgeSkill()
     {
-        $shooter = new Fighter('Shooter', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([Weapons::getByName('Bow')]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
-        $target = new Fighter('Target', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [Skills::getByName('Dodge')], new EquipmentManager([]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
+        $shooter = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager([Weapons::getByName('Bow')]),
+            new \Mordheim\FighterState(
+                [0, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
+        $target = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            new \Mordheim\FighterAdvancement(Characteristics::empty(), [Skills::getByName('Dodge')]),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [2, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
         $battle = $this->makeClearBattle([$shooter], [$target]);
         $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target);
         $this->assertIsBool($result);
@@ -55,8 +90,28 @@ class FighterShootingTest extends TestCase
 
     public function testQuickShotSkill()
     {
-        $shooter = new Fighter('Shooter', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [Skills::getByName('Quick Shot')], new EquipmentManager([Weapons::getByName('Sling')]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
-        $target = new Fighter('Target', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
+        $shooter = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            new \Mordheim\FighterAdvancement(Characteristics::empty(), [Skills::getByName('Quick Shot')]),
+            new \Mordheim\EquipmentManager([Weapons::getByName('Sling')]),
+            new \Mordheim\FighterState(
+                [0, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
+        $target = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [2, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
         $battle = $this->makeClearBattle([$shooter], [$target]);
         $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target, false);
         $this->assertIsBool($result);
@@ -64,8 +119,28 @@ class FighterShootingTest extends TestCase
 
     public function testWeaponSpecialRules()
     {
-        $shooter = new Fighter('Shooter', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([Weapons::getByName('Warplock Jezzail')]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
-        $target = new Fighter('Target', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
+        $shooter = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager([Weapons::getByName('Warplock Jezzail')]),
+            new \Mordheim\FighterState(
+                [0, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
+        $target = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [2, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
         $battle = $this->makeClearBattle([$shooter], [$target]);
         $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target);
         $this->assertIsBool($result);
@@ -73,10 +148,28 @@ class FighterShootingTest extends TestCase
 
     public function testMoveOrFireBlocksShootingAfterMove()
     {
-        $shooter = new Fighter('Shooter', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([
-            Weapons::getByName('Warplock Jezzail')
-        ]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
-        $target = new Fighter('Target', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
+        $shooter = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager([Weapons::getByName('Warplock Jezzail')]),
+            new \Mordheim\FighterState(
+                [0, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
+        $target = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [2, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
         $battle = $this->makeClearBattle([$shooter], [$target]);
         $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target, true); // moved=true
         $this->assertFalse($result, 'MoveOrFire: нельзя стрелять после движения');
@@ -84,8 +177,28 @@ class FighterShootingTest extends TestCase
 
     public function testMoveOrFireAllowsShootingWithoutMove()
     {
-        $shooter = new Fighter('Shooter', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([Weapons::getByName('Warplock Jezzail')]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
-        $target = new Fighter('Target', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
+        $shooter = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager([Weapons::getByName('Warplock Jezzail')]),
+            new \Mordheim\FighterState(
+                [0, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
+        $target = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [2, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
         $battle = $this->makeClearBattle([$shooter], [$target]);
         $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target, false); // moved=false
         $this->assertIsBool($result, 'MoveOrFire: можно стрелять если не двигался');
@@ -93,10 +206,28 @@ class FighterShootingTest extends TestCase
 
     public function testNormalRangedWeaponCanShootAfterMove()
     {
-        $shooter = new Fighter('Shooter', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([
-            Weapons::getByName('Bow')
-        ]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
-        $target = new Fighter('Target', new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7), [], new EquipmentManager([]), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class));
+        $shooter = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager([Weapons::getByName('Bow')]),
+            new \Mordheim\FighterState(
+                [0, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
+        $target = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [2, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+
         $battle = $this->makeClearBattle([$shooter], [$target]);
         $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target, true); // moved=true
         $this->assertIsBool($result, 'Обычное оружие: можно стрелять после движения');

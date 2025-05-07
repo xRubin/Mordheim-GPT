@@ -2,7 +2,6 @@
 
 namespace Mordheim\Rule;
 
-use Mordheim\Ruler;
 use Mordheim\Warband;
 
 class RecoveryPhase
@@ -16,9 +15,9 @@ class RecoveryPhase
     {
         if (!RoutTest::apply($warband)) {
             // Если банда не прошла тест на бегство, все бойцы в PANIC
-            foreach ($warband->fighters as $f) {
-                if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
-                    $f->state = \Mordheim\FighterState::PANIC;
+            foreach ($warband->fighters as $fighter) {
+                if ($fighter->getState()->getStatus()->canAct()) {
+                    $fighter->getState()->setStatus(\Mordheim\Status::PANIC);
                 }
             }
             \Mordheim\BattleLogger::add("Банда {$warband->name} не прошла тест на бегство! Все бойцы в панике.");
@@ -26,58 +25,59 @@ class RecoveryPhase
         }
 
         foreach ($warband->fighters as $fighter) {
-            if (!$fighter->alive) continue;
+            if (!$fighter->getState()->getStatus()->isAlive()) continue;
             // --- PANIC recovery ---
-            if ($fighter->state === \Mordheim\FighterState::PANIC) {
+            if ($fighter->getState()->getStatus() === \Mordheim\Status::PANIC) {
                 if (\Mordheim\Rule\Psychology::leadershipTest($fighter, $warband->fighters)) {
-                    $fighter->state = \Mordheim\FighterState::STANDING;
-                    \Mordheim\BattleLogger::add("{$fighter->name} преодолел панику и возвращается в бой!");
+                    $fighter->getState()->setStatus(\Mordheim\Status::STANDING);
+                    \Mordheim\BattleLogger::add("{$fighter->getName()} преодолел панику и возвращается в бой!");
                 } else {
-                    \Mordheim\BattleLogger::add("{$fighter->name} всё ещё в панике!");
+                    \Mordheim\BattleLogger::add("{$fighter->getName()} всё ещё в панике!");
                 }
             }
             // --- All Alone ---
-            if ($fighter->state === \Mordheim\FighterState::STANDING) {
+            if ($fighter->getState()->getStatus() === \Mordheim\Status::STANDING) {
                 $allies = $warband->fighters;
                 $enemies = [];
                 foreach ($warbands as $otherWb) {
                     if ($otherWb !== $warband) {
-                        foreach ($otherWb->fighters as $f) {
-                            if ($f->alive) $enemies[] = $f;
+                        foreach ($otherWb->fighters as $fighter) {
+                            if ($fighter->getState()->getStatus()->isAlive()) $enemies[] = $fighter;
                         }
                     }
                 }
-                $closeEnemies = array_filter($enemies, fn($enemy) => Ruler::distance($fighter->position, $enemy->position) <= 1.99);
-                $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->alive && $ally->state === \Mordheim\FighterState::STANDING && Ruler::distance($fighter->position, $ally->position) <= 6);
+                $closeEnemies = array_filter($enemies, fn($enemy) => $fighter->getDistance($enemy) <= 1.99);
+                $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->getState()->getStatus()->canAct() && $fighter->getDistance($ally) <= 6);
                 if (count($closeEnemies) >= 2 && count($closeAllies) === 0) {
                     if (!\Mordheim\Rule\Psychology::allAloneTest($fighter, $enemies, $allies)) {
-                        $fighter->state = \Mordheim\FighterState::PANIC;
-                        \Mordheim\BattleLogger::add("{$fighter->name} не выдержал одиночества и впадает в панику!");
+                        $fighter->getState()->setStatus(\Mordheim\Status::PANIC);
+                        \Mordheim\BattleLogger::add("{$fighter->getName()} не выдержал одиночества и впадает в панику!");
                     }
                 }
             }
             // --- Stupidity ---
-            if ($fighter->hasSkill('Stupidity') && $fighter->state === \Mordheim\FighterState::STANDING) {
+            // TODO
+            if ($fighter->hasSkill('Stupidity') && $fighter->getState()->getStatus() === \Mordheim\Status::STANDING) {
                 if (!\Mordheim\Rule\Psychology::leadershipTest($fighter, $warband->fighters)) {
-                    \Mordheim\BattleLogger::add("{$fighter->name} не прошёл тест тупости и стоит без дела!");
+                    \Mordheim\BattleLogger::add("{$fighter->getName()} не прошёл тест тупости и стоит без дела!");
                 } else {
-                    \Mordheim\BattleLogger::add("{$fighter->name} прошёл тест тупости и может действовать нормально.");
+                    \Mordheim\BattleLogger::add("{$fighter->getName()} прошёл тест тупости и может действовать нормально.");
                 }
             }
             // --- Fear & Terror ---
             $enemies = [];
             foreach ($warbands as $otherWb) {
                 if ($otherWb !== $warband) {
-                    foreach ($otherWb->fighters as $f) {
-                        if ($f->alive) $enemies[] = $f;
+                    foreach ($otherWb->fighters as $fighter) {
+                        if ($fighter->getState()->getStatus()->isAlive()) $enemies[] = $fighter;
                     }
                 }
             }
             foreach ($enemies as $enemy) {
-                if ($enemy->hasSkill('Fear') && Ruler::distance($fighter->position, $enemy->position) <= 8) {
+                if ($enemy->hasSkill('Fear') && $fighter->getDistance($enemy) <= 8) {
                     \Mordheim\Rule\Psychology::testFear($fighter, $enemy, $warband->fighters);
                 }
-                if ($enemy->hasSkill('Terror') && Ruler::distance($fighter->position, $enemy->position) <= 8) {
+                if ($enemy->hasSkill('Terror') && $fighter->getDistance($enemy) <= 8) {
                     \Mordheim\Rule\Psychology::testTerror($fighter, $warband->fighters);
                 }
             }

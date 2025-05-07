@@ -9,7 +9,7 @@ class Battle
 {
     /** @var GameField */
     protected GameField $field;
-    /** @var Fighter[] */
+    /** @var FighterInterface[] */
     protected array $fighters = [];
     /** @var int */
     protected int $turn = 1;
@@ -43,7 +43,7 @@ class Battle
     public function nextTurn(): int
     {
         foreach ($this->fighters as $fighter) {
-            $fighter->battleStrategy->resetOnTurn();
+            $fighter->getState()->getBattleStrategy()->resetOnTurn();
         }
 
         $this->turn++;
@@ -89,10 +89,10 @@ class Battle
     protected function phaseMove(Warband $warband): void
     {
         \Mordheim\BattleLogger::add("Фаза движения: {$warband->name}");
-        foreach ($warband->fighters as $f) {
-            if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
-                $enemies = $this->getEnemiesFor($f);
-                $f->battleStrategy->movePhase($this, $f, $enemies);
+        foreach ($warband->fighters as $fighter) {
+            if ($fighter->getState()->getStatus()->canAct()) {
+                $enemies = $this->getEnemiesFor($fighter);
+                $fighter->getState()->getBattleStrategy()->movePhase($this, $fighter, $enemies);
             }
         }
     }
@@ -103,10 +103,10 @@ class Battle
     protected function phaseShoot(Warband $warband): void
     {
         \Mordheim\BattleLogger::add("Фаза стрельбы: {$warband->name}");
-        foreach ($warband->fighters as $f) {
-            if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
-                $enemies = $this->getEnemiesFor($f);
-                $f->battleStrategy->shootPhase($this, $f, $enemies);
+        foreach ($warband->fighters as $fighter) {
+            if ($fighter->getState()->getStatus()->canAct()) {
+                $enemies = $this->getEnemiesFor($fighter);
+                $fighter->getState()->getBattleStrategy()->shootPhase($this, $fighter, $enemies);
             }
         }
     }
@@ -117,10 +117,10 @@ class Battle
     protected function phaseMagic(Warband $warband): void
     {
         \Mordheim\BattleLogger::add("Фаза магии: {$warband->name}");
-        foreach ($warband->fighters as $f) {
-            if ($f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION) {
-                $enemies = $this->getEnemiesFor($f);
-                $f->battleStrategy->magicPhase($this, $f, $enemies);
+        foreach ($warband->fighters as $fighter) {
+            if ($fighter->getState()->getStatus()->canAct()) {
+                $enemies = $this->getEnemiesFor($fighter);
+                $fighter->getState()->getBattleStrategy()->magicPhase($this, $fighter, $enemies);
             }
         }
     }
@@ -133,33 +133,33 @@ class Battle
         \Mordheim\BattleLogger::add("Фаза рукопашного боя");
         foreach ($this->activeCombats->getAll() as $combat) {
             $fighters = $combat->fighters;
-            usort($fighters, function(Fighter $a, Fighter $b) use ($combat) {
+            usort($fighters, function (FighterInterface $a, FighterInterface $b) use ($combat) {
                 if ($combat->getBonus($a, CloseCombat::BONUS_CHARGED))
-                    return ($b->hasSkill('Lightning Reflexes')&& !$a->hasSkill('Lightning Reflexes')) ? 1 : -1;
+                    return ($b->hasSkill('Lightning Reflexes') && !$a->hasSkill('Lightning Reflexes')) ? 1 : -1;
 
                 if ($combat->getBonus($b, CloseCombat::BONUS_CHARGED))
-                    return ($a->hasSkill('Lightning Reflexes')&& !$b->hasSkill('Lightning Reflexes')) ? -1 : 1;
+                    return ($a->hasSkill('Lightning Reflexes') && !$b->hasSkill('Lightning Reflexes')) ? -1 : 1;
 
                 if ($a->getInitiative() === $b->getInitiative())
-                    return mt_rand(0,1) ? 1 : -1;
+                    return mt_rand(0, 1) ? 1 : -1;
 
                 return $b->getInitiative() - $a->getInitiative();
             });
 
             foreach ($fighters as $fighter) {
-                if ($fighter->alive && $fighter->state === \Mordheim\FighterState::STANDING) {
+                if ($fighter->getState()->getStatus()->canAct()) {
                     foreach ($fighters as $target) {
                         if ($fighter !== $target)
-                            $fighter->battleStrategy->closeCombatPhase($this, $fighter, [$target]);
+                            $fighter->getState()->getBattleStrategy()->closeCombatPhase($this, $fighter, [$target]);
                     }
                 }
             }
         }
 
         foreach ($this->getFighters() as $fighter) {
-            if ($fighter->alive && $fighter->state === \Mordheim\FighterState::STANDING) {
+            if ($fighter->getState()->getStatus()->canAct()) {
                 $enemies = $this->getEnemiesFor($fighter);
-                $fighter->battleStrategy->closeCombatPhase($this, $fighter, $enemies);
+                $fighter->getState()->getBattleStrategy()->closeCombatPhase($this, $fighter, $enemies);
             }
         }
     }
@@ -182,15 +182,15 @@ class Battle
 
     /**
      * Получить врагов для бойца
-     * @return Fighter[]
+     * @return FighterInterface[]
      */
-    public function getEnemiesFor(Fighter $fighter): array
+    public function getEnemiesFor(FighterInterface $target): array
     {
         $enemies = [];
         foreach ($this->warbands as $wb) {
-            foreach ($wb->fighters as $f) {
-                if ($f !== $fighter && $f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION && !$this->isAlly($fighter, $f)) {
-                    $enemies[] = $f;
+            foreach ($wb->fighters as $fighter) {
+                if ($fighter !== $target && $fighter->getState()->getStatus()->canAct() && !$this->isAlly($target, $fighter)) {
+                    $enemies[] = $fighter;
                 }
             }
         }
@@ -199,16 +199,16 @@ class Battle
 
     /**
      * Получить союзников для бойца
-     * @param Fighter $fighter
-     * @return Fighter[]
+     * @param FighterInterface $target
+     * @return FighterInterface[]
      */
-    public function getAlliesFor(Fighter $fighter): array
+    public function getAlliesFor(FighterInterface $target): array
     {
         $allies = [];
         foreach ($this->warbands as $wb) {
-            foreach ($wb->fighters as $f) {
-                if ($f !== $fighter && $f->alive && $f->state !== \Mordheim\FighterState::OUT_OF_ACTION && $this->isAlly($fighter, $f)) {
-                    $allies[] = $f;
+            foreach ($wb->fighters as $fighter) {
+                if ($fighter !== $target && $fighter->getState()->getStatus()->canAct() && $this->isAlly($target, $fighter)) {
+                    $allies[] = $fighter;
                 }
             }
         }
@@ -218,7 +218,7 @@ class Battle
     /**
      * Проверить, союзник ли другой боец
      */
-    protected function isAlly(Fighter $a, Fighter $b): bool
+    protected function isAlly(FighterInterface $a, FighterInterface $b): bool
     {
         foreach ($this->warbands as $wb) {
             if (in_array($a, $wb->fighters, true) && in_array($b, $wb->fighters, true)) {
@@ -228,12 +228,73 @@ class Battle
         return false;
     }
 
-    public function killFighter(Fighter $fighter): void
+    public function killFighter(FighterInterface $fighter): void
     {
-        $fighter->state = FighterState::OUT_OF_ACTION;
-        $fighter->alive = false;
-        $fighter->characteristics->wounds = 0;
+        $fighter->getState()->setStatus(Status::OUT_OF_ACTION);
         foreach ($this->getActiveCombats()->getByFighter($fighter) as $combat)
             $this->getActiveCombats()->remove($combat);
+    }
+
+    /**
+     * Проверяет есть ли препятствие между двумя координатами
+     * @param array $start [x,y,z]
+     * @param array $end [x,y,z]
+     * @return bool
+     */
+    public function hasObstacleBetween(array $start, array $end): bool
+    {
+        $x1 = $start[0];
+        $y1 = $start[1];
+        $z1 = $start[2];
+        $x2 = $end[0];
+        $y2 = $end[1];
+        $z2 = $end[2];
+
+        // Если координаты совпадают, нет препятствия
+        if ($x1 === $x2 && $y1 === $y2 && $z1 === $z2) {
+            return false;
+        }
+
+        // Проверяем все целые точки на пути между координатами
+        $dx = abs($x2 - $x1);
+        $dy = abs($y2 - $y1);
+        $dz = abs($z2 - $z1);
+        $x = $x1;
+        $y = $y1;
+        $z = $z1;
+        $n = 1 + $dx + $dy + $dz;
+        $x_inc = ($x2 > $x1) ? 1 : -1;
+        $y_inc = ($y2 > $y1) ? 1 : -1;
+        $z_inc = ($z2 > $z1) ? 1 : -1;
+        $error = $dx - $dy;
+        $error2 = $dx - $dz;
+
+        for ($i = 0; $i < $n; $i++) {
+            if ($this->getField()->getCell($x, $y, $z)->obstacle) {
+                return true;
+            }
+
+            $e2 = 2 * $error;
+            if ($e2 > -$dy) {
+                $error -= $dy;
+                $x += $x_inc;
+            }
+            if ($e2 < $dx) {
+                $error += $dx;
+                $y += $y_inc;
+            }
+
+            $e2 = 2 * $error2;
+            if ($e2 > -$dz) {
+                $error2 -= $dz;
+                $x += $x_inc;
+            }
+            if ($e2 < $dx) {
+                $error2 += $dx;
+                $z += $z_inc;
+            }
+        }
+
+        return false;
     }
 }

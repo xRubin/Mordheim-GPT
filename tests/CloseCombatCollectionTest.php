@@ -1,12 +1,8 @@
 <?php
 
-use Mordheim\Characteristics;
 use Mordheim\CloseCombat;
 use Mordheim\CloseCombatCollection;
-use Mordheim\EquipmentManager;
 use Mordheim\Exceptions\CloseCombatCollectionOutOfBoundsException;
-use Mordheim\Fighter;
-use Mordheim\Strategy\BattleStrategyInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,21 +11,45 @@ use PHPUnit\Framework\TestCase;
 class CloseCombatCollectionTest extends TestCase
 {
     private CloseCombatCollection $collection;
-    private Fighter $fighter1;
-    private Fighter $fighter2;
-    private Fighter $fighter3;
+    private \Mordheim\FighterInterface $fighter1;
+    private \Mordheim\FighterInterface $fighter2;
+    private \Mordheim\FighterInterface $fighter3;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->collection = new CloseCombatCollection();
 
-        // Создаем тестовых бойцов
-        $char = new Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7);
-        $strategy = $this->createMock(BattleStrategyInterface::class);
-        $this->fighter1 = new Fighter('Fighter1', $char, [], new EquipmentManager(), $strategy, [0, 0, 0]);
-        $this->fighter2 = new Fighter('Fighter2', $char, [], new EquipmentManager(), $strategy, [1, 0, 0]);
-        $this->fighter3 = new Fighter('Fighter3', $char, [], new EquipmentManager(), $strategy, [2, 0, 0]);
+        $this->fighter1 = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [0, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+        $this->fighter2 = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MIDDENHEIM_CHAMPION,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [1, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+        $this->fighter3 = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_CHAMPION,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [0, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
     }
 
     public function testAddAndRemove(): void

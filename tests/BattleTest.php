@@ -2,40 +2,58 @@
 
 use Mordheim\Battle;
 use Mordheim\CloseCombat;
-use Mordheim\Fighter;
 use Mordheim\GameField;
 use Mordheim\Warband;
 use PHPUnit\Framework\TestCase;
 
 class BattleTest extends TestCase
 {
-    public function setUp(): void
+    private function makeBattle(): Battle
     {
         // Простое поле 3x3x1
-        $this->field = new GameField(3, 3, 1);
-        $this->warband1 = new Warband('WB1');
-        $this->warband2 = new Warband('WB2');
-        $char = new \Mordheim\Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 7);
-        $this->f1 = new Fighter('A', $char, [], new \Mordheim\EquipmentManager(), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class), [0,0,0]);
-        $this->f2 = new Fighter('B', $char, [], new \Mordheim\EquipmentManager(), $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class), [2,2,0]);
-        $this->warband1->fighters[] = $this->f1;
-        $this->warband2->fighters[] = $this->f2;
-        $this->battle = new Battle($this->field, [$this->warband1, $this->warband2]);
+        $field = new GameField(3, 3, 1);
+        $warband1 = new Warband('WB1');
+        $warband2 = new Warband('WB2');
+        $f1 = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [0, 0, 0],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+        $f2 = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_CHAMPION,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState(
+                [2, 2, 2],
+                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                1
+            )
+        );
+        $warband1->fighters[] = $f1;
+        $warband2->fighters[] = $f2;
+        return new Battle($field, [$warband1, $warband2]);
     }
 
     public function testTurnOrderAndPhases()
     {
-        $this->assertEquals(1, $this->battle->getTurn());
-        $this->battle->playTurn();
-        $this->assertEquals(2, $this->battle->getTurn());
+        $battle = $this->makeBattle();
+        $this->assertEquals(1, $battle->getTurn());
+        $battle->playTurn();
+        $this->assertEquals(2, $battle->getTurn());
     }
 
     public function testAddAndRemoveCombat()
     {
-        $combat = new CloseCombat($this->f1, $this->f2);
-        $this->battle->getActiveCombats()->add($combat);
-        $this->assertCount(1, $this->battle->getActiveCombats()->getAll());
-        $this->battle->getActiveCombats()->remove($combat);
-        $this->assertCount(0, $this->battle->getActiveCombats()->getAll());
+        $battle = $this->makeBattle();
+        $combat = new CloseCombat($battle->getFighters()[0], $battle->getFighters()[1]);
+        $battle->getActiveCombats()->add($combat);
+        $this->assertCount(1, $battle->getActiveCombats()->getAll());
+        $battle->getActiveCombats()->remove($combat);
+        $this->assertCount(0, $battle->getActiveCombats()->getAll());
     }
 }

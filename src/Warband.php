@@ -1,12 +1,11 @@
 <?php
-namespace Mordheim;
 
-use Mordheim\Strategy;
+namespace Mordheim;
 
 class Warband
 {
     public string $name;
-    /** @var Fighter[] */
+    /** @var FighterInterface[] */
     public array $fighters = [];
 
     public function __construct(string $name, array $fighters = [])
