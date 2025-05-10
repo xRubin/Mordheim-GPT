@@ -50,7 +50,7 @@ class AggressiveStrategy extends BaseBattleStrategy
         if (!$ranged) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
         if ($target && $fighter->getDistance($target) <= $ranged->getRange()) {
-            \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, $this->spentMove);
+            \Mordheim\Rule\Attack::ranged($battle, $fighter, $target, $this->spentMove);
         }
     }
 
@@ -66,7 +66,7 @@ class AggressiveStrategy extends BaseBattleStrategy
         if ($target && $fighter->isAdjacent($target)) {
             $canAttack = $this->canActAgainst($battle, $fighter, $target);
             if ($canAttack) {
-                \Mordheim\Rule\Attack::apply($battle, $fighter, $target);
+                \Mordheim\Rule\Attack::melee($battle, $fighter, $target);
             }
         }
     }

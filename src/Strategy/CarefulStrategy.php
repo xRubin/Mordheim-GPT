@@ -34,7 +34,7 @@ class CarefulStrategy extends BaseBattleStrategy
         if (!$ranged) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
         if ($target && $fighter->getDistance($target) <= $ranged->getRange()) {
-            \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, $this->spentMove);
+            \Mordheim\Rule\Attack::ranged($battle, $fighter, $target, $this->spentMove);
         }
     }
 
@@ -49,7 +49,7 @@ class CarefulStrategy extends BaseBattleStrategy
         $target = $this->getNearestEnemy($fighter, $enemies);
         $canAct = $this->canActAgainst($battle, $fighter, $target);
         if ($target && $fighter->isAdjacent($target) && $canAct) {
-            \Mordheim\Rule\Attack::apply($battle, $fighter, $target);
+            \Mordheim\Rule\Attack::melee($battle, $fighter, $target);
         }
     }
 }

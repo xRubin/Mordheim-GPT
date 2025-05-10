@@ -7,6 +7,9 @@ use Mordheim\GameField;
 use Mordheim\SpecialRule;
 use Mordheim\Warband;
 use PHPUnit\Framework\TestCase;
+use Mordheim\Rule\Attack;
+use Mordheim\FighterInterface;
+use Mordheim\Slot;
 
 class FighterShootingTest extends TestCase
 {
@@ -47,7 +50,7 @@ class FighterShootingTest extends TestCase
         );
 
         $battle = $this->makeClearBattle([$shooter], [$target]);
-        $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target);
+        $result = \Mordheim\Rule\Attack::ranged($battle, $shooter, $target);
         $this->assertIsBool($result);
     }
 
@@ -84,7 +87,7 @@ class FighterShootingTest extends TestCase
         );
 
         $battle = $this->makeClearBattle([$shooter], [$target]);
-        $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target);
+        $result = \Mordheim\Rule\Attack::ranged($battle, $shooter, $target);
         $this->assertIsBool($result);
     }
 
@@ -113,7 +116,7 @@ class FighterShootingTest extends TestCase
         );
 
         $battle = $this->makeClearBattle([$shooter], [$target]);
-        $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target, false);
+        $result = \Mordheim\Rule\Attack::ranged($battle, $shooter, $target, false);
         $this->assertIsBool($result);
     }
 
@@ -142,7 +145,7 @@ class FighterShootingTest extends TestCase
         );
 
         $battle = $this->makeClearBattle([$shooter], [$target]);
-        $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target);
+        $result = \Mordheim\Rule\Attack::ranged($battle, $shooter, $target);
         $this->assertIsBool($result);
     }
 
@@ -171,7 +174,7 @@ class FighterShootingTest extends TestCase
         );
 
         $battle = $this->makeClearBattle([$shooter], [$target]);
-        $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target, true); // moved=true
+        $result = \Mordheim\Rule\Attack::ranged($battle, $shooter, $target, true); // moved=true
         $this->assertFalse($result, 'MoveOrFire: нельзя стрелять после движения');
     }
 
@@ -200,7 +203,7 @@ class FighterShootingTest extends TestCase
         );
 
         $battle = $this->makeClearBattle([$shooter], [$target]);
-        $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target, false); // moved=false
+        $result = \Mordheim\Rule\Attack::ranged($battle, $shooter, $target, false); // moved=false
         $this->assertIsBool($result, 'MoveOrFire: можно стрелять если не двигался');
     }
 
@@ -229,7 +232,168 @@ class FighterShootingTest extends TestCase
         );
 
         $battle = $this->makeClearBattle([$shooter], [$target]);
-        $result = \Mordheim\Rule\Shoot::apply($battle, $shooter, $target, true); // moved=true
+        $result = \Mordheim\Rule\Attack::ranged($battle, $shooter, $target, true); // moved=true
         $this->assertIsBool($result, 'Обычное оружие: можно стрелять после движения');
+    }
+
+    public function testSelectRangedWeaponReturnsNullIfMoveOrFireAndMoved()
+    {
+        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
+        $weapon->method('getRange')->willReturn(24);
+        $weapon->method('hasSpecialRule')->willReturnCallback(function($rule) {
+            return $rule === SpecialRule::MOVE_OR_FIRE;
+        });
+        $source = $this->createMock(FighterInterface::class);
+        $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager());
+        $source->method('getDistance')->willReturn(10.0);
+        $target = $this->createMock(FighterInterface::class);
+        $this->assertNull(Attack::selectRangedWeapon($source, $target, true));
+    }
+
+    public function testCalculateRangedParamsWithAllModifiers()
+    {
+        $battle = $this->createMock(Battle::class);
+        $battle->method('hasObstacleBetween')->willReturn(true);
+
+        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
+        $weapon->method('getRange')->willReturn(20);
+
+        $sourceState = $this->createMock(\Mordheim\FighterState::class);
+        $sourceState->method('getPosition')->willReturn([0, 0, 0]);
+
+        $source = $this->createMock(FighterInterface::class);
+        $source->method('getBallisticSkill')->willReturn(3); // 5+ to hit
+        $source->method('getDistance')->willReturn(15.0); // дальний выстрел
+        $source->method('hasSpecialRule')->willReturn(false);
+        $source->method('getHitModifier')->willReturn(2);
+        $source->method('getState')->willReturn($sourceState);
+
+        $targetState = $this->createMock(\Mordheim\FighterState::class);
+        $targetState->method('getPosition')->willReturn([10, 0, 0]);
+
+        $target = $this->createMock(FighterInterface::class);
+        $target->method('hasSpecialRule')->willReturnCallback(function($rule) {
+            return $rule === SpecialRule::LARGE_TARGET;
+        });
+        $target->method('getState')->willReturn($targetState);
+
+        [$toHit, $shots] = Attack::calculateRangedParams($battle, $source, $target, $weapon, true);
+        // 5+ (BS3) +1 (дальний) +1 (двигался) +1 (укрытие) -1 (большая цель) +2 (модификатор оружия) = 9, но максимум 6
+        $this->assertEquals(6, $toHit);
+        $this->assertEquals(1, $shots);
+    }
+
+    public function testTryArmorSaveRangedReturnsTrueIfSaveRollSufficient()
+    {
+        $source = $this->createMock(FighterInterface::class);
+        $target = $this->createMock(FighterInterface::class);
+        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
+        // Мокаем getArmorSave чтобы вернуть 4, и Dice::roll чтобы вернуть 5 (>=4)
+        $target->method('getArmorSave')->willReturn(4);
+        \Mordheim\Dice::setTestRolls([5]);
+        // Здесь имитируем saveRoll >= armorSave
+        $this->assertTrue(Attack::tryArmorSaveRanged($source, $target, $weapon, function() { return 5; }));
+    }
+
+    public function testTryArmorSaveRangedReturnsFalseIfSaveRollInsufficient()
+    {
+        $source = $this->createMock(FighterInterface::class);
+        $target = $this->createMock(FighterInterface::class);
+        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
+
+        $targetState = $this->createMock(\Mordheim\FighterState::class);
+        $targetState->method('getStatus')->willReturn(\Mordheim\Status::STANDING);
+        $target->method('getState')->willReturn($targetState);
+
+        $target->method('getArmorSave')->willReturn(5);
+        $this->assertFalse(Attack::tryArmorSaveRanged($source, $target, $weapon, function() { return 3; }));
+    }
+}
+
+class AttackPublicMethodsTest extends \PHPUnit\Framework\TestCase
+{
+    public function setUp(): void
+    {
+        // Можно добавить инициализацию, если потребуется
+    }
+
+    public function testSelectRangedWeaponReturnsNullIfNoWeapon()
+    {
+        $source = $this->createMock(FighterInterface::class);
+        $source->method('getEquipmentManager')->willReturn(new class {
+            public function getItemsBySlot($slot) { return []; }
+        });
+        $target = $this->createMock(FighterInterface::class);
+        $this->assertNull(Attack::selectRangedWeapon($source, $target, false));
+    }
+
+    public function testSelectRangedWeaponReturnsWeaponIfInRange()
+    {
+        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
+        $weapon->method('getRange')->willReturn(24);
+        $weapon->method('hasSpecialRule')->willReturn(false);
+        $source = $this->createMock(FighterInterface::class);
+        $source->method('getEquipmentManager')->willReturn(new class($weapon) {
+            private $weapon;
+            public function __construct($weapon) { $this->weapon = $weapon; }
+            public function getItemsBySlot($slot) { return [$this->weapon]; }
+        });
+        $source->method('getDistance')->willReturn(10);
+        $target = $this->createMock(FighterInterface::class);
+        $this->assertSame($weapon, Attack::selectRangedWeapon($source, $target, false));
+    }
+
+    public function testSelectRangedWeaponReturnsNullIfOutOfRange()
+    {
+        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
+        $weapon->method('getRange')->willReturn(12);
+        $weapon->method('hasSpecialRule')->willReturn(false);
+        $source = $this->createMock(FighterInterface::class);
+        $source->method('getEquipmentManager')->willReturn(new class($weapon) {
+            private $weapon;
+            public function __construct($weapon) { $this->weapon = $weapon; }
+            public function getItemsBySlot($slot) { return [$this->weapon]; }
+        });
+        $source->method('getDistance')->willReturn(20);
+        $target = $this->createMock(FighterInterface::class);
+        $this->assertNull(Attack::selectRangedWeapon($source, $target, false));
+    }
+
+    public function testCalculateRangedParamsTypical()
+    {
+        $battle = $this->createMock(Battle::class);
+        $battle->method('hasObstacleBetween')->willReturn(false);
+        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
+        $weapon->method('getRange')->willReturn(24);
+        $source = $this->createMock(FighterInterface::class);
+        $source->method('getBallisticSkill')->willReturn(4); // 4+ to hit
+        $source->method('getDistance')->willReturn(10);
+        $source->method('hasSpecialRule')->willReturn(false);
+        $source->method('getHitModifier')->willReturn(0);
+        $target = $this->createMock(FighterInterface::class);
+        $target->method('hasSpecialRule')->willReturn(false);
+        [$toHit, $shots] = Attack::calculateRangedParams($battle, $source, $target, $weapon, false);
+        $this->assertEquals(4, $toHit);
+        $this->assertEquals(1, $shots);
+    }
+
+    public function testCalculateRangedParamsWithQuickShot()
+    {
+        $battle = $this->createMock(Battle::class);
+        $battle->method('hasObstacleBetween')->willReturn(false);
+        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
+        $weapon->method('getRange')->willReturn(24);
+        $source = $this->createMock(FighterInterface::class);
+        $source->method('getBallisticSkill')->willReturn(4);
+        $source->method('getDistance')->willReturn(10);
+        $source->method('hasSpecialRule')->willReturnCallback(function($rule) {
+            return $rule === SpecialRule::QUICK_SHOT;
+        });
+        $source->method('getHitModifier')->willReturn(0);
+        $target = $this->createMock(FighterInterface::class);
+        $target->method('hasSpecialRule')->willReturn(false);
+        [$toHit, $shots] = Attack::calculateRangedParams($battle, $source, $target, $weapon, false);
+        $this->assertEquals(4, $toHit);
+        $this->assertEquals(2, $shots);
     }
 }

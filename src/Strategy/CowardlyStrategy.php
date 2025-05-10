@@ -78,7 +78,7 @@ class CowardlyStrategy extends BaseBattleStrategy
         if (!$ranged) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
         if ($target && $fighter->getDistance($target) <= $ranged->getRange()) {
-            \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, $this->spentMove);
+            \Mordheim\Rule\Attack::ranged($battle, $fighter, $target, $this->spentMove);
         }
     }
 

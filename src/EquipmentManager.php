@@ -22,7 +22,7 @@ class EquipmentManager
     public function addItem(EquipmentInterface $item): static
     {
         $slotMelee = 2;
-        $slotRanged = 2;
+        $slotRanged = 1;
         $slotArmor = 1;
         $slotHelmet = 1;
         foreach (array_merge($this->items, [$item]) as $equipment) {

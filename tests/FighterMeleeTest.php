@@ -77,7 +77,7 @@ class FighterMeleeTest extends TestCase
         $attacker = $this->makeFighter([], [Equipment::SWORD], 2, [0, 0, 0]);
         $defender = self::makeTestFighter([], [Equipment::SWORD], 2, [1, 0, 0]);
         $battle = $this->makeClearBattle([$attacker], [$defender]);
-        $result = \Mordheim\Rule\Attack::apply($battle, $attacker, $defender);
+        $result = \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
         $this->assertTrue($result);
         $this->assertEquals(1, $defender->getState()->getWounds());
     }
@@ -89,7 +89,7 @@ class FighterMeleeTest extends TestCase
         for ($i = 0; $i < 20; $i++) {
             $defender = $this->makeFighter([SpecialRule::STEP_ASIDE], [Equipment::SWORD], 2);
             $battle = $this->makeClearBattle([$attacker], [$defender]);
-            \Mordheim\Rule\Attack::apply($battle, $attacker, $defender);
+            \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
             if ($defender->getState()->getWounds() == 2) {
                 $parried = true;
                 break;
@@ -105,7 +105,7 @@ class FighterMeleeTest extends TestCase
         $attacker = $this->makeFighter([], [Equipment::SWORD], 2, [0, 0, 0]);
         $defender = self::makeTestFighter([], [Equipment::SWORD], 2, [1, 0, 0]);
         $battle = $this->makeClearBattle([$attacker], [$defender]);
-        \Mordheim\Rule\Attack::apply($battle, $attacker, $defender);
+        \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
         $this->assertLessThanOrEqual(1, $defender->getState()->getWounds());
     }
 
@@ -119,7 +119,7 @@ class FighterMeleeTest extends TestCase
         for ($i = 0; $i < 20; $i++) {
             $defender = self::makeTestFighter([SpecialRule::RESILIENT], [Equipment::SWORD], 2, [1, 0, 0]);
             $battle = $this->makeClearBattle([$attacker], [$defender]);
-            \Mordheim\Rule\Attack::apply($battle, $attacker, $defender);
+            \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
             if ($defender->getState()->getWounds() < 2) {
                 $wounded = true;
                 break;
@@ -140,7 +140,7 @@ class FighterMeleeTest extends TestCase
         $defender = self::makeTestFighter([], [Equipment::SWORD], 2, [1, 0, 0]);
         \Mordheim\Dice::setTestRolls([4, 1, 5, 4, 1, 5]); // два успешных удара подряд
         $battle = $this->makeClearBattle([$fighter2], [$defender]);
-        \Mordheim\Rule\Attack::apply($battle, $fighter2, $defender); // предполагается, что attack() вызывает getAttacks() и делает нужное число атак
+        \Mordheim\Rule\Attack::melee($battle, $fighter2, $defender); // предполагается, что attack() вызывает getAttacks() и делает нужное число атак
         // Проверим, что у защитника осталось 0 ран
         $this->assertEquals(0, $defender->getState()->getWounds(), 'Две успешные атаки списывают две раны');
     }
@@ -151,7 +151,7 @@ class FighterMeleeTest extends TestCase
         $attacker = $this->makeFighter([], [Equipment::STEEL_WHIP], 2, [0, 0, 0]);
         $defender = self::makeTestFighter([], [Equipment::SWORD], 2, [1, 0, 0]);
         $battle = $this->makeClearBattle([$attacker], [$defender]);
-        $result = \Mordheim\Rule\Attack::apply($battle, $attacker, $defender);
+        $result = \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
         $this->assertTrue($result, 'Steel Whip should ignore parry');
     }
 
@@ -161,7 +161,7 @@ class FighterMeleeTest extends TestCase
         $attacker = $this->makeFighter([], [Equipment::CLUB], 2, [0, 0, 0]);
         $defender = $this->makeFighter([], [Equipment::SWORD], 2, [1, 0, 0]);
         $battle = $this->makeClearBattle([$attacker], [$defender]);
-        \Mordheim\Rule\Attack::apply($battle, $attacker, $defender);
+        \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
         $this->assertFalse($defender->getState()->getStatus()->isAlive(), 'Club/Mace/Hammer should put out of action on 1');
     }
 
@@ -172,7 +172,7 @@ class FighterMeleeTest extends TestCase
         $attacker = $this->makeFighter([], [Equipment::DOUBLE_HANDED_AXE], 2, [0, 0, 0]);
         $defender = $this->makeFighter([], [Equipment::SWORD, Equipment::LIGHT_ARMOR], 2, [1, 0, 0]);
         $battle = $this->makeClearBattle([$attacker], [$defender]);
-        $result = \Mordheim\Rule\Attack::apply($battle, $attacker, $defender);
+        $result = \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
         $this->assertTrue($result, 'DoubleHanded and ArmorPiercing should worsen save');
     }
 
@@ -187,7 +187,7 @@ class FighterMeleeTest extends TestCase
         $defender = self::makeTestFighter([], [Equipment::SWORD], 2, [1, 0, 0]);
         $defender->getState()->setStatus(\Mordheim\Status::KNOCKED_DOWN);
         $battle = $this->makeClearBattle([$attacker], [$defender]);
-        $result = \Mordheim\Rule\Attack::apply($battle, $attacker, $defender);
+        $result = \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
         $this->assertTrue($result, 'Attack against knocked down should hit and wound if wound roll succeeds');
         $this->assertContains(
             $defender->getState()->getStatus(),
@@ -205,7 +205,7 @@ class FighterMeleeTest extends TestCase
         $defender2 = self::makeTestFighter([], [Equipment::SWORD], 2, [1, 0, 0]);
         $defender2->getState()->setStatus(\Mordheim\Status::KNOCKED_DOWN);
         $battle2 = $this->makeClearBattle([$attacker2], [$defender2]);
-        $result2 = \Mordheim\Rule\Attack::apply($battle, $attacker2, $defender2);
+        $result2 = \Mordheim\Rule\Attack::melee($battle, $attacker2, $defender2);
         $this->assertFalse($result2, 'Attack against knocked down should not wound if wound roll fails, but always counts as hit');
         $this->assertEquals(2, $defender2->getState()->getWounds());
     }
@@ -220,7 +220,7 @@ class FighterMeleeTest extends TestCase
         $defender = self::makeTestFighter([], [Equipment::SWORD], 2, [1, 0, 0]);
         $defender->getState()->setStatus(\Mordheim\Status::STUNNED);
         $battle = $this->makeClearBattle([$attacker], [$defender]);
-        $result = \Mordheim\Rule\Attack::apply($battle, $attacker, $defender);
+        $result = \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
         $this->assertTrue($result, 'Attack against stunned should always wound and skip save');
         // Проверим, что после атаки защитник либо выведен из строя, либо в состоянии травмы
         $this->assertContains($defender->getState()->getStatus(), [\Mordheim\Status::KNOCKED_DOWN, \Mordheim\Status::STUNNED, \Mordheim\Status::OUT_OF_ACTION]);
@@ -232,7 +232,7 @@ class FighterMeleeTest extends TestCase
         $attacker = $this->makeFighter([], [Equipment::SWORD], 2, [0, 0, 0]);
         $defender = self::makeTestFighter([], [Equipment::SWORD], 2, [1, 0, 0]);
         $battle = $this->makeClearBattle([$attacker], [$defender]);
-        \Mordheim\Rule\Attack::apply($battle, $attacker, $defender);
+        \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
         $this->assertEquals(\Mordheim\Status::OUT_OF_ACTION, $defender->getState()->getStatus(), 'Critical should put out of action on 6 to wound');
     }
 }
