@@ -86,6 +86,7 @@ enum SpecialRule implements SpecialRuleInterface
     case TRICK_SHOOTER;
     case HUNTER;
     case KNIFE_FIGHTER;
+    case KNIFE_FIGHTER_EXTRAORDINAIRE;
     case BATTLE_TONGUE;
     case SORCERY;
     case STREETWISE;
@@ -106,6 +107,9 @@ enum SpecialRule implements SpecialRuleInterface
     case INVINCIBLE_SWORDSMAN;
     case WANDERER;
     case CRITICAL_HIT_ON_5;
+    case UNFEELING;
+    case UNBLINKING_EYE;
+    case METALLIC_BODY;
 
     case MUTATION_DAEMON_SOUL;
     case MUTATION_GREAT_CLAW;

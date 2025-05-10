@@ -143,11 +143,13 @@ class EquipmentManager
      */
     public function getArmorSave(?EquipmentInterface $attackerWeapon): int
     {
+        if ($this->hasSpecialRule(SpecialRule::METALLIC_BODY))
+            return 3;
         if ($this->hasSpecialRule(SpecialRule::SAVE_4))
             return 4;
-        elseif ($this->hasSpecialRule(SpecialRule::SAVE_5))
+        if ($this->hasSpecialRule(SpecialRule::SAVE_5))
             return 5;
-        elseif ($this->hasSpecialRule(SpecialRule::SAVE_6))
+        if ($this->hasSpecialRule(SpecialRule::SAVE_6))
             return 6;
 
         return 0;

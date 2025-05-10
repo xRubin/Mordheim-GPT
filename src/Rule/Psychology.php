@@ -71,6 +71,8 @@ class Psychology
      */
     public static function testRout(FighterInterface $fighter, array $allies = []): bool
     {
+        if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
+            return true;
         $res = self::leadershipTest($fighter, $allies);
         \Mordheim\BattleLogger::add("{$fighter->getName()} проходит тест паники/бегства: " . ($res ? 'успех' : 'провал'));
         return $res;
@@ -109,6 +111,8 @@ class Psychology
      */
     public static function allAloneTest(FighterInterface $fighter, array $enemies, array $allies): bool
     {
+        if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
+            return true;
         $closeEnemies = array_filter($enemies, fn($enemy) => $fighter->getDistance($enemy) <= 1.99);
         if (count($closeEnemies) < 2) return true;
         $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->getState()->getStatus()->canAct() && $fighter->getDistance($ally) <= 6);
@@ -127,6 +131,8 @@ class Psychology
      */
     public static function fearTest(FighterInterface $fighter): bool
     {
+        if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
+            return true;
         $roll = \Mordheim\Dice::roll(6) + \Mordheim\Dice::roll(6);
         $success = $roll <= $fighter->getLeadership();
         \Mordheim\BattleLogger::add("Fear test: бросок $roll против {$fighter->getLeadership()} — " . ($success ? 'успех' : 'провал'));
@@ -170,6 +176,8 @@ class Psychology
      */
     public static function stupidityTest(FighterInterface $fighter): bool
     {
+        if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
+            return true;
         $roll = \Mordheim\Dice::roll(6) + \Mordheim\Dice::roll(6);
         $success = $roll <= $fighter->getLeadership();
         \Mordheim\BattleLogger::add("Stupidity test: бросок $roll против {$fighter->getLeadership()} — " . ($success ? 'успех' : 'провал'));

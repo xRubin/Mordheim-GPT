@@ -4,6 +4,13 @@ namespace Mordheim;
 
 interface BlankInterface
 {
+    public function getWarband(): ?WarbandInterface;
+
+    /**
+     * @return WarbandInterface[]
+     */
+    public function getAllowedWarbands(): array;
+
     public function getHireFee(): int;
     public function getUpkeepFee(): int;
 

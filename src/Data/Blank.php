@@ -3,6 +3,7 @@
 namespace Mordheim\Data;
 
 use Mordheim\BlankInterface;
+use Mordheim\Data\Attributes\AllowedWarband;
 use Mordheim\Data\Attributes\Characteristics;
 use Mordheim\Data\Attributes\EquipmentList;
 use Mordheim\Data\Attributes\Henchman;
@@ -386,8 +387,26 @@ enum Blank implements BlankInterface
     #[SpecialRule('STRIKE_TO_INJURE'), SpecialRule('EXPERT_SWORDSMAN'), SpecialRule('STEP_ASIDE')]
     #[SpecialRule('SPRINT'), SpecialRule('LIGHTNING_REFLEXES'), SpecialRule('DODGE'), SpecialRUle('MIGHTY_BLOW')]
     #[SpecialRule('INVINCIBLE_SWORDSMAN'), SpecialRule('WANDERER')]
-    case AENUR_THE_SWORD_OF_TWILIGHT;
+    case AENUR;
 
+    #[Warband('HIRED_SWORDS'), HiredSword, Rating(60)]
+    #[ExceptWarband('SKAVEN'), ExceptWarband('UNDEAD'), ExceptWarband('CULT_OF_THE_POSSESSED')]
+    #[HireFee(70), UpkeepFee(30)]
+    #[MaxCount(1)]
+    #[Characteristics(4, 3, 6, 4, 3, 2, 6, 1, 7)]
+    #[Equipment('DAGGER'), Equipment('DAGGER'), Equipment('THROWING_KNIVES')]
+    #[SpecialRule('DODGE'), SpecialRule('SCALE_SHEER_SURFACES'), SpecialRule('QUICK_SHOT'), SpecialRUle('EAGLE_EYES')]
+    #[SpecialRule('KNIFE_FIGHTER'), SpecialRule('KNIFE_FIGHTER_EXTRAORDINAIRE')]
+    case JOHANN;
+
+    #[Warband('HIRED_SWORDS'), HiredSword, Rating(70)]
+    #[AllowedWarband('SKAVEN')]
+    #[HireFee(80), UpkeepFee(35)]
+    #[MaxCount(1)]
+    #[Characteristics(5, 5, 4, 4, 4, 2, 5, 4, 8)]
+    #[Equipment('ESHIN_FIGHTING_CLAWS')]
+    #[SpecialRule('UNFEELING'), SpecialRule('NO_PAIN'), SpecialRUle('UNBLINKING_EYE'), SpecialRUle('METALLIC_BODY')]
+    case VESKIT;
 
     public function getWarband(): ?WarbandInterface
     {
@@ -400,6 +419,31 @@ enum Blank implements BlankInterface
         return $classAttributes[0]->newInstance()->getValue();
     }
 
+    public function getAllowedWarbands(): array
+    {
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(AllowedWarband::class);
+
+        if (count($classAttributes))
+            return array_map(
+                fn($attribute) => $attribute->newInstance()->getValue(),
+                $classAttributes
+            );
+
+        $classAttributes = $ref->getAttributes(AllowedWarband::class);
+        if (count($classAttributes))
+            return array_values(
+                array_diff(
+                    \Mordheim\Data\Warband::cases(),
+                    array_map(
+                        fn($attribute) => $attribute->newInstance()->getValue(),
+                        $classAttributes
+                    )
+                )
+            );
+
+        return \Mordheim\Data\Warband::cases();
+    }
     public function getHireFee(): int
     {
         $ref = new \ReflectionClassConstant(self::class, $this->name);

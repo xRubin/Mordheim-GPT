@@ -9,3 +9,6 @@ var_dump(\Mordheim\Data\Equipment::GROMRIL_FLAIL->getSpecialRules());
 var_dump(Mordheim\SpecialRule::tryFromName('PARRY'));
 
 var_dump(\Mordheim\Data\Equipment::HELMET->getSlot());
+
+var_dump(\Mordheim\Data\Blank::VESKIT->getAllowedWarbands());
+var_dump(\Mordheim\Data\Blank::AENUR->getAllowedWarbands());

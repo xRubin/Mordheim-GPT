@@ -370,6 +370,14 @@ enum Equipment implements EquipmentInterface
     #[SpecialRule('CUMBERSOME')]
     #[SlotMelee]
     case FIGHTING_CLAWS;
+
+    #[Warband('SKAVEN')]
+    #[Strength(5)]
+    #[SaveModifier(-3)]
+    #[SpecialRule('PAIR')]
+    #[SpecialRule('PARRY')]
+    #[SlotMelee]
+    case ESHIN_FIGHTING_CLAWS;
     #[Warband('SKAVEN')]
     #[Cost(50)]
     #[SpecialRule('PAIR')]
@@ -395,6 +403,8 @@ enum Equipment implements EquipmentInterface
     case BLESSED_WATER;
     #[SlotMisc]
     case HOLY_RELIC;
+    #[SlotMisc]
+    case CRIMSON_SHADE;
     #[SlotMisc]
     case ELVEN_CLOAK;
     #[SlotMisc]

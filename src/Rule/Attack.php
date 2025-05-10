@@ -97,7 +97,7 @@ class Attack
     {
         if ($target->getState()->getStatus() === Status::STUNNED) {
             \Mordheim\BattleLogger::add("Атака по оглушённому (STUNNED): попадание и ранение автоматически успешны, сейв невозможен.");
-            return InjuryRoll::roll($battle, $source, $target, $weapon);
+            return Injuries::roll($battle, $source, $target, $weapon);
         }
         if ($target->getState()->getStatus() === Status::KNOCKED_DOWN) {
             \Mordheim\BattleLogger::add("Атака по сбитому с ног (KNOCKED_DOWN): попадание автоматически успешно.");
@@ -106,7 +106,7 @@ class Attack
             $woundResult = RollToWound::roll($source, $target, $weapon);
             if (!$woundResult['success']) return false;
             if (self::tryArmorSave($source, $target, $weapon)) return false;
-            return InjuryRoll::roll($battle, $source, $target, $weapon, $woundResult['isCritical']);
+            return Injuries::roll($battle, $source, $target, $weapon, $woundResult['isCritical']);
         }
         return null;
     }
@@ -174,7 +174,7 @@ class Attack
         \Mordheim\BattleLogger::add("Сэйв защищающегося: $armorSave (модификатор: $armorSaveMod)");
         if ($woundResult['isCritical']) {
             \Mordheim\BattleLogger::add("[DEBUG][Attack] Критическое ранение! Перед InjuryRoll");
-            $success = InjuryRoll::roll($battle, $source, $target, $weapon, true);
+            $success = Injuries::roll($battle, $source, $target, $weapon, true);
             \Mordheim\BattleLogger::add("[DEBUG][Attack] После InjuryRoll: статус цели=" . $target->getState()->getStatus()->value);
             return true;
         } else {
@@ -190,7 +190,7 @@ class Attack
             }
             if ($weapon && $weapon->hasSpecialRule(SpecialRule::CONCUSSION)) {
                 \Mordheim\BattleLogger::add("Особое правило: дубина/конкашн — всегда injury table");
-                $success = InjuryRoll::roll($battle, $source, $target, $weapon);
+                $success = Injuries::roll($battle, $source, $target, $weapon);
             } else {
                 $target->getState()->decreaseWounds();
                 \Mordheim\BattleLogger::add("У {$target->getName()} осталось {$target->getState()->getWounds()} ран(а/ий)");
