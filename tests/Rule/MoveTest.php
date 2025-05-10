@@ -104,7 +104,7 @@ class MoveTest extends TestCase
         $battle = $this->makeClearBattle([$fighter], []);
         // Клетка [1,0,0] — вода
         $battle->getField()->setCell(1, 0, 0, $waterCell);
-        $this->expectException(\Mordheim\Exceptions\PathfinderInitiativeRollFailedException::class);
+        $this->expectException(\Mordheim\Exceptions\MoveInitiativeRollFailedException::class);
         \Mordheim\Rule\Move::common($battle, $fighter, [2, 0, 0], 1.0);
         $this->assertEquals([1, 0, 0], $fighter->getState()->getPosition(), 'Боец должен остановиться на воде при провале инициативы');
         $logs = \Mordheim\BattleLogger::getAll();
@@ -176,10 +176,8 @@ class MoveTest extends TestCase
         $fighter = $this->makeFighter([0, 0, 0], 3);
         $enemy = $this->makeFighter([5, 0, 0], 3);
         $battle = $this->makeClearBattle([$fighter], [$enemy]);
+        $this->expectException(\Mordheim\Exceptions\MoveRunDeprecatedException::class);
         \Mordheim\Rule\Move::run($battle, $fighter, [6, 0, 0], 1.0);
-        $this->assertEquals([0, 0, 0], $fighter->getState()->getPosition(), 'Боец не должен бежать, если враг ближе 8"');
-        $logs = \Mordheim\BattleLogger::getAll();
-        $this->assertStringContainsString('не может бежать: враг слишком близко', implode("\n", $logs));
     }
 
     public function testRun_StopOnWater()

@@ -4,6 +4,7 @@ namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
 use Mordheim\Exceptions\ChargeFailedException;
+use Mordheim\Exceptions\MoveRunDeprecatedException;
 use Mordheim\FighterInterface;
 use Mordheim\Rule\Charge;
 use Mordheim\Slot;
@@ -33,7 +34,13 @@ class AggressiveStrategy extends BaseBattleStrategy
             } catch (ChargeFailedException $e) {
             }
         }
-        \Mordheim\Rule\Move::common($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
+
+        try {
+            \Mordheim\Rule\Move::run($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
+            $this->spentShoot = true;
+        } catch (MoveRunDeprecatedException $e) {
+            \Mordheim\Rule\Move::common($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
+        }
     }
 
     protected function onShootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void

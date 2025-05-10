@@ -3,6 +3,7 @@
 namespace Mordheim\Rule;
 
 use Mordheim\Battle;
+use Mordheim\Exceptions\MoveRunDeprecatedException;
 use Mordheim\Exceptions\PathfinderTargetUnreachableException;
 use Mordheim\FighterInterface;
 
@@ -33,13 +34,14 @@ class Move
      * @param float $aggressiveness
      * @return void
      * @throws PathfinderTargetUnreachableException
+     * @throws MoveRunDeprecatedException
      */
     public static function run(Battle $battle, FighterInterface $fighter, array $target, float $aggressiveness): void
     {
         foreach ($battle->getEnemiesFor($fighter) as $enemy) {
             if ($fighter->getDistance($enemy) < 8) { // 8 клеток = 8"
                 \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать: враг слишком близко (меньше 8\")");
-                return;
+                throw new MoveRunDeprecatedException();
             }
         }
         $blockers = self::prepareBlockers($battle, $fighter);
@@ -137,7 +139,7 @@ class Move
             if ($roll > $fighter->getInitiative()) {
                 $fighter->getState()->setPosition([$x, $y, $z]);
                 \Mordheim\BattleLogger::add("Провал Initiative в воде — движение остановлено на клетке ($x,$y,$z)");
-                throw (new \Mordheim\Exceptions\PathfinderInitiativeRollFailedException())->setField($cell);
+                throw (new \Mordheim\Exceptions\MoveInitiativeRollFailedException())->setField($cell);
             }
             $cost = 2;
         }
@@ -149,7 +151,7 @@ class Move
             if ($roll > $fighter->getInitiative()) {
                 $fighter->getState()->setPosition([$x, $y, $z]);
                 \Mordheim\BattleLogger::add("Провал Initiative на опасной клетке ($x,$y,$z) — юнит упал");
-                throw (new \Mordheim\Exceptions\PathfinderInitiativeRollFailedException())->setField($cell);
+                throw (new \Mordheim\Exceptions\MoveInitiativeRollFailedException())->setField($cell);
             }
         }
         // Прыжок через разрыв: если разница высот > 1
@@ -160,7 +162,7 @@ class Move
             if ($roll > $fighter->getInitiative()) {
                 $fighter->getState()->setPosition([$x, $y, $z]);
                 \Mordheim\BattleLogger::add("Провал Initiative при прыжке — юнит падает на ({$x},{$y},{$z})");
-                throw (new \Mordheim\Exceptions\PathfinderInitiativeRollFailedException())->setField($cell);
+                throw (new \Mordheim\Exceptions\MoveInitiativeRollFailedException())->setField($cell);
             }
         }
         // Лестница: можно двигаться по вертикали
@@ -174,7 +176,7 @@ class Move
                 if ($roll > $fighter->getClimbInitiative()) {
                     $fighter->getState()->setPosition([$x, $y, $z]);
                     \Mordheim\BattleLogger::add("Провал Initiative при прыжке — юнит падает на ({$x},{$y},{$z})");
-                    throw (new \Mordheim\Exceptions\PathfinderInitiativeRollFailedException())->setField($cell);
+                    throw (new \Mordheim\Exceptions\MoveInitiativeRollFailedException())->setField($cell);
                 }
             }
         }

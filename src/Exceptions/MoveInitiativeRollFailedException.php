@@ -4,7 +4,7 @@ namespace Mordheim\Exceptions;
 
 use Mordheim\FieldCell;
 
-class PathfinderInitiativeRollFailedException extends \Exception
+class MoveInitiativeRollFailedException extends \Exception
 {
     private ?FieldCell $field = null;
 
