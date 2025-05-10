@@ -6,7 +6,7 @@ use Mordheim\Battle;
 use Mordheim\FighterInterface;
 use Mordheim\Slot;
 
-class CarefulStrategy extends BaseBattleStrategy implements BattleStrategyInterface
+class CarefulStrategy extends BaseBattleStrategy
 {
     public float $aggressiveness = 0.8;
 
@@ -23,7 +23,7 @@ class CarefulStrategy extends BaseBattleStrategy implements BattleStrategyInterf
         if (!$canAct) return;
         if (!$fighter->isAdjacent($target)) {
             // Держит дистанцию
-            \Mordheim\Rule\Move::apply($battle, $fighter, [$fighter->getState()->getPosition()[0] + 1, $fighter->getState()->getPosition()[1] + 1, $fighter->getState()->getPosition()[2]], $this->aggressiveness, [], true);
+            \Mordheim\Rule\Move::common($battle, $fighter, [$fighter->getState()->getPosition()[0] + 1, $fighter->getState()->getPosition()[1] + 1, $fighter->getState()->getPosition()[2]], $this->aggressiveness);
         }
     }
 

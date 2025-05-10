@@ -3,6 +3,7 @@
 namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
+use Mordheim\BattleStrategyInterface;
 use Mordheim\FighterInterface;
 use Mordheim\Slot;
 use Mordheim\SpecialRule;

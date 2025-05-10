@@ -2,8 +2,6 @@
 
 namespace Mordheim;
 
-use Mordheim\Strategy\BattleStrategyInterface;
-
 class FighterState implements FighterStateInterface
 {
     public function __construct(

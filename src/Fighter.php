@@ -187,7 +187,7 @@ class Fighter implements FighterInterface
         return Ruler::isAdjacent($this->getState()->getPosition(), $target->getState()->getPosition());
     }
 
-    public function getDistance(FighterInterface $target): bool
+    public function getDistance(FighterInterface $target): float
     {
         return Ruler::distance($this->getState()->getPosition(), $target->getState()->getPosition());
     }

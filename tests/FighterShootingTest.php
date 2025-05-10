@@ -30,7 +30,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager([Equipment::BOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -41,7 +41,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [2, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -67,7 +67,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager([Equipment::BOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -78,7 +78,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [2, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -96,7 +96,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager([Equipment::SLING]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -107,7 +107,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [2, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -125,7 +125,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager([Equipment::CROSSBOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -136,7 +136,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [2, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -154,7 +154,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager([Equipment::CROSSBOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -165,7 +165,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [2, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -183,7 +183,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager([Equipment::CROSSBOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -194,7 +194,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [2, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -212,7 +212,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager([Equipment::BOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -223,7 +223,7 @@ class FighterShootingTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [2, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );

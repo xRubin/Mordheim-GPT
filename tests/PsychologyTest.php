@@ -17,7 +17,7 @@ class PsychologyTest extends TestCase
             new EquipmentManager(),
             new \Mordheim\FighterState(
                 [0, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 2
             )
         );

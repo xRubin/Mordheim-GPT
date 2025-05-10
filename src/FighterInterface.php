@@ -57,7 +57,7 @@ interface FighterInterface
     public function hasSpecialRule(SpecialRule $specialRule): bool;
 
     public function isAdjacent(FighterInterface $target): bool;
-    public function getDistance(FighterInterface $target): bool;
+    public function getDistance(FighterInterface $target): float;
 }
 
 

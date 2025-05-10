@@ -33,7 +33,7 @@ class MoveTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 $pos,
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             ),
             $move,
@@ -89,7 +89,7 @@ class MoveTest extends TestCase
         $battle = $this->makeClearBattle([$fighter], []);
         // Клетка [1,0,0] — вода
         $battle->getField()->setCell(1, 0, 0, $waterCell);
-        \Mordheim\Rule\Move::apply($battle, $fighter, [2, 0, 0], 1.0, [], false);
+        \Mordheim\Rule\Move::common($battle, $fighter, [2, 0, 0], 1.0);
         $this->assertEquals([2, 0, 0], $fighter->getState()->getPosition(), 'Боец должен пройти через воду при успешном броске');
         $logs = \Mordheim\BattleLogger::getAll();
         $this->assertStringContainsString('бросает Initiative для воды', implode("\n", $logs));
@@ -105,7 +105,7 @@ class MoveTest extends TestCase
         // Клетка [1,0,0] — вода
         $battle->getField()->setCell(1, 0, 0, $waterCell);
         $this->expectException(\Mordheim\Exceptions\PathfinderInitiativeRollFailedException::class);
-        \Mordheim\Rule\Move::apply($battle, $fighter, [2, 0, 0], 1.0, [], false);
+        \Mordheim\Rule\Move::common($battle, $fighter, [2, 0, 0], 1.0);
         $this->assertEquals([1, 0, 0], $fighter->getState()->getPosition(), 'Боец должен остановиться на воде при провале инициативы');
         $logs = \Mordheim\BattleLogger::getAll();
         $this->assertStringContainsString('Провал Initiative в воде', implode("\n", $logs));
@@ -116,7 +116,7 @@ class MoveTest extends TestCase
         $fighter = $this->makeFighter([0, 0, 0], 2); // move > 1.4
         $target = [1, 1, 0];
         $battle = $this->makeClearBattle([$fighter], []);
-        \Mordheim\Rule\Move::apply($battle, $fighter, $target, 1.0, [], false);
+        \Mordheim\Rule\Move::common($battle, $fighter, $target, 1.0);
         $this->assertEquals($target, $fighter->getState()->getPosition());
     }
 
@@ -125,7 +125,7 @@ class MoveTest extends TestCase
         $fighter = $this->makeFighter([0, 0, 0], 3);
         $target = [3, 0, 0];
         $battle = $this->makeClearBattle([$fighter], []);
-        \Mordheim\Rule\Move::apply($battle, $fighter, $target, 1.0, [], false);
+        \Mordheim\Rule\Move::common($battle, $fighter, $target, 1.0);
         $this->assertEquals($target, $fighter->getState()->getPosition());
     }
 
@@ -134,7 +134,7 @@ class MoveTest extends TestCase
         $fighter = $this->makeFighter([0, 0, 0], 2);
         $target = [4, 0, 0];
         $battle = $this->makeClearBattle([$fighter], []);
-        \Mordheim\Rule\Move::apply($battle, $fighter, $target, 1.0, [], true);
+        \Mordheim\Rule\Move::common($battle, $fighter, $target, 1.0);
         $this->assertEquals([2, 0, 0], $fighter->getState()->getPosition());
     }
 
@@ -146,7 +146,7 @@ class MoveTest extends TestCase
         $target = [2, 0, 0];
         $battle = $this->makeClearBattle([$fighter], []);
         $battle->getField()->setCell(1, 0, 0, $cell);
-        \Mordheim\Rule\Move::apply($battle, $fighter, $target, 1.0, [], true);
+        \Mordheim\Rule\Move::common($battle, $fighter, $target, 1.0);
         // Ожидаем, что дойдет по диагонали
         $this->assertEquals([2, 0, 0], $fighter->getState()->getPosition());
     }
@@ -158,8 +158,48 @@ class MoveTest extends TestCase
         $fighter = $this->makeFighter([0, 0, 0], 3, 3, [SpecialRule::SPRINT]);
         $target = [10, 0, 0];
         $battle = $this->makeClearBattle([$fighter], []);
-        \Mordheim\Rule\Move::apply($battle, $fighter, $target, 1.0);
+        \Mordheim\Rule\Move::common($battle, $fighter, $target, 1.0);
         $this->assertGreaterThanOrEqual(3, $fighter->getState()->getPosition()[0]);
         $this->assertLessThanOrEqual(9, $fighter->getState()->getPosition()[0]); // не больше чем 3+6
+    }
+
+    public function testRun_NoEnemiesIn8Inches()
+    {
+        $fighter = $this->makeFighter([0, 0, 0], 3);
+        $battle = $this->makeClearBattle([$fighter], []);
+        \Mordheim\Rule\Move::run($battle, $fighter, [6, 0, 0], 1.0);
+        $this->assertEquals([6, 0, 0], $fighter->getState()->getPosition(), 'Боец должен пробежать на 6 клеток (двойное движение)');
+    }
+
+    public function testRun_EnemyWithin8Inches()
+    {
+        $fighter = $this->makeFighter([0, 0, 0], 3);
+        $enemy = $this->makeFighter([5, 0, 0], 3);
+        $battle = $this->makeClearBattle([$fighter], [$enemy]);
+        \Mordheim\Rule\Move::run($battle, $fighter, [6, 0, 0], 1.0);
+        $this->assertEquals([0, 0, 0], $fighter->getState()->getPosition(), 'Боец не должен бежать, если враг ближе 8"');
+        $logs = \Mordheim\BattleLogger::getAll();
+        $this->assertStringContainsString('не может бежать: враг слишком близко', implode("\n", $logs));
+    }
+
+    public function testRun_StopOnWater()
+    {
+        $fighter = $this->makeFighter([0, 0, 0], 4);
+        $battle = $this->makeClearBattle([$fighter], []);
+        $waterCell = new \Mordheim\FieldCell();
+        $waterCell->water = true;
+        $battle->getField()->setCell(3, 0, 0, $waterCell); // На пути вода
+        \Mordheim\Rule\Move::run($battle, $fighter, [8, 0, 0], 1.0);
+        $this->assertEquals([2, 0, 0], $fighter->getState()->getPosition(), 'Боец должен остановиться перед водой');
+        $logs = \Mordheim\BattleLogger::getAll();
+        $this->assertStringContainsString('не может бежать: на пути есть вода', implode("\n", $logs));
+    }
+
+    public function testRun_MaxDistance()
+    {
+        $fighter = $this->makeFighter([0, 0, 0], 5);
+        $battle = $this->makeClearBattle([$fighter], []);
+        \Mordheim\Rule\Move::run($battle, $fighter, [20, 0, 0], 1.0);
+        $this->assertEquals([10, 0, 0], $fighter->getState()->getPosition(), 'Боец должен пробежать ровно на 10 клеток (двойное движение)');
     }
 }

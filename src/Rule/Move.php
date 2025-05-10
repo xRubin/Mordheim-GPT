@@ -3,10 +3,8 @@
 namespace Mordheim\Rule;
 
 use Mordheim\Battle;
-use Mordheim\Exceptions\PathfinderInitiativeRollFailedException;
 use Mordheim\Exceptions\PathfinderTargetUnreachableException;
 use Mordheim\FighterInterface;
-use Mordheim\SpecialRule;
 
 class Move
 {
@@ -17,136 +15,168 @@ class Move
      * @param FighterInterface $fighter
      * @param array $target
      * @param float $aggressiveness
-     * @param array $otherUnits
-     * @param bool $partialMove Если true — двигаться максимально в направлении цели, даже если не хватает очков движения
      * @return void
      */
-    public static function apply(Battle $battle, FighterInterface $fighter, array $target, float $aggressiveness, array $otherUnits = [], bool $partialMove = false): void
+    public static function common(Battle $battle, FighterInterface $fighter, array $target, float $aggressiveness): void
     {
-        $blockers = [];
-        foreach ($otherUnits as $unit) {
-            if ($unit !== $fighter && $unit->alive) {
-                $blockers[] = $unit->position;
+        $blockers = self::prepareBlockers($battle, $fighter);
+        $movePoints = $fighter->getMovement();
+        [$path, $lastReachableIdx] = self::findPathAndReachableIndex($battle, $fighter, $target, $aggressiveness, $blockers, $movePoints);
+        self::moveAlongPath($battle, $fighter, $path, $lastReachableIdx);
+    }
+
+    /**
+     * Бег по правилам Mordheim 1999: удвоенное движение, нельзя бежать если в начале хода есть враг в 8" (20.32 см), нельзя бежать по воде
+     * @param Battle $battle
+     * @param FighterInterface $fighter
+     * @param array $target
+     * @param float $aggressiveness
+     * @return void
+     * @throws PathfinderTargetUnreachableException
+     */
+    public static function run(Battle $battle, FighterInterface $fighter, array $target, float $aggressiveness): void
+    {
+        foreach ($battle->getEnemiesFor($fighter) as $enemy) {
+            if ($fighter->getDistance($enemy) < 8) { // 8 клеток = 8"
+                \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать: враг слишком близко (меньше 8\")");
+                return;
             }
         }
-        $movePoints = $fighter->getMovement();
-        $sprintBonus = 0;
-        // Sprint: +D6 к движению при беге (если partialMove == false)
-        if ($fighter->hasSpecialRule(SpecialRule::SPRINT) && !$partialMove) {
-            $sprintBonus = \Mordheim\Dice::roll(6);
-            \Mordheim\BattleLogger::add("{$fighter->getName()} использует Sprint: бонус к движению = $sprintBonus");
-            $movePoints += $sprintBonus;
+        $blockers = self::prepareBlockers($battle, $fighter);
+        $movePoints = $fighter->getRunRange();
+        \Mordheim\BattleLogger::add("{$fighter->getName()}: runPoints = $movePoints (run range)");
+        [$path, $lastReachableIdx] = self::findPathAndReachableIndex($battle, $fighter, $target, $aggressiveness, $blockers, $movePoints);
+        // Проверяем, есть ли на пути вода (бег по воде невозможен)
+        for ($i = 1; $i <= $lastReachableIdx; $i++) {
+            [$x, $y, $z] = $path[$i]['pos'];
+            $cell = $battle->getField()->getCell($x, $y, $z);
+            if ($cell->water) {
+                \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать: на пути есть вода (клетка $x,$y,$z)");
+                // Останавливаемся на предыдущей клетке
+                $lastReachableIdx = $i - 1;
+                break;
+            }
         }
-        \Mordheim\BattleLogger::add("{$fighter->getName()}: movePoints = $movePoints (base: {$fighter->getMovement()}, sprintBonus: $sprintBonus)");
-        // Получаем полный путь до цели
+        self::moveAlongPath($battle, $fighter, $path, $lastReachableIdx, true);
+    }
+
+    // --- Общие защищённые методы ---
+
+    /**
+     * Подготовка массива блокирующих позиций
+     */
+    protected static function prepareBlockers(Battle $battle, FighterInterface $fighter): array
+    {
+        return array_filter(
+            array_map(
+                fn(FighterInterface $fighter) => $fighter->getState()->getStatus()->isAlive() ? $fighter->getState()->getPosition() : null,
+                $battle->getFighters()
+            )
+        );
+    }
+
+    /**
+     * Поиск пути и определение индекса достижимой точки
+     */
+    protected static function findPathAndReachableIndex(Battle $battle, FighterInterface $fighter, array $target, float $aggressiveness, array $blockers, int $movePoints): array
+    {
         $path = \Mordheim\PathFinder::findPath($battle->getField(), $fighter->getState()->getPosition(), $target, $fighter->getMovementWeights(), $aggressiveness, $blockers);
         if (!$path || count($path) < 2)
             throw new PathfinderTargetUnreachableException();
-
-        \Mordheim\BattleLogger::add("{$fighter->getName()}: путь до цели: " . json_encode(array_map(fn($p) => $p['pos'], $path)));
-
-        // Определяем, куда реально можем дойти по накопленной стоимости пути
         $lastReachableIdx = 0;
         for ($i = 1; $i < count($path); $i++) {
-            if ($path[$i]['cost'] > $movePoints + 1e-6) break; // допускаем погрешность для float
+            if ($path[$i]['cost'] > $movePoints + 1e-6) break;
             $lastReachableIdx = $i;
         }
-        // Если можем дойти до цели полностью
-        if ($lastReachableIdx === count($path) - 1) {
-            // обычная логика движения (до цели)
-            $from = $fighter->getState()->getPosition();
-            for ($i = 1; $i < count($path); $i++) {
-                $to = $path[$i]['pos'];
-                \Mordheim\BattleLogger::add("{$fighter->getName()} перемещается с [" . implode(',', $from) . "] на [" . implode(',', $to) . "]");
-                $from = $to;
-            }
-            $fighter->getState()->setPosition($from);
-        } elseif ($lastReachableIdx > 0) {
-            // Двигаемся максимально далеко по пути (даже если partialMove == false)
-            $from = $fighter->getState()->getPosition();
-            for ($i = 1; $i <= $lastReachableIdx; $i++) {
-                $to = $path[$i]['pos'];
-                \Mordheim\BattleLogger::add("{$fighter->getName()} перемещается с [" . implode(',', $from) . "] на [" . implode(',', $to) . "] (максимальное движение)");
-                $from = $to;
-            }
-            $fighter->getState()->setPosition($from);
-            \Mordheim\BattleLogger::add('Двигаемся максимально в сторону цели, но цель недостижима за ход. Новая позиция: (' . implode(',', $from) . ')');
-            return;
-        } else
-            throw new PathfinderTargetUnreachableException();
+        return [$path, $lastReachableIdx];
+    }
 
+    /**
+     * Движение по пути до lastReachableIdx (включительно)
+     * Если reachedTarget == true, то это бег/движение до максимума, иначе обычное движение
+     */
+    protected static function moveAlongPath(Battle $battle, FighterInterface $fighter, array $path, int $lastReachableIdx, bool $run = false): void
+    {
         $cur = $fighter->getState()->getPosition();
-        $stepsTaken = 0;
-        for ($i = 1; $i < count($path) && $movePoints > 0; $i++) {
+        $movePoints = $run ? $fighter->getRunRange() : $fighter->getMovement();
+        for ($i = 1; $i <= $lastReachableIdx && $movePoints > 0; $i++) {
             [$x, $y, $z] = $path[$i]['pos'];
             $cell = $battle->getField()->getCell($x, $y, $z);
             $fromCell = $battle->getField()->getCell($cur[0], $cur[1], $cur[2]);
             $cost = 1;
             $desc = "";
-            // Difficult terrain: double cost
-            if ($cell->difficultTerrain) {
-                $cost = 2;
-                $desc .= "Труднопроходимая местность. ";
-            }
-            // Water: must swim, can't run, test Initiative or stop
-            if ($cell->water) {
-                $desc .= "Вода: требуется тест Initiative. ";
-                $roll = \Mordheim\Dice::roll(6);
-                \Mordheim\BattleLogger::add("{$fighter->getName()} бросает Initiative для воды: $roll против {$fighter->getInitiative()}");
-                if ($roll > $fighter->getInitiative()) {
-                    $fighter->getState()->setPosition([$x, $y, $z]);
-                    \Mordheim\BattleLogger::add("Провал Initiative в воде — движение остановлено на клетке ($x,$y,$z)");
-                    throw (new PathfinderInitiativeRollFailedException())->setField($cell);
-                }
-                $cost = 2;
-            }
-            // Dangerous terrain: test Initiative or fall
-            if ($cell->dangerousTerrain) {
-                $desc .= "Опасная местность: тест Initiative. ";
-                $roll = \Mordheim\Dice::roll(6);
-                \Mordheim\BattleLogger::add("{$fighter->getName()} бросает Initiative на опасной местности: $roll против {$fighter->getInitiative()}");
-                if ($roll > $fighter->getInitiative()) {
-                    $fighter->getState()->setPosition([$x, $y, $z]);
-                    \Mordheim\BattleLogger::add("Провал Initiative на опасной клетке ($x,$y,$z) — юнит упал");
-                    throw (new PathfinderInitiativeRollFailedException())->setField($cell);
-                }
-            }
-            // Прыжок через разрыв: если разница высот > 1
-            if (abs($cell->height - $fromCell->height) > 1) {
-                $desc .= "Прыжок: тест Initiative. ";
-                $roll = \Mordheim\Dice::roll(6);
-                \Mordheim\BattleLogger::add("{$fighter->getName()} бросает Initiative для прыжка: $roll против {$fighter->getInitiative()}");
-                if ($roll > $fighter->getInitiative()) {
-                    $fighter->getState()->setPosition([$x, $y, $z]);
-                    \Mordheim\BattleLogger::add("Провал Initiative при прыжке — юнит падает на ({$x},{$y},{$z})");
-                    throw (new PathfinderInitiativeRollFailedException())->setField($cell);
-                }
-            }
-            // Лестница: можно двигаться по вертикали
-            if ($cell->ladder || $fromCell->ladder) {
-                $desc .= "Лестница: разрешено движение по вертикали. ";
-            } else {
-                if ($z > $cur[2] && abs($x - $cur[0]) + abs($y - $cur[1]) == 1) {
-                    $desc .= "Лазание: тест Initiative. ";
-                    $roll = \Mordheim\Dice::roll(6);
-                    \Mordheim\BattleLogger::add("{$fighter->getName()} бросает Initiative для лазания: $roll против {$fighter->getClimbInitiative()}");
-                    if ($roll > $fighter->getClimbInitiative()) {
-                        $fighter->getState()->setPosition([$x, $y, $z]);
-                        \Mordheim\BattleLogger::add("Провал Initiative при прыжке — юнит падает на ({$x},{$y},{$z})");
-                        throw (new PathfinderInitiativeRollFailedException())->setField($cell);
-                    }
-                }
-            }
+            // Обработка особенностей клетки
+            self::processCellFeatures($battle, $fighter, $cell, $fromCell, $x, $y, $z, $cur, $cost, $desc);
             if ($cost > $movePoints) {
                 \Mordheim\BattleLogger::add("Недостаточно очков движения для клетки ($x,$y,$z)");
                 break;
             }
             $movePoints -= $cost;
+            \Mordheim\BattleLogger::add("{$fighter->getName()} перемещается с [" . implode(',', $cur) . "] на [" . implode(',', [$x, $y, $z]) . "]" . ($run ? " (бег)" : "") . ": $desc Осталось ОД: $movePoints");
             $cur = [$x, $y, $z];
-            $stepsTaken++;
-            \Mordheim\BattleLogger::add("Перемещён на ($x,$y,$z): $desc Осталось ОД: $movePoints");
         }
         $fighter->getState()->setPosition($cur);
         \Mordheim\BattleLogger::add("Движение завершено. Итоговая позиция: (" . implode(",", $cur) . ")");
+    }
+
+    /**
+     * Обработка особенностей клетки (вода, труднопроходимость, опасность, прыжки, лестницы, лазание)
+     */
+    protected static function processCellFeatures(Battle $battle, FighterInterface $fighter, $cell, $fromCell, $x, $y, $z, $cur, &$cost, &$desc): void
+    {
+        // Difficult terrain: double cost
+        if ($cell->difficultTerrain) {
+            $cost = 2;
+            $desc .= "Труднопроходимая местность. ";
+        }
+        // Water: must swim, can't run, test Initiative or stop
+        if ($cell->water) {
+            $desc .= "Вода: требуется тест Initiative. ";
+            $roll = \Mordheim\Dice::roll(6);
+            \Mordheim\BattleLogger::add("{$fighter->getName()} бросает Initiative для воды: $roll против {$fighter->getInitiative()}");
+            if ($roll > $fighter->getInitiative()) {
+                $fighter->getState()->setPosition([$x, $y, $z]);
+                \Mordheim\BattleLogger::add("Провал Initiative в воде — движение остановлено на клетке ($x,$y,$z)");
+                throw (new \Mordheim\Exceptions\PathfinderInitiativeRollFailedException())->setField($cell);
+            }
+            $cost = 2;
+        }
+        // Dangerous terrain: test Initiative or fall
+        if ($cell->dangerousTerrain) {
+            $desc .= "Опасная местность: тест Initiative. ";
+            $roll = \Mordheim\Dice::roll(6);
+            \Mordheim\BattleLogger::add("{$fighter->getName()} бросает Initiative на опасной местности: $roll против {$fighter->getInitiative()}");
+            if ($roll > $fighter->getInitiative()) {
+                $fighter->getState()->setPosition([$x, $y, $z]);
+                \Mordheim\BattleLogger::add("Провал Initiative на опасной клетке ($x,$y,$z) — юнит упал");
+                throw (new \Mordheim\Exceptions\PathfinderInitiativeRollFailedException())->setField($cell);
+            }
+        }
+        // Прыжок через разрыв: если разница высот > 1
+        if (abs($cell->height - $fromCell->height) > 1) {
+            $desc .= "Прыжок: тест Initiative. ";
+            $roll = \Mordheim\Dice::roll(6);
+            \Mordheim\BattleLogger::add("{$fighter->getName()} бросает Initiative для прыжка: $roll против {$fighter->getInitiative()}");
+            if ($roll > $fighter->getInitiative()) {
+                $fighter->getState()->setPosition([$x, $y, $z]);
+                \Mordheim\BattleLogger::add("Провал Initiative при прыжке — юнит падает на ({$x},{$y},{$z})");
+                throw (new \Mordheim\Exceptions\PathfinderInitiativeRollFailedException())->setField($cell);
+            }
+        }
+        // Лестница: можно двигаться по вертикали
+        if ($cell->ladder || $fromCell->ladder) {
+            $desc .= "Лестница: разрешено движение по вертикали. ";
+        } else {
+            if ($z > $cur[2] && abs($x - $cur[0]) + abs($y - $cur[1]) == 1) {
+                $desc .= "Лазание: тест Initiative. ";
+                $roll = \Mordheim\Dice::roll(6);
+                \Mordheim\BattleLogger::add("{$fighter->getName()} бросает Initiative для лазания: $roll против {$fighter->getClimbInitiative()}");
+                if ($roll > $fighter->getClimbInitiative()) {
+                    $fighter->getState()->setPosition([$x, $y, $z]);
+                    \Mordheim\BattleLogger::add("Провал Initiative при прыжке — юнит падает на ({$x},{$y},{$z})");
+                    throw (new \Mordheim\Exceptions\PathfinderInitiativeRollFailedException())->setField($cell);
+                }
+            }
+        }
     }
 }

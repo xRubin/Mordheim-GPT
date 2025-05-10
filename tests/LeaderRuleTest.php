@@ -1,10 +1,10 @@
 <?php
 
+use Mordheim\BattleStrategyInterface;
 use Mordheim\Characteristics;
 use Mordheim\EquipmentManager;
 use Mordheim\Rule\Psychology;
 use Mordheim\Status;
-use Mordheim\Strategy\BattleStrategyInterface;
 use PHPUnit\Framework\TestCase;
 
 class LeaderRuleTest extends TestCase

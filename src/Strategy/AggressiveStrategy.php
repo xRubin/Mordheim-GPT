@@ -8,7 +8,7 @@ use Mordheim\FighterInterface;
 use Mordheim\Rule\Charge;
 use Mordheim\Slot;
 
-class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategyInterface
+class AggressiveStrategy extends BaseBattleStrategy
 {
     public float $aggressiveness = 1.0;
 
@@ -33,7 +33,7 @@ class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategyInt
             } catch (ChargeFailedException $e) {
             }
         }
-        \Mordheim\Rule\Move::apply($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
+        \Mordheim\Rule\Move::common($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
     }
 
     protected function onShootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void

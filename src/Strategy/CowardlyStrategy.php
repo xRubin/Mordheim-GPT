@@ -38,7 +38,7 @@ class CowardlyStrategy extends BaseBattleStrategy
                 }
             }
             if ($nearest) {
-                \Mordheim\Rule\Move::apply($battle, $fighter, $nearest->getState()->getPosition(), $this->aggressiveness, [], true);
+                \Mordheim\Rule\Move::common($battle, $fighter, $nearest->getState()->getPosition(), $this->aggressiveness);
                 return;
             }
         }
@@ -66,7 +66,7 @@ class CowardlyStrategy extends BaseBattleStrategy
             $ranged = $fighter->getEquipmentManager()->getMainWeapon(Slot::RANGED);
             if ($ranged && $fighter->getDistance($target) > $ranged->getRange()) {
                 // Если не в радиусе, двигаемся к цели
-                \Mordheim\Rule\Move::apply($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness, [], true);
+                \Mordheim\Rule\Move::common($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
             }
         }
     }

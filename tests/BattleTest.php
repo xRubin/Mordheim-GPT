@@ -20,7 +20,7 @@ class BattleTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [0, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -30,7 +30,7 @@ class BattleTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [2, 2, 2],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );

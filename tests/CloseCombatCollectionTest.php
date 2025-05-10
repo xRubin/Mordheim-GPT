@@ -26,7 +26,7 @@ class CloseCombatCollectionTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [0, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -36,7 +36,7 @@ class CloseCombatCollectionTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [1, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );
@@ -46,7 +46,7 @@ class CloseCombatCollectionTest extends TestCase
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [0, 0, 0],
-                $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
+                $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
         );

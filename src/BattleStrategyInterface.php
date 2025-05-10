@@ -1,9 +1,6 @@
 <?php
 
-namespace Mordheim\Strategy;
-
-use Mordheim\Battle;
-use Mordheim\FighterInterface;
+namespace Mordheim;
 
 interface BattleStrategyInterface
 {

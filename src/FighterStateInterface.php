@@ -2,8 +2,6 @@
 
 namespace Mordheim;
 
-use Mordheim\Strategy\BattleStrategyInterface;
-
 interface FighterStateInterface
 {
     public function getPosition(): array;
