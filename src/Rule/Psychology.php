@@ -4,6 +4,7 @@ namespace Mordheim\Rule;
 
 use Mordheim\Dice;
 use Mordheim\FighterInterface;
+use Mordheim\SpecialRule;
 
 /**
  * Класс для проверки психологических эффектов и лидерства по правилам Mordheim
@@ -25,7 +26,7 @@ class Psychology
         foreach ($allies as $ally) {
             if (
                 $ally !== $fighter &&
-                $ally->hasSkill('Leader') &&
+                $ally->hasSpecialRule(SpecialRule::LEADER) &&
                 $ally->getState()->getStatus()->canAct()
             ) {
                 if ($fighter->getDistance($ally) <= 6) {
@@ -60,19 +61,6 @@ class Psychology
             return $res;
         }
         return true;
-    }
-
-    /**
-     * Тест на ужас (Terror) с учётом спецправила Leader
-     * @param FighterInterface $fighter
-     * @param FighterInterface[] $allies
-     * @return bool
-     */
-    public static function testTerror(FighterInterface $fighter, array $allies = []): bool
-    {
-        $res = self::leadershipTest($fighter, $allies);
-        \Mordheim\BattleLogger::add("{$fighter->getName()} проходит тест ужаса: " . ($res ? 'успех' : 'провал'));
-        return $res;
     }
 
     /**

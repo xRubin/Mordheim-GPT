@@ -3,10 +3,10 @@
 use Mordheim\AdvancementInterface;
 use Mordheim\Battle;
 use Mordheim\BlankInterface;
-use Mordheim\Data\Skills;
 use Mordheim\EquipmentManager;
 use Mordheim\FighterStateInterface;
 use Mordheim\GameField;
+use Mordheim\SpecialRule;
 use Mordheim\Warband;
 use PHPUnit\Framework\TestCase;
 
@@ -155,7 +155,7 @@ class MoveTest extends TestCase
     public function testSprintBonusMovement()
     {
         // Sprint skill: movement increases by D6
-        $fighter = $this->makeFighter([0, 0, 0], 3, 3, [Skills::getByName('Sprint')]);
+        $fighter = $this->makeFighter([0, 0, 0], 3, 3, [SpecialRule::SPRINT]);
         $target = [10, 0, 0];
         $battle = $this->makeClearBattle([$fighter], []);
         \Mordheim\Rule\Move::apply($battle, $fighter, $target, 1.0);

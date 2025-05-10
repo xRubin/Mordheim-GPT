@@ -6,6 +6,7 @@ use Mordheim\Battle;
 use Mordheim\Exceptions\PathfinderInitiativeRollFailedException;
 use Mordheim\Exceptions\PathfinderTargetUnreachableException;
 use Mordheim\FighterInterface;
+use Mordheim\SpecialRule;
 
 class Move
 {
@@ -31,7 +32,7 @@ class Move
         $movePoints = $fighter->getMovement();
         $sprintBonus = 0;
         // Sprint: +D6 к движению при беге (если partialMove == false)
-        if ($fighter->hasSkill('Sprint') && !$partialMove) {
+        if ($fighter->hasSpecialRule(SpecialRule::SPRINT) && !$partialMove) {
             $sprintBonus = \Mordheim\Dice::roll(6);
             \Mordheim\BattleLogger::add("{$fighter->getName()} использует Sprint: бонус к движению = $sprintBonus");
             $movePoints += $sprintBonus;

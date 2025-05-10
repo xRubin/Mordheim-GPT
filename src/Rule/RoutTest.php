@@ -4,6 +4,7 @@ namespace Mordheim\Rule;
 
 use Mordheim\Exceptions\RoutTestLeaderNotFoundException;
 use Mordheim\FighterInterface;
+use Mordheim\SpecialRule;
 use Mordheim\Warband;
 
 class RoutTest
@@ -51,7 +52,7 @@ class RoutTest
     private static function findLeader(Warband $warband): FighterInterface
     {
         foreach ($warband->fighters as $fighter) {
-            if ($fighter->getState()->getStatus()->canAct() && $fighter->hasSkill('Leader')) {
+            if ($fighter->getState()->getStatus()->canAct() && $fighter->hasSpecialRule(SpecialRule::LEADER)) {
                 return $fighter;
             }
         }

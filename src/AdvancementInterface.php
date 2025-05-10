@@ -6,7 +6,7 @@ interface AdvancementInterface
     public function getCharacteristics(): Characteristics;
 
     /**
-     * @return Skill[]
+     * @return SpecialRuleInterface[]
      */
     public function getSpecialRules(): array;
 }

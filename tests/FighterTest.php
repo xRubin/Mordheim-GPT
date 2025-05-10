@@ -1,5 +1,6 @@
 <?php
 
+use Mordheim\Data\Equipment;
 use Mordheim\Rule\AvoidStun;
 use PHPUnit\Framework\TestCase;
 
@@ -46,14 +47,14 @@ class FighterTest extends TestCase
         $fighter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([], [\Mordheim\Data\Armors::getByName('Heavy Armor')])
+            new \Mordheim\EquipmentManager([Equipment::HEAVY_ARMOR])
         );
         $this->assertEquals(4, $fighter->getMovement());
 
         $fighter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([], [\Mordheim\Data\Armors::getByName('Shield')])
+            new \Mordheim\EquipmentManager([Equipment::SHIELD])
         );
         $this->assertEquals(4, $fighter->getMovement());
 
@@ -61,7 +62,7 @@ class FighterTest extends TestCase
         $fighter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([], [\Mordheim\Data\Armors::getByName('Heavy Armor'), \Mordheim\Data\Armors::getByName('Shield')])
+            new \Mordheim\EquipmentManager([Equipment::HEAVY_ARMOR, Equipment::SHIELD])
         );
         $this->assertEquals(3, $fighter->getMovement());
     }
@@ -71,7 +72,7 @@ class FighterTest extends TestCase
         $fighter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([], [\Mordheim\Data\Armors::getByName('Helmet')])
+            new \Mordheim\EquipmentManager([Equipment::HELMET])
         );
         // Используем Dice::setTestRolls для мокирования бросков
         $mockedRolls = [3, 4, 5, 6]; // 3 - fail, 4/5/6 - success

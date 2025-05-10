@@ -3,6 +3,7 @@
 namespace Mordheim\Rule;
 
 use Mordheim\FighterInterface;
+use Mordheim\SpecialRule;
 use Mordheim\Status;
 
 class StandUp
@@ -16,7 +17,7 @@ class StandUp
     public static function apply(FighterInterface $fighter): bool
     {
         if ($fighter->getState()->getStatus() !== Status::KNOCKED_DOWN) return false;
-        if ($fighter->hasSkill('Jump Up')) {
+        if ($fighter->hasSpecialRule(SpecialRule::JUMP_UP)) {
             \Mordheim\BattleLogger::add("{$fighter->getName()} использует Jump Up и мгновенно встаёт!");
             $fighter->getState()->setStatus(Status::STANDING);
             return false;

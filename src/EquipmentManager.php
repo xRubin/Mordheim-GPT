@@ -2,47 +2,48 @@
 
 namespace Mordheim;
 
-use Mordheim\Exceptions\EquipmentManagerAddWeaponException;
+use Mordheim\Data\Equipment;
+use Mordheim\Exceptions\EquipmentManagerAddItemException;
 
 class EquipmentManager
 {
-    /** @var Weapon[] */
-    private array $weapons = [];
-    /** @var Armor[] */
-    private array $armors = [];
+    /** @var EquipmentInterface[] */
+    private array $items = [];
 
-    public function __construct(array $weapons = [], array $armors = [])
+    public function __construct(array $items = [])
     {
-        foreach ($weapons as $weapon) {
-            $this->addWeapon($weapon);
-            $weaponNames = array_map(fn($w) => $w->name, $this->weapons);
-            \Mordheim\BattleLogger::add("[DEBUG] Оружие после добавления: " . implode(',', $weaponNames));
-        }
-        foreach ($armors as $armor) {
-            $this->addArmor($armor);
+        foreach ($items as $item) {
+            $this->addItem($item);
+            $names = array_map(fn($equipment) => $equipment->getName(), $this->items);
+            \Mordheim\BattleLogger::add("[DEBUG] Оружие после добавления: " . implode(',', $names));
         }
     }
 
-    public function addWeapon(Weapon $weapon): bool
+    public function addItem(EquipmentInterface $item): static
     {
-        $freeHands = 2;
-        foreach (array_merge($this->weapons, [$weapon]) as $w) {
-            if ($weapon->hasRule(\Mordheim\SpecialRule::DOUBLE_HANDED)) {
-                $freeHands -= 2;
-            } else {
-                $freeHands -= 1;
+        $slotMelee = 2;
+        $slotRanged = 2;
+        $slotArmor = 1;
+        $slotHelmet = 1;
+        foreach (array_merge($this->items, [$item]) as $equipment) {
+            if ($equipment->getSlot() === Slot::RANGED) {
+                $slotRanged -= 1;
+            } elseif ($equipment->getSlot() === Slot::MELEE) {
+                if ($equipment->hasSpecialRule(SpecialRule::TWO_HANDED)) {
+                    $slotMelee -= 2;
+                } else {
+                    $slotMelee -= 1;
+                }
+            } elseif ($equipment->getSlot() === Slot::ARMOR) {
+                $slotArmor -= 1;
+            } elseif ($equipment->getSlot() === Slot::HELMET) {
+                $slotHelmet -= 1;
             }
         }
-        if ($freeHands < 0)
-            throw new EquipmentManagerAddWeaponException();
-        $this->weapons[] = $weapon;
-        return true;
-    }
-
-    public function addArmor(Armor $armor): bool
-    {
-        $this->armors[] = $armor;
-        return true;
+        if ($slotRanged < 0 || $slotMelee < 0 || $slotArmor < 0 || $slotHelmet < 0)
+            throw new EquipmentManagerAddItemException();
+        $this->items[] = $item;
+        return $this;
     }
 
     /**
@@ -50,8 +51,8 @@ class EquipmentManager
      */
     public function hasHelmetProtection(): bool
     {
-        foreach ($this->armors as $eq) {
-            if ($eq->hasRule(\Mordheim\SpecialRule::AVOID_STUN)) {
+        foreach ($this->items as $eq) {
+            if ($eq->hasSpecialRule(SpecialRule::AVOID_STUN)) {
                 return true;
             }
         }
@@ -61,36 +62,38 @@ class EquipmentManager
     /**
      * Итоговые параметры оружия для атаки (главное оружие)
      */
-    public function getMainWeapon(): ?Weapon
+    public function getMainWeapon(Slot $slot, $default = null): ?EquipmentInterface
     {
-        return $this->weapons[0] ?? null;
+        $items = $this->getItemsBySlot($slot);
+        return reset($items) ?: $default;
     }
 
     /**
      * Оружие в зависимости от номера атаки
      */
-    public function getWeaponByAttackIdx(int $i): ?Weapon
+    public function getWeaponByAttackIdx(Slot $slot, int $i): EquipmentInterface
     {
-        if (!count($this->weapons))
-            return null;
-
         $offset = 0;
-        foreach ($this->weapons as $idx => $weapon) {
-            if (!$weapon->isOneHanded())
+        foreach ($this->getItemsBySlot($slot) as $idx => $equipment) {
+            if ($equipment->hasSpecialRule(SpecialRule::TWO_HANDED)) {
                 $offset += 1;
+            }
             if ($idx >= ($i - $offset))
-                return $weapon;
+                return $equipment;
         }
 
-        return null;
+        return Equipment::FIST;
     }
 
     /**
-     * Все оружие (например, для dual wield)
+     * @param Slot $slot
+     * @return EquipmentInterface[]
      */
-    public function getWeapons(): array
+    public function getItemsBySlot(Slot $slot): array
     {
-        return $this->weapons;
+        return array_values(
+            array_filter($this->items, fn(EquipmentInterface $item) => $item->getSlot() === $slot)
+        );
     }
 
     /**
@@ -99,42 +102,9 @@ class EquipmentManager
     public function countOneHandedMeleeWeapons(): int
     {
         $count = 0;
-        foreach ($this->weapons as $weapon) {
+        foreach ($this->getItemsBySlot(Slot::MELEE) as $weapon) {
             if (
-                $weapon->damageType === 'Melee'
-                && $weapon->isOneHanded()
-            ) {
-                $count++;
-            }
-        }
-        return $count;
-    }
-
-    /**
-     * Возвращает количество оружия ближнего боя
-     */
-    public function countMeleeWeapons(): int
-    {
-        $count = 0;
-        foreach ($this->weapons as $weapon) {
-            if (
-                $weapon->damageType === 'Melee'
-            ) {
-                $count++;
-            }
-        }
-        return $count;
-    }
-
-    /**
-     * Возвращает количество оружия дальнего боя
-     */
-    public function countRangedWeapons(): int
-    {
-        $count = 0;
-        foreach ($this->weapons as $weapon) {
-            if (
-                $weapon->damageType === 'Ranged'
+                !$weapon->hasSpecialRule(SpecialRule::TWO_HANDED) && !$weapon->hasSpecialRule(SpecialRule::PAIR)
             ) {
                 $count++;
             }
@@ -145,199 +115,42 @@ class EquipmentManager
     public function getMovementPenalty(): int
     {
         // Heavy Armor и Shield вместе дают -1 к движению, иначе штрафа нет
-        $hasHeavyArmor = false;
-        $hasShield = false;
-        foreach ($this->armors as $eq) {
-            if ($eq->hasRule(\Mordheim\SpecialRule::MOVEMENT)) {
-                $hasHeavyArmor = true;
-            }
-            if ($eq->hasRule(\Mordheim\SpecialRule::SHIELD_PARRY)) {
-                $hasShield = true;
-            }
-        }
-        return ($hasHeavyArmor && $hasShield) ? -1 : 0;
+        return (in_array(Equipment::HEAVY_ARMOR, $this->items) && in_array(Equipment::SHIELD, $this->items)) ? -1 : 0;
     }
 
-    public function hasShieldParry(): bool
+    public function canBeParried(EquipmentInterface $attackerWeapon, EquipmentInterface $defenderWeapon, int $hitRoll): bool
     {
-        foreach ($this->armors as $eq) {
-            if ($eq->hasRule(\Mordheim\SpecialRule::SHIELD_PARRY)) {
-                return true;
-            }
-        }
-        return false;
+        return $defenderWeapon->hasSpecialRule(SpecialRule::PARRY) && $hitRoll >= 4 && !$attackerWeapon->hasSpecialRule(SpecialRule::CANNOT_BE_PARRIED);
     }
 
-    public function canBeParried(Weapon $attackerWeapon, ?Weapon $defenderWeapon, int $hitRoll): bool
-    {
-        $attackerHasFlail = $attackerWeapon->hasRule(\Mordheim\SpecialRule::FLAIL);
-        $defenderCanParry = $defenderWeapon && $defenderWeapon->hasRule(\Mordheim\SpecialRule::PARRY);
-        return $defenderCanParry && $hitRoll >= 4 && !$attackerHasFlail;
-    }
-
-    public function getResilientModifier(FighterInterface $target): int
-    {
-        return (int)$target->hasSkill('Resilient');
-    }
-
-    public function getArmorSaveModifier(?Weapon $weapon = null): int
+    public function getArmorSaveModifier(?EquipmentInterface $weapon = null): int
     {
         $mod = 0;
-        if ($weapon && $weapon->hasRule(\Mordheim\SpecialRule::DOUBLE_HANDED)) {
-            $mod += 2; // Double-Handed ухудшает сейв на 2
+        if ($weapon && $weapon->hasSpecialRule(SpecialRule::TWO_HANDED)) {
+            $mod += 2; // Two-Handed ухудшает сейв на 2
         }
-        if ($weapon && $weapon->hasRule(\Mordheim\SpecialRule::ARMOR_PIERCING)) {
-            $mod += 1; // Armor-Piercing ухудшает сейв на 1
+        if ($weapon && $weapon->hasSpecialRule(SpecialRule::MINUS_1_SAVE_MODIFIER)) {
+            $mod += 1; // эльфийский лук?
+        }
+        if ($weapon && $weapon->hasSpecialRule(SpecialRule::CUTTING_EDGE)) {
+            $mod += 1; // Cutting Edge ухудшает сейв на 1
         }
         return $mod;
-    }
-
-    public function getInjuryModifier(?Weapon $weapon = null): int
-    {
-        if (null === $weapon)
-            return 0;
-        return $weapon->hasRule(\Mordheim\SpecialRule::AXE) ? -1 : 0;
     }
 
     /**
      * Итоговый сейв с учётом всей брони
      */
-    public function getArmorSave(?Weapon $attackerWeapon, bool $isCritical = false): int
+    public function getArmorSave(?EquipmentInterface $attackerWeapon): int
     {
-        $baseSave = 0;
-        $bonus = 0;
-        $specialRules = [];
-        foreach ($this->armors as $eq) {
-            if (isset($eq->baseSave) && $eq->baseSave > 0) {
-                $baseSave = max($baseSave, $eq->baseSave);
-                $bonus += $eq->saveModifier;
-                $specialRules = array_merge($specialRules, $eq->specialRules ?? []);
-            }
-        }
-        $ap = $attackerWeapon ? $attackerWeapon->armorPiercing : 0;
-        $save = $baseSave - $bonus - $ap;
-        // Спецправила брони
-        if ($isCritical && in_array(\Mordheim\SpecialRule::IGNORE_CRIT, $specialRules)) {
-            // Броня не игнорируется при крите
-            // (можно реализовать спецэффекты, если нужно)
-        }
-        if (in_array(\Mordheim\SpecialRule::HEAVY_ARMOR_PENALTY, $specialRules)) {
-            $save += 1; // штраф к сейву
-        }
-        if (in_array(\Mordheim\SpecialRule::LIGHT_ARMOR_BONUS, $specialRules)) {
-            $save -= 1; // бонус к сейву
-        }
-        if ($save < 2) $save = 2;
-        if ($save > 6) $save = 6;
-        return $save;
-    }
+        if ($this->hasSpecialRule(SpecialRule::SAVE_4))
+            return 4;
+        elseif ($this->hasSpecialRule(SpecialRule::SAVE_5))
+            return 5;
+        elseif ($this->hasSpecialRule(SpecialRule::SAVE_6))
+            return 6;
 
-    /**
-     * Суммарные модификаторы от экипировки (пример)
-     */
-    public function getTotalModifiers(): array
-    {
-        $mods = ['strength' => 0, 'toHit' => 0, 'armorPiercing' => 0];
-        foreach ($this->weapons as $w) {
-            $mods['strength'] += $w->strength;
-            $mods['toHit'] += $w->toHitModifier;
-            $mods['armorPiercing'] += $w->armorPiercing;
-        }
-        return $mods;
-    }
-
-    /**
-     * Удаляет оружие по имени
-     */
-    public function removeWeapon(string $weaponName): bool
-    {
-        foreach ($this->weapons as $i => $w) {
-            if ($w->name === $weaponName) {
-                array_splice($this->weapons, $i, 1);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Удаляет броню по имени
-     */
-    public function removeArmor(string $armorName): bool
-    {
-        foreach ($this->armors as $i => $a) {
-            if ($a->name === $armorName) {
-                array_splice($this->armors, $i, 1);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Меняет экипированное оружие на другое (если оно есть в списке)
-     */
-    public function swapWeapon(string $from, Weapon $to): bool
-    {
-        foreach ($this->weapons as $i => $w) {
-            if ($w->name === $from) {
-                $copy = $this->weapons;
-                $copy[$i] = $to;
-                $test = new self($copy, $this->armors);
-                if (count($test->weapons) === count($this->weapons)) {
-                    $this->weapons = $test->weapons;
-                    return true;
-                }
-                return false;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Меняет экипированную броню на другую (по типу)
-     */
-    public function swapArmor(Armor $from, Armor $to): bool
-    {
-        foreach ($this->armors as $i => $a) {
-            if ($a->name === $from->name) {
-                $copy = $this->armors;
-                $copy[$i] = $to;
-                $test = new self($this->weapons, $copy);
-                if (count($test->armors) === count($this->armors)) {
-                    $this->armors = $test->armors;
-                    return true;
-                }
-                return false;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Полностью заменить оружие (контроль правил)
-     */
-    public function setWeapons(array $weapons): bool
-    {
-        $test = new self($weapons, $this->armors);
-        if (count($test->weapons) === count($weapons)) {
-            $this->weapons = $test->weapons;
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Полностью заменить броню (контроль правил)
-     */
-    public function setArmors(array $armors): bool
-    {
-        $test = new self($this->weapons, $armors);
-        if (count($test->armors) === count($armors)) {
-            $this->armors = $test->armors;
-            return true;
-        }
-        return false;
+        return 0;
     }
 
     /**
@@ -346,13 +159,8 @@ class EquipmentManager
      */
     public function hasSpecialRule(SpecialRule $specialRule): bool
     {
-        foreach ($this->weapons as $i => $weapon) {
-            if ($weapon->hasRule($specialRule))
-                return true;
-        }
-
-        foreach ($this->armors as $i => $armor) {
-            if ($armor->hasRule($specialRule))
+        foreach ($this->items as $equipment) {
+            if ($equipment->hasSpecialRule($specialRule))
                 return true;
         }
 

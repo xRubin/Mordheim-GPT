@@ -57,13 +57,6 @@ class PsychologyTest extends TestCase
         $this->assertIsBool($result);
     }
 
-    public function testTerror()
-    {
-        $f = $this->makeFighter(3, 7);
-        $result = Psychology::testTerror($f);
-        $this->assertIsBool($result);
-    }
-
     public function testRout()
     {
         $f = $this->makeFighter(3, 7);

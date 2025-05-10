@@ -4,6 +4,8 @@ namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
 use Mordheim\FighterInterface;
+use Mordheim\Slot;
+use Mordheim\SpecialRule;
 
 class CowardlyStrategy extends BaseBattleStrategy
 {
@@ -17,7 +19,7 @@ class CowardlyStrategy extends BaseBattleStrategy
         // Ищем лидера в радиусе 6" (Ld bubble)
         $leader = null;
         foreach ($battle->getAlliesFor($fighter) as $ally) {
-            if ($ally->hasSkill('Leader') && $fighter->getDistance($ally) <= 6) {
+            if ($ally->hasSpecialRule(SpecialRule::LEADER) && $fighter->getDistance($ally) <= 6) {
                 $leader = $ally;
                 break;
             }
@@ -27,7 +29,7 @@ class CowardlyStrategy extends BaseBattleStrategy
             $nearest = null;
             $minDist = PHP_INT_MAX;
             foreach ($battle->getAlliesFor($fighter) as $ally) {
-                if ($ally->hasSkill('Leader')) {
+                if ($ally->hasSpecialRule(SpecialRule::LEADER) && $ally->getDistance($ally) <= 6) {
                     $dist = $fighter->getDistance($ally);
                     if ($dist < $minDist) {
                         $minDist = $dist;
@@ -61,8 +63,8 @@ class CowardlyStrategy extends BaseBattleStrategy
             }
         } else {
             // Проверяем наличие стрелкового оружия и его дальность
-            $ranged = $this->getRangedWeapon($fighter);
-            if ($ranged && $fighter->getDistance($target) > $ranged->range) {
+            $ranged = $fighter->getEquipmentManager()->getMainWeapon(Slot::RANGED);
+            if ($ranged && $fighter->getDistance($target) > $ranged->getRange()) {
                 // Если не в радиусе, двигаемся к цели
                 \Mordheim\Rule\Move::apply($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness, [], true);
             }
@@ -72,9 +74,10 @@ class CowardlyStrategy extends BaseBattleStrategy
     protected function onShootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
     {
         if (empty($enemies)) return;
+        $ranged = $fighter->getEquipmentManager()->getMainWeapon(Slot::RANGED);
+        if (!$ranged) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
-        $ranged = $this->getRangedWeapon($fighter);
-        if ($ranged && $target && $fighter->getDistance($target) > 6) {
+        if ($target && $fighter->getDistance($target) <= $ranged->getRange()) {
             \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, $this->spentMove);
         }
     }

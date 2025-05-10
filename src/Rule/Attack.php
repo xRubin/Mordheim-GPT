@@ -4,7 +4,9 @@ namespace Mordheim\Rule;
 
 use Mordheim\Battle;
 use Mordheim\CloseCombat;
+use Mordheim\Data\Equipment;
 use Mordheim\FighterInterface;
+use Mordheim\Slot;
 use Mordheim\SpecialRule;
 use Mordheim\Status;
 
@@ -15,7 +17,7 @@ class Attack
      * @param Battle $battle
      * @param FighterInterface $source
      * @param FighterInterface $target
-     * @param \Mordheim\CloseCombat|null $combat
+     * @param CloseCombat|null $combat
      * @return bool true если нанесён урон, false если промах/парирование/сейв
      */
     public static function apply(Battle $battle, FighterInterface $source, FighterInterface $target, ?\Mordheim\CloseCombat $combat = null): bool
@@ -33,13 +35,13 @@ class Attack
         \Mordheim\BattleLogger::add("{$source->getName()} атакует {$target->getName()}!");
 
         // Диагностика: вывести все оружия у бойца
-        \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: " . implode(',', array_map(fn($w) => $w->name, $source->getEquipmentManager()->getWeapons())));
+        \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: " . implode(',', array_map(fn($weapon) => $weapon->getName(), $source->getEquipmentManager()->getItemsBySlot(Slot::MELEE))));
 
         $success = false;
         $parried = false;
         for ($i = 0; $i < $source->getAttacks(); $i++) {
-            $weapon = $source->getEquipmentManager()->getWeaponByAttackIdx($i);
-            \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->getState()->getWounds()}, state={$target->getState()->getStatus()->value}, weapon={$weapon?->name}");
+            $weapon = $source->getEquipmentManager()->getWeaponByAttackIdx(Slot::MELEE, $i);
+            \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->getState()->getWounds()}, state={$target->getState()->getStatus()->value}, weapon={$weapon->getName()}");
             // Особые правила для атак по KNOCKED_DOWN/STUNNED
             if ($target->getState()->getStatus() === Status::STUNNED) {
                 \Mordheim\BattleLogger::add("Атака по оглушённому (STUNNED): попадание и ранение автоматически успешны, сейв невозможен.");
@@ -58,11 +60,10 @@ class Attack
                     return false;
                 }
                 $armorSave = $target->getArmorSave($weapon);
-                $armorSaveMod = $source->getEquipmentManager()->getArmorSaveModifier($weapon);
-                $armorSave += $armorSaveMod;
-                \Mordheim\BattleLogger::add("Сэйв защищающегося: $armorSave (модификатор: $armorSaveMod)");
-                $saveRoll = null;
                 if ($armorSave > 0) {
+                    $armorSaveMod = $source->getEquipmentManager()->getArmorSaveModifier($weapon);
+                    $armorSave += $armorSaveMod;
+                    \Mordheim\BattleLogger::add("Сэйв защищающегося: $armorSave (модификатор: $armorSaveMod)");
                     $saveRoll = \Mordheim\Dice::roll(6);
                     \Mordheim\BattleLogger::add("{$target->getName()} бросает на сэйв: $saveRoll (нужно $armorSave+)");
                     \Mordheim\BattleLogger::add("[DEBUG] armorSave={$armorSave}, saveRoll={$saveRoll}");
@@ -74,8 +75,7 @@ class Attack
                         \Mordheim\BattleLogger::add("Сэйв не удался.");
                     }
                 }
-                // Critical: woundRoll==6
-                $success = InjuryRoll::roll($battle, $source, $target, $weapon, $woundResult['woundRoll'] == 6);
+                $success = InjuryRoll::roll($battle, $source, $target, $weapon, $woundResult['isCritical']);
                 \Mordheim\BattleLogger::add("[DEBUG] result=" . (string)$success . " (damage inflicted)");
                 return $success;
             }
@@ -84,7 +84,7 @@ class Attack
             if ($target->getState()->getWounds() <= 0) break;
             $attackerWS = $source->getWeaponSkill();
             $defenderWS = $target->getWeaponSkill();
-            $toHitMod = $weapon ? $weapon->toHitModifier : 0;
+            $toHitMod = $source->getHitModifier($weapon);
             // 1. Roll to hit (WS vs WS)
             $toHit = 4;
             if ($attackerWS > $defenderWS) $toHit = 3;
@@ -94,12 +94,12 @@ class Attack
             $toHitBonus = ($combat && ($i === 0)) ? $combat->getBonus($source, CloseCombat::BONUS_TO_HIT) : 0;
             $toHit += $toHitMod + $toHitBonus;
             \Mordheim\BattleLogger::add("WS атакующего: $attackerWS, WS защищающегося: $defenderWS, модификаторы: Weapon {$toHitMod}, close combat {$toHitBonus}, итоговое значение для попадания: $toHit+");
-            \Mordheim\BattleLogger::add("[DEBUG][Attack] Перед броском на попадание: оружие={$weapon?->name}, атакующий={$source->getName()}, защищающийся={$target->getName()}");
+            \Mordheim\BattleLogger::add("[DEBUG][Attack] Перед броском на попадание: оружие={$weapon->getName()}, атакующий={$source->getName()}, защищающийся={$target->getName()}");
             $hitRoll = \Mordheim\Dice::roll(6);
             \Mordheim\BattleLogger::add("[DEBUG][Attack] Бросок на попадание: $hitRoll");
             $parried = false;
-            $defenderWeapon = $target->getEquipmentManager()->getMainWeapon();
-            \Mordheim\BattleLogger::add("[DEBUG][attack] call canBeParried: attackerWeapon=" . ($weapon ? $weapon->name : 'NONE') . ", defenderWeapon=" . ($defenderWeapon ? $defenderWeapon->name : 'NONE') . ", hitRoll=$hitRoll");
+            $defenderWeapon = $target->getEquipmentManager()->getMainWeapon(Slot::MELEE, Equipment::FIST);
+            \Mordheim\BattleLogger::add("[DEBUG][attack] call canBeParried: attackerWeapon={$weapon->getName()}, defenderWeapon={$defenderWeapon->getName()}, hitRoll=$hitRoll");
             $canBeParried = $source->getEquipmentManager()->canBeParried($weapon, $defenderWeapon, $hitRoll);
             \Mordheim\BattleLogger::add("[DEBUG][attack] canBeParried returned: " . ($canBeParried ? 'true' : 'false'));
 
@@ -132,8 +132,7 @@ class Attack
             $armorSaveMod = $source->getEquipmentManager()->getArmorSaveModifier($weapon);
             $armorSave += $armorSaveMod;
             \Mordheim\BattleLogger::add("Сэйв защищающегося: $armorSave (модификатор: $armorSaveMod)");
-            // Critical: woundRoll==6 и у атакующего есть спецправило Critical
-            if ($woundResult['woundRoll'] == 6) {
+            if ($woundResult['isCritical']) {
                 \Mordheim\BattleLogger::add("[DEBUG][Attack] Критическое ранение! Перед InjuryRoll");
                 $success = InjuryRoll::roll($battle, $source, $target, $weapon, true);
                 \Mordheim\BattleLogger::add("[DEBUG][Attack] После InjuryRoll: статус цели=" . $target->getState()->getStatus()->value);
@@ -149,7 +148,7 @@ class Attack
                         \Mordheim\BattleLogger::add("Сэйв не удался.");
                     }
                 }
-                if ($weapon && ($weapon->hasRule(\Mordheim\SpecialRule::CLUB) || $weapon->hasRule(\Mordheim\SpecialRule::CONCUSSION))) {
+                if ($weapon && $weapon->hasSpecialRule(SpecialRule::CONCUSSION)) {
                     \Mordheim\BattleLogger::add("Особое правило: дубина/конкашн — всегда injury table");
                     $success = InjuryRoll::roll($battle, $source, $target, $weapon);
                 } else {

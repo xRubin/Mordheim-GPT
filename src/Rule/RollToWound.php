@@ -2,8 +2,10 @@
 
 namespace Mordheim\Rule;
 
+use Mordheim\Data\Equipment;
+use Mordheim\EquipmentInterface;
 use Mordheim\FighterInterface;
-use Mordheim\Weapon;
+use Mordheim\SpecialRule;
 
 class RollToWound
 {
@@ -11,13 +13,13 @@ class RollToWound
      * Обычный бросок на ранение и сейв
      * @param FighterInterface $source
      * @param FighterInterface $target
-     * @param Weapon|null $weapon
+     * @param EquipmentInterface $weapon
      * @return array
      */
-    public static function roll(FighterInterface $source, FighterInterface $target, ?Weapon $weapon): array
+    public static function roll(FighterInterface $source, FighterInterface $target, EquipmentInterface $weapon): array
     {
-        $attackerS = $source->getStrength($weapon);
-        $resilientMod = $source->getEquipmentManager()->getResilientModifier($target);
+        $attackerS = $weapon->getStrength($source->getStrength());
+        $resilientMod = (int)$source->getEquipmentManager()->hasSpecialRule(SpecialRule::RESILIENT);
         $defenderT = $target->getToughness() + $resilientMod;
         $toWound = 4;
         if ($attackerS > $defenderT) $toWound = 3;
@@ -31,8 +33,9 @@ class RollToWound
         if ($woundRoll < $toWound) {
             \Mordheim\BattleLogger::add("Ранение не удалось!");
             \Mordheim\BattleLogger::add("[DEBUG] result=false (woundRoll < toWound)");
-            return ['success' => false, 'woundRoll' => $woundRoll];
+            return ['success' => false, 'woundRoll' => $woundRoll, 'isCritical' => false];
         }
-        return ['success' => true, 'woundRoll' => $woundRoll];
+            $toCrit = $weapon->hasSpecialRule(SpecialRule::CRITICAL_HIT_ON_5) ? 5 : 6;
+        return ['success' => true, 'woundRoll' => $woundRoll, 'isCritical' => $woundRoll >= $toCrit];
     }
 }

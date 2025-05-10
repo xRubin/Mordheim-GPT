@@ -2,37 +2,40 @@
 
 namespace Mordheim;
 
-use Mordheim\Data\SkillGroup;
-
 interface BlankInterface
 {
-    public function getTitle(): string;
-    public function getHireCost(): int;
+    public function getHireFee(): int;
+    public function getUpkeepFee(): int;
+
     public function getStartExp(): int;
+    public function getRating(): int;
 
     /**
-     * @return Weapon[]
+     * @return EquipmentInterface[]
      */
-    public function getStartWeapons(): array;
+    public function getEquipment(): array;
 
-    /**
-     * @return Armor[]
-     */
-    public function getStartArmors(): array;
     public function getMinCount(): int;
+
     public function getMaxCount(): int;
+
     public function isHero(): bool;
+
     public function isHenchman(): bool;
-    public function isMercenary(): bool;
+
+    public function isHiredSword(): bool;
+
     public function getCharacteristics(): Characteristics;
+
     /**
-     * @return Skill[]
+     * @return SpecialRuleInterface[]
      */
     public function getSpecialRules(): array;
+
     public function getEquipmentList(): EquipmentListInterface;
 
     /**
-     * @return SkillGroup[]
+     * @return SkillGroupInterface[]
      */
     public function getAdvancementSkillGroups(): array;
 }

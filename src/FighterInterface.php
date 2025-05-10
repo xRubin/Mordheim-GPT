@@ -18,7 +18,7 @@ interface FighterInterface
     public function getInitiative(): int;
     public function getLeadership(): int;
 
-    public function getStrength(?Weapon $weapon = null): int;
+    public function getStrength(): int;
 
     /**
      * Итоговое количество атак с учётом экипировки (два одноручных оружия = +1 атака)
@@ -38,7 +38,8 @@ interface FighterInterface
     /**
      * Расчёт сейва с учётом всей экипировки
      */
-    public function getArmorSave(?Weapon $attackerWeapon): int;
+    public function getArmorSave(?EquipmentInterface $attackerWeapon): int;
+    public function getHitModifier(?EquipmentInterface $attackerWeapon): int;
 
     /**
      * Максимальная диистанция для бега
@@ -53,10 +54,10 @@ interface FighterInterface
     /**
      * Проверка навыка
      */
-    public function hasSkill(string $skillName): bool;
+    public function hasSpecialRule(SpecialRule $specialRule): bool;
 
-    public function isAdjacent(FighterInterface $fighter): bool;
-    public function getDistance(FighterInterface $fighter): bool;
+    public function isAdjacent(FighterInterface $target): bool;
+    public function getDistance(FighterInterface $target): bool;
 }
 
 

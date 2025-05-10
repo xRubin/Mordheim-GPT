@@ -135,10 +135,10 @@ class Battle
             $fighters = $combat->fighters;
             usort($fighters, function (FighterInterface $a, FighterInterface $b) use ($combat) {
                 if ($combat->getBonus($a, CloseCombat::BONUS_CHARGED))
-                    return ($b->hasSkill('Lightning Reflexes') && !$a->hasSkill('Lightning Reflexes')) ? 1 : -1;
+                    return ($b->hasSpecialRule(SpecialRule::LIGHTNING_REFLEXES) && !$a->hasSpecialRule(SpecialRule::LIGHTNING_REFLEXES)) ? 1 : -1;
 
                 if ($combat->getBonus($b, CloseCombat::BONUS_CHARGED))
-                    return ($a->hasSkill('Lightning Reflexes') && !$b->hasSkill('Lightning Reflexes')) ? -1 : 1;
+                    return ($a->hasSpecialRule(SpecialRule::LIGHTNING_REFLEXES) && !$b->hasSpecialRule(SpecialRule::LIGHTNING_REFLEXES)) ? -1 : 1;
 
                 if ($a->getInitiative() === $b->getInitiative())
                     return mt_rand(0, 1) ? 1 : -1;

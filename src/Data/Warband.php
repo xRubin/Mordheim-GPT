@@ -2,51 +2,32 @@
 
 namespace Mordheim\Data;
 
+use Mordheim\Traits\EnumTryFromNameTrait;
 use Mordheim\WarbandInterface;
 
-enum Warband: int implements WarbandInterface
+enum Warband implements WarbandInterface
 {
-    case REIKLAND = 1;
-    case MIDDENHEIM = 2;
-    case MARIENBURG = 3;
+    use EnumTryFromNameTrait;
 
-    public function getTitle(): string
-    {
-        return match ($this) {
-            self::REIKLAND => 'Reikland',
-            self::MIDDENHEIM => 'Middenheim',
-            self::MARIENBURG => 'Marienburg',
-        };
-    }
+    case REIKLAND;
+    case MIDDENHEIM;
+    case MARIENBURG;
+    case CULT_OF_THE_POSSESSED;
+    case WITCH_HUNTERS;
+    case SISTERS_OF_SIGMAR;
+    case UNDEAD;
+    case SKAVEN;
+    case HIRED_SWORDS;
 
     public function getBlanks(): array
     {
-        return match ($this) {
-            self::REIKLAND => [
-                Blank::REIKLAND_MERCENARY_CAPTAIN,
-                Blank::REIKLAND_CHAMPION,
-                Blank::REIKLAND_YOUNGBLOOD,
-                Blank::REIKLAND_WARRIOR,
-                Blank::REIKLAND_MARKSMAN,
-                Blank::REIKLAND_SWORDSMAN
-            ],
-            self::MIDDENHEIM => [
-                Blank::MIDDENHEIM_MERCENARY_CAPTAIN,
-                Blank::MIDDENHEIM_CHAMPION,
-                Blank::MIDDENHEIM_YOUNGBLOOD,
-                Blank::MIDDENHEIM_WARRIOR,
-                Blank::MIDDENHEIM_MARKSMAN,
-                Blank::MIDDENHEIM_SWORDSMAN,
-            ],
-            self::MARIENBURG => [
-                Blank::MARIENBURG_MERCENARY_CAPTAIN,
-                Blank::MARIENBURG_CHAMPION,
-                Blank::MARIENBURG_YOUNGBLOOD,
-                Blank::MARIENBURG_WARRIOR,
-                Blank::MARIENBURG_MARKSMAN,
-                Blank::MARIENBURG_SWORDSMAN,
-            ],
-        };
+        return array_filter(
+            (new \ReflectionClass(Blank::class))->getConstants(),
+            fn($value) => (new \ReflectionClassConstant(Blank::class, $value->name))
+                    ->getAttributes(Attributes\Warband::class)[0]
+                    ->newInstance()
+                    ->getValue() === $this
+        );
     }
 
     public function getStartWealth(): int

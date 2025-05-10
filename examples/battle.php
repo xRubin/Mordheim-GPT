@@ -6,8 +6,7 @@
 
 use Mordheim\Battle;
 use Mordheim\BattleLogger;
-use Mordheim\Data\Armors;
-use Mordheim\Data\Weapons;
+use Mordheim\Data\Equipment;
 use Mordheim\EquipmentManager;
 use Mordheim\GameField;
 use Mordheim\Strategy\AggressiveStrategy;
@@ -21,7 +20,7 @@ $battle = new Battle($field, [
         new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_MERCENARY_CAPTAIN,
             \Mordheim\FighterAdvancement::empty(),
-            new EquipmentManager([Weapons::getByName('Sword')], [Armors::getByName('Light Armor')]),
+            new EquipmentManager([Equipment::SWORD, Equipment::LIGHT_ARMOR]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
                 new AggressiveStrategy(),
@@ -31,7 +30,7 @@ $battle = new Battle($field, [
         new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_YOUNGBLOOD,
             \Mordheim\FighterAdvancement::empty(),
-            new EquipmentManager([Weapons::getByName('Axe')], [Armors::getByName('Heavy Armor')]),
+            new EquipmentManager([Equipment::AXE, Equipment::HEAVY_ARMOR]),
             new \Mordheim\FighterState(
                 [0, 2, 0],
                 new AggressiveStrategy(),
@@ -41,7 +40,7 @@ $battle = new Battle($field, [
         new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new EquipmentManager([Weapons::getByName('Bow')]),
+            new EquipmentManager([Equipment::BOW]),
             new \Mordheim\FighterState(
                 [0, 4, 0],
                 new AggressiveStrategy(),
@@ -53,7 +52,7 @@ $battle = new Battle($field, [
         new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MIDDENHEIM_MERCENARY_CAPTAIN,
             \Mordheim\FighterAdvancement::empty(),
-            new EquipmentManager([Weapons::getByName('Sword')], [Armors::getByName('Shield')]),
+            new EquipmentManager([Equipment::SWORD, Equipment::SHIELD]),
             new \Mordheim\FighterState(
                 [7, 0, 0],
                 new AggressiveStrategy(),
@@ -63,7 +62,7 @@ $battle = new Battle($field, [
         new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MIDDENHEIM_YOUNGBLOOD,
             \Mordheim\FighterAdvancement::empty(),
-            new EquipmentManager([Weapons::getByName('Axe')], [Armors::getByName('Heavy Armor')]),
+            new EquipmentManager([Equipment::AXE, Equipment::HEAVY_ARMOR]),
             new \Mordheim\FighterState(
                 [7, 2, 0],
                 new AggressiveStrategy(),
@@ -73,7 +72,7 @@ $battle = new Battle($field, [
         new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MIDDENHEIM_WARRIOR,
             \Mordheim\FighterAdvancement::empty(),
-            new EquipmentManager([Weapons::getByName('Club')]),
+            new EquipmentManager([Equipment::CLUB]),
             new \Mordheim\FighterState(
                 [7, 4, 0],
                 new AggressiveStrategy(),

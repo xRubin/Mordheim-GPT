@@ -2,64 +2,217 @@
 
 namespace Mordheim\Data;
 
+use Mordheim\Data\Attributes\Equipment;
 use Mordheim\EquipmentListInterface;
+use Mordheim\Traits\EnumTryFromNameTrait;
 
-enum EquipmentList: int implements EquipmentListInterface
+enum EquipmentList implements EquipmentListInterface
 {
-    case MERCENARY_EQUIPMENT_LIST = 1;
-    case MARKSMAN_EQUIPMENT_LIST = 2;
+    use EnumTryFromNameTrait;
 
-    public function getTitle(): string
-    {
-        return match ($this) {
-            self::MERCENARY_EQUIPMENT_LIST => 'Mercenary Equipment List',
-            self::MARKSMAN_EQUIPMENT_LIST => 'Marksman Equipment List',
-        };
-    }
+    case EMPTY;
+    #[Equipment('DAGGER')]
+    #[Equipment('CLUB')]
+    #[Equipment('MACE')]
+    #[Equipment('HAMMER')]
+    #[Equipment('AXE')]
+    #[Equipment('SWORD')]
+    #[Equipment('MORNING_STAR')]
+    #[Equipment('DOUBLE_HANDED_AXE')]
+    #[Equipment('DOUBLE_HANDED_SWORD')]
+    #[Equipment('SPEAR')]
+    #[Equipment('HALBERD')]
+    #[Equipment('CROSSBOW')]
+    #[Equipment('PISTOL')]
+    #[Equipment('DUELLING_PISTOL')]
+    #[Equipment('BOW')]
+    #[Equipment('LIGHT_ARMOR')]
+    #[Equipment('HEAVY_ARMOR')]
+    #[Equipment('SHIELD')]
+    #[Equipment('BUCKLER')]
+    #[Equipment('HELMET')]
+    case MERCENARY_EQUIPMENT_LIST;
+    #[Equipment('DAGGER')]
+    #[Equipment('CLUB')]
+    #[Equipment('MACE')]
+    #[Equipment('HAMMER')]
+    #[Equipment('AXE')]
+    #[Equipment('SWORD')]
+    #[Equipment('CROSSBOW')]
+    #[Equipment('PISTOL')]
+    #[Equipment('BOW')]
+    #[Equipment('LONG_BOW')]
+    #[Equipment('BLUNDERBUSS')]
+    #[Equipment('HANDGUN')]
+    #[Equipment('HUNTING_RIFLE')]
+    #[Equipment('LIGHT_ARMOR')]
+    #[Equipment('SHIELD')]
+    #[Equipment('HELMET')]
+    case MARKSMAN_EQUIPMENT_LIST;
+
+    #[Equipment('DAGGER')]
+    #[Equipment('MACE')]
+    #[Equipment('HAMMER')]
+    #[Equipment('AXE')]
+    #[Equipment('SWORD')]
+    #[Equipment('DOUBLE_HANDED_AXE')]
+    #[Equipment('DOUBLE_HANDED_HAMMER')]
+    #[Equipment('DOUBLE_HANDED_SWORD')]
+    #[Equipment('SPEAR')]
+    #[Equipment('BOW')]
+    #[Equipment('SHORT_BOW')]
+    #[Equipment('LIGHT_ARMOR')]
+    #[Equipment('HEAVY_ARMOR')]
+    #[Equipment('SHIELD')]
+    #[Equipment('HELMET')]
+    case POSSESSED_EQUIPMENT_LIST;
+
+    #[Equipment('DAGGER')]
+    #[Equipment('MACE')]
+    #[Equipment('HAMMER')]
+    #[Equipment('AXE')]
+    #[Equipment('SWORD')]
+    #[Equipment('DOUBLE_HANDED_AXE')]
+    #[Equipment('DOUBLE_HANDED_HAMMER')]
+    #[Equipment('DOUBLE_HANDED_SWORD')]
+    #[Equipment('FLAIL')]
+    #[Equipment('LIGHT_ARMOR')]
+    #[Equipment('HEAVY_ARMOR')]
+    #[Equipment('SHIELD')]
+    #[Equipment('HELMET')]
+    case DARKSOUL_EQUIPMENT_LIST;
+
+    #[Equipment('DAGGER')]
+    #[Equipment('MACE')]
+    #[Equipment('HAMMER')]
+    #[Equipment('AXE')]
+    #[Equipment('SWORD')]
+    #[Equipment('DOUBLE_HANDED_AXE')]
+    #[Equipment('DOUBLE_HANDED_HAMMER')]
+    #[Equipment('DOUBLE_HANDED_SWORD')]
+    #[Equipment('CROSSBOW')]
+    #[Equipment('PISTOL')]
+    #[Equipment('CROSSBOW_PISTOL')]
+    #[Equipment('LIGHT_ARMOR')]
+    #[Equipment('HEAVY_ARMOR')]
+    #[Equipment('SHIELD')]
+    #[Equipment('BUCKLER')]
+    #[Equipment('HELMET')]
+    case WITCH_HUNTER_EQUIPMENT_LIST;
+    #[Equipment('FLAIL')]
+    #[Equipment('MORNING_STAR')]
+    #[Equipment('DOUBLE_HANDED_AXE')]
+    #[Equipment('DOUBLE_HANDED_HAMMER')]
+    #[Equipment('DOUBLE_HANDED_SWORD')]
+    case FLAGELLANT_EQUIPMENT_LIST;
+    #[Equipment('DAGGER')]
+    #[Equipment('MACE')]
+    #[Equipment('HAMMER')]
+    #[Equipment('AXE')]
+    #[Equipment('SWORD')]
+    #[Equipment('DOUBLE_HANDED_AXE')]
+    #[Equipment('DOUBLE_HANDED_HAMMER')]
+    #[Equipment('DOUBLE_HANDED_SWORD')]
+    #[Equipment('SPEAR')]
+    #[Equipment('BOW')]
+    #[Equipment('SHORT_BOW')]
+    #[Equipment('LIGHT_ARMOR')]
+    #[Equipment('SHIELD')]
+    #[Equipment('HELMET')]
+    case ZEALOT_EQUIPMENT_LIST;
+
+    #[Equipment('DAGGER')]
+    #[Equipment('MACE')]
+    #[Equipment('HAMMER')]
+    #[Equipment('SIGMARITE_WARHAMMER')]
+    #[Equipment('FLAIL')]
+    #[Equipment('STEEL_WHIP')]
+    #[Equipment('DOUBLE_HANDED_AXE')]
+    #[Equipment('DOUBLE_HANDED_HAMMER')]
+    #[Equipment('DOUBLE_HANDED_SWORD')]
+    #[Equipment('SLING')]
+    #[Equipment('LIGHT_ARMOR')]
+    #[Equipment('HEAVY_ARMOR')]
+    #[Equipment('SHIELD')]
+    #[Equipment('BUCKLER')]
+    #[Equipment('HELMET')]
+    case SISTERS_OF_SIGMAR_EQUIPMENT_LIST;
+
+    #[Equipment('DAGGER')]
+    #[Equipment('MACE')]
+    #[Equipment('HAMMER')]
+    #[Equipment('SIGMARITE_WARHAMMER')]
+    #[Equipment('FLAIL')]
+    #[Equipment('STEEL_WHIP')]
+    #[Equipment('DOUBLE_HANDED_AXE')]
+    #[Equipment('DOUBLE_HANDED_HAMMER')]
+    #[Equipment('DOUBLE_HANDED_SWORD')]
+    #[Equipment('SLING')]
+    #[Equipment('LIGHT_ARMOR')]
+    #[Equipment('HEAVY_ARMOR')]
+    #[Equipment('SHIELD')]
+    #[Equipment('BUCKLER')]
+    #[Equipment('HELMET')]
+    #[Equipment('HOLY_TOME')]
+    #[Equipment('BLESSED_WATER')]
+    #[Equipment('HOLY_RELIC')]
+    case SISTERS_OF_SIGMAR_HERO_EQUIPMENT_LIST;
+
+    #[Equipment('DAGGER')]
+    #[Equipment('MACE')]
+    #[Equipment('HAMMER')]
+    #[Equipment('AXE')]
+    #[Equipment('SWORD')]
+    #[Equipment('DOUBLE_HANDED_AXE')]
+    #[Equipment('DOUBLE_HANDED_HAMMER')]
+    #[Equipment('DOUBLE_HANDED_SWORD')]
+    #[Equipment('SPEAR')]
+    #[Equipment('HALBERD')]
+    #[Equipment('BOW')]
+    #[Equipment('SHORT_BOW')]
+    #[Equipment('LIGHT_ARMOR')]
+    #[Equipment('HEAVY_ARMOR')]
+    #[Equipment('SHIELD')]
+    #[Equipment('HELMET')]
+    case UNDEAD_EQUIPMENT_LIST;
+
+    #[Equipment('DAGGER')]
+    #[Equipment('SWORD')]
+    #[Equipment('FLAIL')]
+    #[Equipment('SPEAR')]
+    #[Equipment('HALBERD')]
+    #[Equipment('WEEPING_BLADES')]
+    #[Equipment('FIGHTING_CLAWS')]
+    #[Equipment('SLING')]
+    #[Equipment('THROWING_STARS')]
+    #[Equipment('BLOWPIPE')]
+    #[Equipment('WARPLOCK_PISTOL')]
+    #[Equipment('LIGHT_ARMOR')]
+    #[Equipment('BUCKLER')]
+    #[Equipment('HELMET')]
+    case SKAVEN_HEROES_EQUIPMENT_LIST;
+
+    #[Equipment('DAGGER')]
+    #[Equipment('CLUB')]
+    #[Equipment('SWORD')]
+    #[Equipment('SPEAR')]
+    #[Equipment('SLING')]
+    #[Equipment('LIGHT_ARMOR')]
+    #[Equipment('SHIELD')]
+    #[Equipment('HELMET')]
+    case SKAVEN_HENCHMEN_EQUIPMENT_LIST;
 
     public function getItems(): array
     {
-        return match ($this) {
-            self::MERCENARY_EQUIPMENT_LIST => [
-                Weapons::getByName('Dagger'),
-                Weapons::getByName('Club'),
-                Weapons::getByName('Mace'),
-                Weapons::getByName('Hammer'),
-                Weapons::getByName('Axe'),
-                Weapons::getByName('Sword'),
-                Weapons::getByName('Morning star'),
-                Weapons::getByName('Double-handed axe'),
-                Weapons::getByName('Double-handed sword'),
-                Weapons::getByName('Spear'),
-                Weapons::getByName('Halberd'),
-                Weapons::getByName('Crossbow'),
-                Weapons::getByName('Pistol'),
-                Weapons::getByName('Duelling pistol'),
-                Weapons::getByName('Bow'),
-                Armors::getByName('Light armour'),
-                Armors::getByName('Heavy armour'),
-                Armors::getByName('Shield'),
-                Armors::getByName('Buckler'),
-                Armors::getByName('Helmet'),
-            ],
-            self::MARKSMAN_EQUIPMENT_LIST => [
-                Weapons::getByName('Dagger'),
-                Weapons::getByName('Club'),
-                Weapons::getByName('Mace'),
-                Weapons::getByName('Hammer'),
-                Weapons::getByName('Axe'),
-                Weapons::getByName('Sword'),
-                Weapons::getByName('Crossbow'),
-                Weapons::getByName('Pistol'),
-                Weapons::getByName('Bow'),
-                Weapons::getByName('Long bow'),
-                Weapons::getByName('Blunderbuss'),
-                Weapons::getByName('Handgun'),
-                Weapons::getByName('Hunting rifle'),
-                Armors::getByName('Light armour'),
-                Armors::getByName('Shield'),
-                Armors::getByName('Helmet'),
-            ],
-        };
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(Equipment::class);
+
+        if (count($classAttributes) === 0)
+            return [];
+
+        return array_map(
+            fn($attribute) => $attribute->newInstance()->getValue(),
+            $classAttributes
+        );
     }
 }

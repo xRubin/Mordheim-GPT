@@ -4,6 +4,8 @@ namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
 use Mordheim\FighterInterface;
+use Mordheim\Slot;
+use Mordheim\SpecialRule;
 use Mordheim\Status;
 
 abstract class BaseBattleStrategy implements BattleStrategyInterface
@@ -41,29 +43,14 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
      */
     protected function canActAgainst(Battle $battle, FighterInterface $fighter, FighterInterface $target): bool
     {
-        if ($fighter->hasSkill('Frenzy') && ($fighter->getDistance($target) < $fighter->getMovement() * 2)) {
+        if ($fighter->getState()->getStatus() === Status::FRENZY && ($fighter->getDistance($target) < $fighter->getMovement() * 2)) {
             return true;
         } else {
             $allies = $battle->getAlliesFor($fighter);
-            if ($target->hasSkill('Terror'))
-                return \Mordheim\Rule\Psychology::testTerror($fighter, $allies);
-            if ($target->hasSkill('Fear'))
+            if ($target->hasSpecialRule(SpecialRule::CAUSE_FEAR))
                 return \Mordheim\Rule\Psychology::testFear($fighter, $target, $allies);
         }
         return true;
-    }
-
-    /**
-     * Получить стрелковое оружие и его радиус
-     */
-    protected function getRangedWeapon(FighterInterface $fighter): ?\Mordheim\Weapon
-    {
-        foreach ($fighter->getEquipmentManager()->getWeapons() as $weapon) {
-            if ($weapon->damageType === 'Ranged') {
-                return $weapon;
-            }
-        }
-        return null;
     }
 
     public function movePhase(Battle $battle, FighterInterface $fighter, array $enemies): void
@@ -97,7 +84,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
             return;
         }
 
-        if (0 === $fighter->getEquipmentManager()->countRangedWeapons())
+        if (!count($fighter->getEquipmentManager()->getItemsBySlot(SLOT::RANGED)))
             return;
 
         if ($battle->getActiveCombats()->isFighterInCombat($fighter))
@@ -129,7 +116,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
             return;
         }
 
-        if (0 === $fighter->getEquipmentManager()->countMeleeWeapons())
+        if (!count($fighter->getEquipmentManager()->getItemsBySlot(Slot::MELEE)))
             return;
 
         if (!$this->spentCloseCombat)

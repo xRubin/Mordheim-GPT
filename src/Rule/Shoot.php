@@ -4,6 +4,8 @@ namespace Mordheim\Rule;
 
 use Mordheim\Battle;
 use Mordheim\FighterInterface;
+use Mordheim\Slot;
+use Mordheim\SpecialRule;
 
 class Shoot
 {
@@ -14,18 +16,12 @@ class Shoot
     public static function apply(Battle $battle, FighterInterface $source, FighterInterface $target, bool $moved = false): bool
     {
         if (!$source->getState()->getStatus()->isAlive() || !$target->getState()->getStatus()->isAlive()) return false;
-        $ranged = null;
-        foreach ($source->getEquipmentManager()->getWeapons() as $w) {
-            if ($w->damageType === 'Ranged') {
-                $ranged = $w;
-                break;
-            }
-        }
-        if (!$ranged) return false;
-        if ($source->getDistance($target) > $ranged->range) return false;
+        $weapons = $source->getEquipmentManager()->getItemsBySlot(Slot::RANGED);
+        if (!($weapon = reset($weapons))) return false;
+        if ($source->getDistance($target) > $weapon->getRange()) return false;
         // Move Or Fire: если оружие содержит спецправило, нельзя стрелять после движения
-        if ($moved && $ranged->hasRule(\Mordheim\SpecialRule::MOVE_OR_FIRE)) {
-            \Mordheim\BattleLogger::add("{$source->getName()} не может стрелять из {$ranged->name} после движения (Move or Fire).");
+        if ($moved && $weapon->hasSpecialRule(SpecialRule::MOVE_OR_FIRE)) {
+            \Mordheim\BattleLogger::add("{$source->getName()} не может стрелять из {$weapon->getName()} после движения (Move or Fire).");
             return false;
         }
 
@@ -36,20 +32,20 @@ class Shoot
         if ($toHitBase > 6) $toHitBase = 6;
 
         // Навык Quick Shot: если есть, стреляет дважды, если не двигался
-        $shots = ($source->hasSkill('Quick Shot') && !$moved) ? 2 : 1;
+        $shots = ($source->hasSpecialRule(SpecialRule::QUICK_SHOT) && !$moved) ? 2 : 1;
 
         // Модификаторы
         $mod = 0;
         // Дальний выстрел (больше половины дистанции)
-        if ($source->getDistance($target) > $ranged->range / 2) $mod += 1;
+        if ($source->getDistance($target) > $weapon->getRange() / 2) $mod += 1;
         // Двигался
         if ($moved) $mod += 1;
         // Цель в укрытии
         if ($battle->hasObstacleBetween($source->getState()->getPosition(), $target->getState()->getPosition())) $mod += 1;
         // Большая цель
-        if ($target->hasSkill('Large Target')) $mod -= 1;
+        if ($target->hasSpecialRule(SpecialRule::LARGE_TARGET)) $mod -= 1;
         // Модификатор оружия
-        $mod += $ranged->toHitModifier;
+        $mod += $source->getHitModifier($weapon);
 
         $toHit = $toHitBase + $mod;
         if ($toHit > 6) $toHit = 6;
@@ -69,13 +65,10 @@ class Shoot
             }
             if ($roll >= $toHit) {
                 // Навык Dodge: 5+ save против стрельбы
-                $hasDodge = $target->hasSkill('Dodge');
+                $hasDodge = $target->hasSpecialRule(SpecialRule::DODGE);
                 if ($hasDodge && \Mordheim\Dice::roll(6) >= 5) continue; // уклонился
 
-                // Особые эффекты оружия: игнор сейва/повтор броска
-                $ignoreSave = $ranged->hasRule(\Mordheim\SpecialRule::IGNORE_ARMOR_SAVE);
-
-                $armorSave = $ignoreSave ? 0 : $target->getArmorSave($ranged);
+                $armorSave = $target->getArmorSave($weapon);
                 $saveRoll = $armorSave > 0 ? \Mordheim\Dice::roll(6) : 7;
                 if ($saveRoll < $armorSave) {
                     $target->getState()->decreaseWounds();

@@ -1,8 +1,9 @@
 <?php
 
-namespace Mordheim\Attributes;
+namespace Mordheim\Data\Attributes;
 
 use Attribute;
+use Mordheim\SpecialRuleInterface;
 
 #[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_CLASS_CONSTANT)]
 readonly class SpecialRule
@@ -12,8 +13,8 @@ readonly class SpecialRule
     ) {
     }
 
-    public function getValue(): \Mordheim\Data\SpecialRule
+    public function getValue(): SpecialRuleInterface
     {
-        return \Mordheim\Data\SpecialRule::tryFromName($this->value);
+        return \Mordheim\SpecialRule::tryFromName($this->value);
     }
 }

@@ -1,34 +1,118 @@
 <?php
+
 namespace Mordheim;
 
-/**
- * Перечисление спецправил для оружия и брони.
- */
-enum SpecialRule: string
-{
-    case PARRY = 'Parry';
-    case CONCUSSION = 'Concussion';
-    case CRITICAL = 'Critical';
-    case ARMOR_PIERCING = 'ArmorPiercing';
-    case DOUBLE_HANDED = 'DoubleHanded';
-    case FLAIL = 'Flail';
-    case TWO_HANDED = 'TwoHanded';
-    case WHIP = 'Whip';
-    case CLUB = 'Club';
-    case IGNORE_ARMOR_SAVE = 'IgnoreArmorSave';
-    case AXE = 'Axe';
-    case SWORD = 'Sword';
-    case IGNORE_CRIT = 'IgnoreCrit'; // броня не игнорируется при критах
-    case AVOID_STUN = 'AvoidStun'; //  A model has a special 4+ save on a D6 against being stunned. If the save is made, treat the stunned result as knocked down instead. This save is not modified by the opponent’s Strength.
-    case SHIELD_PARRY = 'ShieldParry'; // щит даёт возможность парировать
-    case HEAVY_ARMOR_PENALTY = 'HeavyArmorPenalty'; // штраф к сейву или инициативе
-    case HELMET_PROTECTION = 'HelmetProtection'; // шлем даёт защиту от стана/оглушения
-    case LIGHT_ARMOR_BONUS = 'LightArmorBonus'; // облегчённая броня даёт бонус к инициативе/сейву
-    case SAVE = 'Save'; // тяжелая броня даёт базовый сейв 5+
-    case MOVEMENT = 'Movement'; // Heavy Armor + Shield: -1 к движению
-    case MOVE_OR_FIRE = 'MoveOrFire'; // You may not move and fire in the same turn
-    case PAIR = 'Pair'; // Всегда используются парой, дают +1 атаку
-    case CLIMB = 'Climb'; // Даёт бонус +1 к тесту Initiative на лазание
-    case CUMBERSOME = 'Cumbersome'; // Громоздкое: нельзя использовать с другим оружием в рукопашной
-}
+use Mordheim\Traits\EnumTryFromNameTrait;
 
+enum SpecialRule implements SpecialRuleInterface
+{
+    use EnumTryFromNameTrait;
+
+    case PLUS_1_ENEMY_ARMOR_SAVE;
+    case CONCUSSION;
+    case CUTTING_EDGE;
+    case PARRY;
+    case HEAVY;
+    case TWO_HANDED;
+    case DIFFICULT_TO_USE;
+    case STRIKE_FIRST;
+    case UNWIELDY;
+    case CAVALRY_BONUS;
+    case STRIKE_LAST;
+    case MINUS_1_SAVE_MODIFIER;
+    case MOVE_OR_FIRE;
+    case FIRE_TWICE_AT_HALF_RANGE;
+    case THROWN_WEAPON;
+    case FIRE_TWICE;
+    case SHOOT_IN_HAND_TO_HAND_COMBAT;
+    case PREPARE_SHOT;
+    case SAVE_MODIFIER;
+    case HAND_TO_HAND;
+    case ACCURACY;
+    case PICK_TARGET;
+    case SAVE_4;
+    case SAVE_5;
+    case SAVE_6;
+    case ITHILMAR;
+    case GROMRIL;
+    case HOLY_WEAPON;
+    case CANNOT_BE_PARRIED;
+    case WHIPCRACK;
+    case POISON;
+    case STEALTHY;
+    case PAIR;
+    case CLIMB;
+    case CUMBERSOME;
+    case VENOMOUS;
+    case AVOID_STUN;
+    case MOVEMENT;
+
+    case LEADER;
+    case EXPERT_SWORDSMAN;
+    case WIZARD_CHAOS_RITUALS;
+    case MUTATIONS;
+    case CAUSE_FEAR;
+    case CRAZED;
+    case BURN_THE_WITCH;
+    case PRAYERS;
+    case FANATICAL;
+    case ANIMAL;
+    case PRAYERS_OF_SIGMAR;
+    case BLESSED_SIGHT;
+    case WIZARD_NECROMANCER;
+    case CHARGE;
+    case MAY_NOT_RUN;
+    case IMMUNE_TO_PSYCHOLOGY;
+    case IMMUNE_TO_POISON;
+    case UNLIVING;
+    case NO_PAIN;
+    case NO_BRAIN;
+    case PERFECT_KILLER;
+    case WIZARD_MAGIC_OF_THE_HORNED_RAT;
+    case LARGE_TARGET;
+    case STEP_ASIDE;
+    case RESILIENT;
+    case DODGE;
+    case QUICK_SHOT;
+    case SPRINT;
+    case STRIKE_TO_INJURE;
+    case COMBAT_MASTER;
+    case WEAPONS_TRAINING;
+    case WEB_OF_STEEL;
+    case PISTOLIER;
+    case EAGLE_EYES;
+    case WEAPONS_EXPERT;
+    case NIMBLE;
+    case TRICK_SHOOTER;
+    case HUNTER;
+    case KNIFE_FIGHTER;
+    case BATTLE_TONGUE;
+    case SORCERY;
+    case STREETWISE;
+    case HAGGLE;
+    case ARCANE_LORE;
+    case WYRDSTONE_HUNTER;
+    case WARRIOR_WIZARD;
+    case MIGHTY_BLOW;
+    case PIT_FIGHTER;
+    case STRONGMAN;
+    case UNSTOPPABLE_CHARGE;
+    case LEAP;
+    case ACROBAT;
+    case LIGHTNING_REFLEXES;
+    case JUMP_UP;
+    case SCALE_SHEER_SURFACES;
+    case STUPIDITY;
+    case INVINCIBLE_SWORDSMAN;
+    case WANDERER;
+    case CRITICAL_HIT_ON_5;
+
+    case MUTATION_DAEMON_SOUL;
+    case MUTATION_GREAT_CLAW;
+    case MUTATION_CLOVEN_HOOFS;
+    case MUTATION_TENTACLE;
+    case MUTATION_BLACKBLOOD;
+    case MUTATION_SPINES;
+    case MUTATION_SCORPION_TAIL;
+    case MUTATION_EXTRA_ARM;
+}

@@ -2,9 +2,9 @@
 
 use Mordheim\Battle;
 use Mordheim\Characteristics;
-use Mordheim\Data\Skills;
-use Mordheim\Data\Weapons;
+use Mordheim\Data\Equipment;
 use Mordheim\GameField;
+use Mordheim\SpecialRule;
 use Mordheim\Warband;
 use PHPUnit\Framework\TestCase;
 
@@ -27,7 +27,7 @@ class FighterShootingTest extends TestCase
         $shooter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([Weapons::getByName('Bow')]),
+            new \Mordheim\EquipmentManager([Equipment::BOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
                 $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
@@ -64,7 +64,7 @@ class FighterShootingTest extends TestCase
         $shooter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([Weapons::getByName('Bow')]),
+            new \Mordheim\EquipmentManager([Equipment::BOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
                 $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
@@ -74,7 +74,7 @@ class FighterShootingTest extends TestCase
 
         $target = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
-            new \Mordheim\FighterAdvancement(Characteristics::empty(), [Skills::getByName('Dodge')]),
+            new \Mordheim\FighterAdvancement(Characteristics::empty(), [SpecialRule::DODGE]),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [2, 0, 0],
@@ -92,8 +92,8 @@ class FighterShootingTest extends TestCase
     {
         $shooter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
-            new \Mordheim\FighterAdvancement(Characteristics::empty(), [Skills::getByName('Quick Shot')]),
-            new \Mordheim\EquipmentManager([Weapons::getByName('Sling')]),
+            new \Mordheim\FighterAdvancement(Characteristics::empty(), [SpecialRule::QUICK_SHOT]),
+            new \Mordheim\EquipmentManager([Equipment::SLING]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
                 $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
@@ -122,7 +122,7 @@ class FighterShootingTest extends TestCase
         $shooter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([Weapons::getByName('Warplock Jezzail')]),
+            new \Mordheim\EquipmentManager([Equipment::CROSSBOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
                 $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
@@ -151,7 +151,7 @@ class FighterShootingTest extends TestCase
         $shooter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([Weapons::getByName('Warplock Jezzail')]),
+            new \Mordheim\EquipmentManager([Equipment::CROSSBOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
                 $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
@@ -180,7 +180,7 @@ class FighterShootingTest extends TestCase
         $shooter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([Weapons::getByName('Warplock Jezzail')]),
+            new \Mordheim\EquipmentManager([Equipment::CROSSBOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
                 $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),
@@ -209,7 +209,7 @@ class FighterShootingTest extends TestCase
         $shooter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([Weapons::getByName('Bow')]),
+            new \Mordheim\EquipmentManager([Equipment::BOW]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
                 $this->createMock(\Mordheim\Strategy\BattleStrategyInterface::class),

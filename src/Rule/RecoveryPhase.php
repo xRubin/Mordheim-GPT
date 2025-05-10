@@ -2,6 +2,7 @@
 
 namespace Mordheim\Rule;
 
+use Mordheim\SpecialRule;
 use Mordheim\Warband;
 
 class RecoveryPhase
@@ -28,7 +29,7 @@ class RecoveryPhase
             if (!$fighter->getState()->getStatus()->isAlive()) continue;
             // --- PANIC recovery ---
             if ($fighter->getState()->getStatus() === \Mordheim\Status::PANIC) {
-                if (\Mordheim\Rule\Psychology::leadershipTest($fighter, $warband->fighters)) {
+                if (Psychology::leadershipTest($fighter, $warband->fighters)) {
                     $fighter->getState()->setStatus(\Mordheim\Status::STANDING);
                     \Mordheim\BattleLogger::add("{$fighter->getName()} преодолел панику и возвращается в бой!");
                 } else {
@@ -49,7 +50,7 @@ class RecoveryPhase
                 $closeEnemies = array_filter($enemies, fn($enemy) => $fighter->getDistance($enemy) <= 1.99);
                 $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->getState()->getStatus()->canAct() && $fighter->getDistance($ally) <= 6);
                 if (count($closeEnemies) >= 2 && count($closeAllies) === 0) {
-                    if (!\Mordheim\Rule\Psychology::allAloneTest($fighter, $enemies, $allies)) {
+                    if (!Psychology::allAloneTest($fighter, $enemies, $allies)) {
                         $fighter->getState()->setStatus(\Mordheim\Status::PANIC);
                         \Mordheim\BattleLogger::add("{$fighter->getName()} не выдержал одиночества и впадает в панику!");
                     }
@@ -57,8 +58,8 @@ class RecoveryPhase
             }
             // --- Stupidity ---
             // TODO
-            if ($fighter->hasSkill('Stupidity') && $fighter->getState()->getStatus() === \Mordheim\Status::STANDING) {
-                if (!\Mordheim\Rule\Psychology::leadershipTest($fighter, $warband->fighters)) {
+            if ($fighter->hasSpecialRule(SpecialRule::STUPIDITY) && $fighter->getState()->getStatus() === \Mordheim\Status::STANDING) {
+                if (!Psychology::leadershipTest($fighter, $warband->fighters)) {
                     \Mordheim\BattleLogger::add("{$fighter->getName()} не прошёл тест тупости и стоит без дела!");
                 } else {
                     \Mordheim\BattleLogger::add("{$fighter->getName()} прошёл тест тупости и может действовать нормально.");
@@ -74,11 +75,8 @@ class RecoveryPhase
                 }
             }
             foreach ($enemies as $enemy) {
-                if ($enemy->hasSkill('Fear') && $fighter->getDistance($enemy) <= 8) {
-                    \Mordheim\Rule\Psychology::testFear($fighter, $enemy, $warband->fighters);
-                }
-                if ($enemy->hasSkill('Terror') && $fighter->getDistance($enemy) <= 8) {
-                    \Mordheim\Rule\Psychology::testTerror($fighter, $warband->fighters);
+                if ($enemy->hasSpecialRule(SpecialRule::CAUSE_FEAR) && $fighter->getDistance($enemy) <= 8) {
+                    Psychology::testFear($fighter, $enemy, $warband->fighters);
                 }
             }
         }

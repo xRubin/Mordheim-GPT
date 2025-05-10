@@ -9,11 +9,13 @@ enum Status: string
     case STUNNED = 'stunned';
     case OUT_OF_ACTION = 'out_of_action';
     case PANIC = 'panic';
+    case FRENZY = 'frenzy';
 
     public function canAct(): bool
     {
         return match ($this) {
-            self::STANDING => true,
+            self::STANDING,
+            self::FRENZY => true,
             default => false,
         };
     }

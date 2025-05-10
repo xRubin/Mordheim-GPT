@@ -1,11 +1,11 @@
 <?php
 
-namespace Mordheim\Attributes;
+namespace Mordheim\Data\Attributes;
 
 use Attribute;
 
 #[Attribute(Attribute::TARGET_CLASS_CONSTANT)]
-readonly class MaximumRange
+readonly class Rating
 {
     public function __construct(
         private int $value,

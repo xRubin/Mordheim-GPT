@@ -4,6 +4,7 @@ namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
 use Mordheim\FighterInterface;
+use Mordheim\Slot;
 
 class CarefulStrategy extends BaseBattleStrategy implements BattleStrategyInterface
 {
@@ -29,9 +30,10 @@ class CarefulStrategy extends BaseBattleStrategy implements BattleStrategyInterf
     protected function onShootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
     {
         if (empty($enemies)) return;
+        $ranged = $fighter->getEquipmentManager()->getMainWeapon(Slot::RANGED);
+        if (!$ranged) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
-        $ranged = $this->getRangedWeapon($fighter);
-        if ($ranged && $target && $fighter->getDistance($target) <= $ranged->range && !$fighter->isAdjacent($target)) {
+        if ($target && $fighter->getDistance($target) <= $ranged->getRange()) {
             \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, $this->spentMove);
         }
     }

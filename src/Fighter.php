@@ -13,7 +13,7 @@ class Fighter implements FighterInterface
         private ?FighterStateInterface        $fighterState = null,
     )
     {
-        $this->name = uniqid();
+        $this->name = $blank->name;
     }
 
     public function getName(): string
@@ -47,11 +47,9 @@ class Fighter implements FighterInterface
         return max(1, $base + $penalty); // движение не может быть меньше 1
     }
 
-    public function getStrength(?Weapon $weapon = null): int
+    public function getStrength(): int
     {
-        return $this->blank->getCharacteristics()->strength
-            + $this->advancement->getCharacteristics()->strength
-            + ($weapon ? $weapon->strength : 0);
+        return $this->blank->getCharacteristics()->strength + $this->advancement->getCharacteristics()->strength;
     }
 
     public function getWeaponSkill(): int
@@ -81,7 +79,7 @@ class Fighter implements FighterInterface
     {
         $base = $this->blank->getCharacteristics()->attacks + $this->advancement->getCharacteristics()->attacks;
         $bonus = 0;
-        if ($this->hasSkill('Frenzy')) {
+        if ($this->getState()->getStatus() === Status::FRENZY) {
             $base *= 2;
         }
         if ($this->equipmentManager->countOneHandedMeleeWeapons() >= 2) {
@@ -97,7 +95,7 @@ class Fighter implements FighterInterface
     {
         $base = $this->blank->getCharacteristics()->initiative + $this->advancement->getCharacteristics()->initiative;
         $bonus = 0;
-        if ($this->hasSkill('Nimble')) { // TODO: check
+        if ($this->hasSpecialRule(SpecialRule::NIMBLE)) {  // TODO: check rules
             $bonus = 1;
         }
         return $base + $bonus;
@@ -120,7 +118,7 @@ class Fighter implements FighterInterface
     {
         return function ($dx, $dy, $dz) {
             if ($dz !== 0) {
-                if ($this->hasSkill('Scale Sheer Surfaces')) return abs(1.0 * $dz);
+                if ($this->hasSpecialRule(SpecialRule::SCALE_SHEER_SURFACES)) return abs(1.0 * $dz);
                 return abs(2.0 * $dz);
             }
             if ($dx !== 0 && $dy !== 0) return 0.7 * (abs($dx) + abs($dy));
@@ -131,9 +129,22 @@ class Fighter implements FighterInterface
     /**
      * Расчёт сейва с учётом всей экипировки через менеджер
      */
-    public function getArmorSave(?Weapon $attackerWeapon): int
+    public function getArmorSave(?EquipmentInterface $attackerWeapon): int
     {
         return $this->equipmentManager->getArmorSave($attackerWeapon);
+    }
+
+    public function getHitModifier(?EquipmentInterface $attackerWeapon): int
+    {
+        if (!$attackerWeapon)
+            return 0;
+
+        if ($attackerWeapon->hasSpecialRule(SpecialRule::ACCURACY))
+            return 1;
+
+        //SpecialRule::SHOOT_IN_HAND_TO_HAND_COMBAT ?
+
+        return 0;
     }
 
     /**
@@ -154,25 +165,21 @@ class Fighter implements FighterInterface
      */
     public function getChargeRange(): int
     {
-        $moveMultiplier = $this->hasSkill('Sprint') ? 3 : 2;
+        $moveMultiplier = $this->hasSpecialRule(SpecialRule::SPRINT) ? 3 : 2;
         $movePoints = $this->getMovement() * $moveMultiplier;
         \Mordheim\BattleLogger::add("{$this->getName()} может Charge на: $movePoints, множитель: $moveMultiplier");
         return $movePoints;
     }
 
     /**
-     * @param string $skillName
+     * @param SpecialRule $specialRule
      * @return bool
      */
-    public function hasSkill(string $skillName): bool
+    public function hasSpecialRule(SpecialRule $specialRule): bool
     {
-        foreach ($this->blank->getSpecialRules() as $s) {
-            if ($s->name === $skillName) return true;
-        }
-        foreach ($this->advancement->getSpecialRules() as $s) {
-            if ($s->name === $skillName) return true;
-        }
-        return false;
+        return in_array($specialRule, $this->blank->getSpecialRules())
+            || in_array($specialRule, $this->advancement->getSpecialRules())
+            || $this->equipmentManager->hasSpecialRule($specialRule);
     }
 
     public function isAdjacent(FighterInterface $target): bool
@@ -180,9 +187,9 @@ class Fighter implements FighterInterface
         return Ruler::isAdjacent($this->getState()->getPosition(), $target->getState()->getPosition());
     }
 
-    public function getDistance(FighterInterface $fighter): bool
+    public function getDistance(FighterInterface $target): bool
     {
-        return Ruler::distance($this->getState()->getPosition(), $fighter->getState()->getPosition());
+        return Ruler::distance($this->getState()->getPosition(), $target->getState()->getPosition());
     }
 }
 

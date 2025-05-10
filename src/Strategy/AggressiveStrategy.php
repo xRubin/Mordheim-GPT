@@ -6,6 +6,7 @@ use Mordheim\Battle;
 use Mordheim\Exceptions\ChargeFailedException;
 use Mordheim\FighterInterface;
 use Mordheim\Rule\Charge;
+use Mordheim\Slot;
 
 class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategyInterface
 {
@@ -37,10 +38,11 @@ class AggressiveStrategy extends BaseBattleStrategy implements BattleStrategyInt
 
     protected function onShootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
     {
-        $ranged = $this->getRangedWeapon($fighter);
-        if (!$ranged || empty($enemies)) return;
+        if (empty($enemies)) return;
+        $ranged = $fighter->getEquipmentManager()->getMainWeapon(Slot::RANGED);
+        if (!$ranged) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
-        if ($target && $fighter->getDistance($target) <= $ranged->range) {
+        if ($target && $fighter->getDistance($target) <= $ranged->getRange()) {
             \Mordheim\Rule\Shoot::apply($battle, $fighter, $target, $this->spentMove);
         }
     }

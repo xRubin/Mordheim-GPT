@@ -2,295 +2,558 @@
 
 namespace Mordheim\Data;
 
-use Mordheim\Armor;
 use Mordheim\BlankInterface;
-use Mordheim\Characteristics;
+use Mordheim\Data\Attributes\Characteristics;
+use Mordheim\Data\Attributes\EquipmentList;
+use Mordheim\Data\Attributes\Henchman;
+use Mordheim\Data\Attributes\Hero;
+use Mordheim\Data\Attributes\HireFee;
+use Mordheim\Data\Attributes\HiredSword;
+use Mordheim\Data\Attributes\MaxCount;
+use Mordheim\Data\Attributes\MinCount;
+use Mordheim\Data\Attributes\SkillGroup;
+use Mordheim\Data\Attributes\SpecialRule;
+use Mordheim\Data\Attributes\StartExp;
+use Mordheim\Data\Attributes\UpkeepFee;
+use Mordheim\Data\Attributes\Warband;
+use Mordheim\EquipmentInterface;
 use Mordheim\EquipmentListInterface;
+use Mordheim\Exceptions\InvalidAttributesException;
 use Mordheim\WarbandInterface;
-use Mordheim\Weapon;
+use Mordheim\Data\Attributes\Equipment;
+use Mordheim\Data\Attributes\ExceptWarband;
+use Mordheim\Data\Attributes\Rating;
 
-enum Blank: int implements BlankInterface
+enum Blank implements BlankInterface
 {
-    case REIKLAND_MERCENARY_CAPTAIN = 1;
-    case REIKLAND_CHAMPION = 2;
-    case REIKLAND_YOUNGBLOOD = 3;
-    case REIKLAND_WARRIOR = 4;
-    case REIKLAND_MARKSMAN = 5;
-    case REIKLAND_SWORDSMAN = 6;
+    #[Warband('REIKLAND'), Hero]
+    #[HireFee(60)]
+    #[StartExp(20)]
+    #[MinCount(1), MaxCount(1)]
+    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SpecialRule('LEADER')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
+    case REIKLAND_MERCENARY_CAPTAIN;
+    #[Warband('REIKLAND'), Hero]
+    #[HireFee(35)]
+    #[StartExp(8)]
+    #[MaxCount(2)]
+    #[Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('STRENGTH')]
+    case REIKLAND_CHAMPION;
+    #[Warband('REIKLAND'), Hero]
+    #[HireFee(15)]
+    #[MaxCount(2)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('SPEED')]
+    case REIKLAND_YOUNGBLOOD;
+    #[Warband('REIKLAND'), Henchman]
+    #[HireFee(25)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    case REIKLAND_WARRIOR;
+    #[Warband('REIKLAND'), Henchman]
+    #[HireFee(25)]
+    #[MaxCount(7)]
+    #[Characteristics(4, 3, 4, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MARKSMAN_EQUIPMENT_LIST')]
+    case REIKLAND_MARKSMAN;
+    #[Warband('REIKLAND'), Henchman]
+    #[HireFee(35)]
+    #[MaxCount(5)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SpecialRule('EXPERT_SWORDSMAN')]
+    case REIKLAND_SWORDSMAN;
 
-    case MIDDENHEIM_MERCENARY_CAPTAIN = 11;
-    case MIDDENHEIM_CHAMPION = 12;
-    case MIDDENHEIM_YOUNGBLOOD = 13;
-    case MIDDENHEIM_WARRIOR = 14;
-    case MIDDENHEIM_MARKSMAN = 15;
-    case MIDDENHEIM_SWORDSMAN = 16;
+    #[Warband('MIDDENHEIM'), Hero]
+    #[HireFee(60)]
+    #[StartExp(20)]
+    #[MinCount(1), MaxCount(1)]
+    #[Characteristics(4, 4, 4, 4, 3, 1, 4, 1, 8)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SpecialRule('LEADER')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
+    case MIDDENHEIM_MERCENARY_CAPTAIN;
+    #[Warband('MIDDENHEIM'), Hero]
+    #[HireFee(35)]
+    #[StartExp(8)]
+    #[MaxCount(2)]
+    #[Characteristics(4, 4, 3, 4, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SkillGroup('COMBAT'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
+    case MIDDENHEIM_CHAMPION;
+    #[Warband('MIDDENHEIM'), Hero]
+    #[HireFee(15)]
+    #[MaxCount(2)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('SPEED')]
+    case MIDDENHEIM_YOUNGBLOOD;
+    #[Warband('MIDDENHEIM'), Henchman]
+    #[HireFee(25)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    case MIDDENHEIM_WARRIOR;
+    #[Warband('MIDDENHEIM'), Henchman]
+    #[HireFee(25)]
+    #[MaxCount(7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MARKSMAN_EQUIPMENT_LIST')]
+    case MIDDENHEIM_MARKSMAN;
+    #[Warband('MIDDENHEIM'), Henchman]
+    #[HireFee(35)]
+    #[MaxCount(5)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SpecialRule('EXPERT_SWORDSMAN')]
+    case MIDDENHEIM_SWORDSMAN;
 
-    case MARIENBURG_MERCENARY_CAPTAIN = 21;
-    case MARIENBURG_CHAMPION = 22;
-    case MARIENBURG_YOUNGBLOOD = 23;
-    case MARIENBURG_WARRIOR = 24;
-    case MARIENBURG_MARKSMAN = 25;
-    case MARIENBURG_SWORDSMAN = 26;
+    #[Warband('MARIENBURG'), Hero]
+    #[HireFee(60)]
+    #[StartExp(20)]
+    #[MinCount(1), MaxCount(1)]
+    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SpecialRule('LEADER')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
+    case MARIENBURG_MERCENARY_CAPTAIN;
+    #[Warband('MARIENBURG'), Hero]
+    #[HireFee(35)]
+    #[StartExp(8)]
+    #[MaxCount(2)]
+    #[Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('SPEED')]
+    case MARIENBURG_CHAMPION;
+    #[Warband('MARIENBURG'), Hero]
+    #[HireFee(15)]
+    #[MaxCount(2)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SkillGroup('COMBAT'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
+    case MARIENBURG_YOUNGBLOOD;
+    #[Warband('MARIENBURG'), Henchman]
+    #[HireFee(25)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    case MARIENBURG_WARRIOR;
+    #[Warband('MARIENBURG'), Henchman]
+    #[HireFee(25)]
+    #[MaxCount(7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MARKSMAN_EQUIPMENT_LIST')]
+    case MARIENBURG_MARKSMAN;
+    #[Warband('MARIENBURG'), Henchman]
+    #[HireFee(35)]
+    #[MaxCount(5)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
+    #[SpecialRule('EXPERT_SWORDSMAN')]
+    case MARIENBURG_SWORDSMAN;
+
+    #[Warband('CULT_OF_THE_POSSESSED'), Hero]
+    #[HireFee(70)]
+    #[MinCount(1), MaxCount(1)]
+    #[Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 8)]
+    #[EquipmentList('POSSESSED_EQUIPMENT_LIST')]
+    #[SpecialRule('LEADER'), SpecialRule('WIZARD_CHAOS_RITUALS')]
+    #[SkillGroup('COMBAT'), SkillGroup('ACADEMIC'), SkillGroup('SPEED')]
+    case CULT_MAGISTER;
+    #[Warband('CULT_OF_THE_POSSESSED'), Hero]
+    #[HireFee(90)]
+    #[MaxCount(2)]
+    #[Characteristics(5, 4, 0, 4, 4, 2, 4, 2, 7)]
+    #[EquipmentList('EMPTY')]
+    #[SpecialRule('CAUSE_FEAR'), SpecialRule('MUTATIONS')]
+    #[SkillGroup('COMBAT'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
+    case CULT_POSSESSED;
+    #[Warband('CULT_OF_THE_POSSESSED'), Hero]
+    #[HireFee(25)]
+    #[MaxCount(2)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('POSSESSED_EQUIPMENT_LIST')]
+    #[SpecialRule('MUTATIONS')]
+    #[SkillGroup('COMBAT'), SkillGroup('SPEED')]
+    case CULT_MUTANT;
+    #[Warband('CULT_OF_THE_POSSESSED'), Henchman]
+    #[HireFee(35)]
+    #[MaxCount(5)]
+    #[Characteristics(4, 2, 2, 4, 3, 1, 3, 1, 6)]
+    #[EquipmentList('DARKSOUL_EQUIPMENT_LIST')]
+    #[SpecialRule('CRAZED')]
+    case CULT_DARKSOUL;
+    #[Warband('CULT_OF_THE_POSSESSED'), Henchman]
+    #[HireFee(25)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('POSSESSED_EQUIPMENT_LIST')]
+    case CULT_BROTHER;
+    #[Warband('CULT_OF_THE_POSSESSED'), Henchman]
+    #[HireFee(45)]
+    #[MaxCount(3)]
+    #[Characteristics(4, 4, 3, 3, 4, 2, 3, 1, 7)]
+    #[EquipmentList('DARKSOUL_EQUIPMENT_LIST')]
+    case CULT_BEASTMAN;
+
+    #[Warband('WITCH_HUNTERS'), Hero]
+    #[HireFee(60)]
+    #[StartExp(20)]
+    #[MinCount(1), MaxCount(1)]
+    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8)]
+    #[EquipmentList('WITCH_HUNTER_EQUIPMENT_LIST')]
+    #[SpecialRule('LEADER'), SpecialRule('BURN_THE_WITCH')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
+    case WITCH_HUNTER_CAPTAIN;
+    #[Warband('WITCH_HUNTERS'), Hero]
+    #[HireFee(40)]
+    #[StartExp(12)]
+    #[MaxCount(1)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 8)]
+    #[EquipmentList('WITCH_HUNTER_EQUIPMENT_LIST')]
+    #[SpecialRule('PRAYERS')]
+    #[SkillGroup('COMBAT'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH')]
+    case WARRIOR_PRIEST;
+    #[Warband('WITCH_HUNTERS'), Hero]
+    #[HireFee(25)]
+    #[StartExp(8)]
+    #[MaxCount(3)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('WITCH_HUNTER_EQUIPMENT_LIST')]
+    #[SpecialRule('BURN_THE_WITCH')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('SPEED')]
+    case WITCH_HUNTER;
+    #[Warband('WITCH_HUNTERS'), Henchman]
+    #[HireFee(20)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('ZEALOT_EQUIPMENT_LIST')]
+    case ZEALOT;
+    #[Warband('WITCH_HUNTERS'), Henchman]
+    #[HireFee(40)]
+    #[MaxCount(5)]
+    #[Characteristics(4, 3, 3, 4, 4, 1, 3, 1, 10)]
+    #[EquipmentList('FLAGELLANT_EQUIPMENT_LIST')]
+    #[SpecialRule('FANATICAL')]
+    case FLAGELLANT;
+    #[Warband('WITCH_HUNTERS'), Henchman]
+    #[HireFee(15)]
+    #[MaxCount(5)]
+    #[Characteristics(6, 4, 0, 4, 3, 1, 4, 1, 5)]
+    #[EquipmentList('EMPTY')]
+    #[SpecialRule('ANIMAL')]
+    case WARHOUND;
+
+    #[Warband('SISTERS_OF_SIGMAR'), Hero]
+    #[HireFee(70)]
+    #[StartExp(20)]
+    #[MinCount(1), MaxCount(1)]
+    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8)]
+    #[EquipmentList('SISTERS_OF_SIGMAR_HERO_EQUIPMENT_LIST')]
+    #[SpecialRule('LEADER'), SpecialRule('PRAYERS_OF_SIGMAR')]
+    #[SkillGroup('COMBAT'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
+    case SIGMARITE_MATRIARCH;
+    #[Warband('SISTERS_OF_SIGMAR'), Hero]
+    #[HireFee(35)]
+    #[StartExp(8)]
+    #[MaxCount(3)]
+    #[Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('SISTERS_OF_SIGMAR_HERO_EQUIPMENT_LIST')]
+    #[SkillGroup('COMBAT'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
+    case SIGMARITE_SISTER_SUPERIOR;
+    #[Warband('SISTERS_OF_SIGMAR'), Hero]
+    #[HireFee(25)]
+    #[MaxCount(1)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('SISTERS_OF_SIGMAR_HERO_EQUIPMENT_LIST')]
+    #[SpecialRule('BLESSED_SIGHT')]
+    #[SkillGroup('ACADEMIC'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
+    case SIGMARITE_AUGUR;
+    #[Warband('SISTERS_OF_SIGMAR'), Henchman]
+    #[HireFee(25)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('SISTERS_OF_SIGMAR_EQUIPMENT_LIST')]
+    case SIGMARITE_SISTER;
+    #[Warband('SISTERS_OF_SIGMAR'), Henchman]
+    #[HireFee(15)]
+    #[MaxCount(10)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6)]
+    #[EquipmentList('SISTERS_OF_SIGMAR_EQUIPMENT_LIST')]
+    case SIGMARITE_NOVICE;
+
+    #[Warband('UNDEAD'), Hero]
+    #[HireFee(110)]
+    #[MinCount(1), MaxCount(1)]
+    #[Characteristics(6, 4, 4, 4, 4, 2, 5, 2, 8)]
+    #[EquipmentList('UNDEAD_EQUIPMENT_LIST')]
+    #[SpecialRule('LEADER'), SpecialRule('CAUSE_FEAR'), SpecialRule('IMMUNE_TO_PSYCHOLOGY'), SpecialRule('IMMUNE_TO_POISON'), SpecialRule('NO_PAIN')]
+    #[SkillGroup('COMBAT'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
+    case UNDEAD_VAMPIRE;
+    #[Warband('UNDEAD'), Hero]
+    #[HireFee(35)]
+    #[MaxCount(1)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('UNDEAD_EQUIPMENT_LIST')]
+    #[SpecialRule('WIZARD_NECROMANCER')]
+    #[SkillGroup('ACADEMIC'), SkillGroup('SPEED')]
+    case UNDEAD_NECROMANCER;
+    #[Warband('UNDEAD'), Hero]
+    #[HireFee(20)]
+    #[MaxCount(3)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 7)]
+    #[EquipmentList('UNDEAD_EQUIPMENT_LIST')]
+    #[SkillGroup('COMBAT'), SkillGroup('STRENGTH')]
+    case UNDEAD_DREG;
+    #[Warband('UNDEAD'), Henchman]
+    #[HireFee(15)]
+    #[Characteristics(4, 2, 0, 3, 3, 1, 1, 1, 5)]
+    #[EquipmentList('EMPTY')]
+    #[SpecialRule('CAUSE_FEAR'), SpecialRule('MAY_NOT_RUN'), SpecialRule('IMMUNE_TO_PSYCHOLOGY'), SpecialRule('IMMUNE_TO_POISON'), SpecialRule('NO_PAIN'), SpecialRule('NO_BRAIN')]
+    case UNDEAD_ZOMBIE;
+    #[Warband('UNDEAD'), Henchman]
+    #[HireFee(40)]
+    #[Characteristics(4, 2, 2, 3, 4, 1, 3, 2, 5)]
+    #[EquipmentList('EMPTY')]
+    #[SpecialRule('CAUSE_FEAR')]
+    case UNDEAD_GHOUL;
+    #[Warband('UNDEAD'), Henchman]
+    #[HireFee(50)]
+    #[MaxCount(5)]
+    #[Characteristics(9, 3, 0, 4, 3, 1, 2, 1, 4)]
+    #[EquipmentList('EMPTY')]
+    #[SpecialRule('CHARGE'), SpecialRule('CAUSE_FEAR'), SpecialRule('MAY_NOT_RUN'), SpecialRule('IMMUNE_TO_PSYCHOLOGY'), SpecialRule('IMMUNE_TO_POISON'), SpecialRule('UNLIVING'), SpecialRule('NO_PAIN')]
+    case UNDEAD_DIRE_WOLF;
+
+    #[Warband('SKAVEN'), Hero]
+    #[HireFee(60)]
+    #[MinCount(1), MaxCount(1)]
+    #[StartExp(20)]
+    #[Characteristics(6, 4, 4, 4, 3, 1, 5, 1, 7)]
+    #[EquipmentList('SKAVEN_HEROES_EQUIPMENT_LIST')]
+    #[SpecialRule('LEADER'), SpecialRule('PERFECT_KILLER')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
+    case SKAVEN_ASSASSIN_ADEPT;
+    #[Warband('SKAVEN'), Hero]
+    #[HireFee(45)]
+    #[MaxCount(1)]
+    #[StartExp(8)]
+    #[Characteristics(5, 3, 3, 3, 3, 1, 4, 1, 6)]
+    #[EquipmentList('SKAVEN_HEROES_EQUIPMENT_LIST')]
+    #[SpecialRule('WIZARD_MAGIC_OF_THE_HORNED_RAT')]
+    #[SkillGroup('ACADEMIC'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
+    case SKAVEN_ESHIN_SORCERER;
+    #[Warband('SKAVEN'), Hero]
+    #[HireFee(40)]
+    #[MaxCount(2)]
+    #[StartExp(8)]
+    #[Characteristics(6, 4, 3, 4, 3, 1, 5, 1, 6)]
+    #[EquipmentList('SKAVEN_HEROES_EQUIPMENT_LIST')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('STRENGTH'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
+    case SKAVEN_BLACK_SKAVEN;
+    #[Warband('SKAVEN'), Hero]
+    #[HireFee(20)]
+    #[MaxCount(2)]
+    #[Characteristics(6, 2, 3, 3, 3, 1, 4, 1, 4)]
+    #[EquipmentList('SKAVEN_HENCHMEN_EQUIPMENT_LIST')]
+    #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('SPECIAL')]
+    case SKAVEN_NIGHT_RUNNER;
+    #[Warband('SKAVEN'), Henchman]
+    #[HireFee(20)]
+    #[Characteristics(5, 3, 3, 3, 3, 1, 4, 1, 5)]
+    #[EquipmentList('SKAVEN_HENCHMEN_EQUIPMENT_LIST')]
+    case SKAVEN_VERMINKIN;
+    #[Warband('SKAVEN'), Henchman]
+    #[HireFee(15)]
+    #[Characteristics(6, 2, 0, 3, 3, 1, 4, 1, 4)]
+    #[EquipmentList('EMPTY')]
+    #[SpecialRule('ANIMAL')]
+    case SKAVEN_GIANT_RAT;
+    #[Warband('SKAVEN'), Henchman, Rating(20)]
+    #[HireFee(210)]
+    #[MaxCount(1)]
+    #[Characteristics(6, 3, 3, 5, 5, 3, 4, 3, 4)]
+    #[EquipmentList('EMPTY')]
+    #[SpecialRule('CAUSE_FEAR'), SpecialRule('STUPIDITY'), SpecialRule('ANIMAL'), SpecialRule('LARGE_TARGET')]
+    case SKAVEN_RAT_OGRE;
+
+    #[Warband('HIRED_SWORDS'), HiredSword, Rating(100)]
+    #[ExceptWarband('SKAVEN'), ExceptWarband('UNDEAD'), ExceptWarband('CULT_OF_THE_POSSESSED')]
+    #[HireFee(150)]
+    #[MaxCount(1)]
+    #[Characteristics(5, 8, 4, 4, 3, 2, 7, 3, 8)]
+    #[Equipment('ITHILMAR_ARMOR'), Equipment('ELVEN_CLOAK'), Equipment('SWORD_IENH_KHAIN')]
+    #[SpecialRule('STRIKE_TO_INJURE'), SpecialRule('EXPERT_SWORDSMAN'), SpecialRule('STEP_ASIDE')]
+    #[SpecialRule('SPRINT'), SpecialRule('LIGHTNING_REFLEXES'), SpecialRule('DODGE'), SpecialRUle('MIGHTY_BLOW')]
+    #[SpecialRule('INVINCIBLE_SWORDSMAN'), SpecialRule('WANDERER')]
+    case AENUR_THE_SWORD_OF_TWILIGHT;
 
 
     public function getWarband(): ?WarbandInterface
     {
-        return match ($this) {
-            self::REIKLAND_MERCENARY_CAPTAIN,
-            self::REIKLAND_CHAMPION,
-            self::REIKLAND_YOUNGBLOOD,
-            self::REIKLAND_WARRIOR,
-            self::REIKLAND_MARKSMAN,
-            self::REIKLAND_SWORDSMAN => Warband::REIKLAND,
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(Warband::class);
 
-            self::MIDDENHEIM_MERCENARY_CAPTAIN,
-            self::MIDDENHEIM_CHAMPION,
-            self::MIDDENHEIM_YOUNGBLOOD,
-            self::MIDDENHEIM_WARRIOR,
-            self::MIDDENHEIM_MARKSMAN,
-            self::MIDDENHEIM_SWORDSMAN => Warband::MIDDENHEIM,
+        if (count($classAttributes) === 0)
+            throw new InvalidAttributesException('Invalid attributes for: ' . $this->name);
 
-            self::MARIENBURG_MERCENARY_CAPTAIN,
-            self::MARIENBURG_CHAMPION,
-            self::MARIENBURG_YOUNGBLOOD,
-            self::MARIENBURG_WARRIOR,
-            self::MARIENBURG_MARKSMAN,
-            self::MARIENBURG_SWORDSMAN => Warband::MARIENBURG,
-
-            default => null,
-        };
+        return $classAttributes[0]->newInstance()->getValue();
     }
 
-    public function getTitle(): string
+    public function getHireFee(): int
     {
-        return match ($this) {
-            self::REIKLAND_MERCENARY_CAPTAIN => 'Mercenary Captain',
-            self::REIKLAND_CHAMPION => 'Champion',
-            self::REIKLAND_YOUNGBLOOD => 'Youngblood',
-            self::REIKLAND_WARRIOR => 'Warrior',
-            self::REIKLAND_MARKSMAN => 'Marksman',
-            self::REIKLAND_SWORDSMAN => 'Swordman',
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(HireFee::class);
 
-            self::MIDDENHEIM_MERCENARY_CAPTAIN => 'Mercenary Captain',
-            self::MIDDENHEIM_CHAMPION => 'Champion',
-            self::MIDDENHEIM_YOUNGBLOOD => 'Youngblood',
-            self::MIDDENHEIM_WARRIOR => 'Warrior',
-            self::MIDDENHEIM_MARKSMAN => 'Marksman',
-            self::MIDDENHEIM_SWORDSMAN => 'Swordman',
+        if (count($classAttributes) === 0)
+            throw new InvalidAttributesException('Invalid attributes for: ' . $this->name);
 
-            self::MARIENBURG_MERCENARY_CAPTAIN => 'Mercenary Captain',
-            self::MARIENBURG_CHAMPION => 'Champion',
-            self::MARIENBURG_YOUNGBLOOD => 'Youngblood',
-            self::MARIENBURG_WARRIOR => 'Warrior',
-            self::MARIENBURG_MARKSMAN => 'Marksman',
-            self::MARIENBURG_SWORDSMAN => 'Swordman',
-        };
+        return $classAttributes[0]->newInstance()->getValue();
     }
 
-    public function getHireCost(): int
+    public function getUpkeepFee(): int
     {
-        return match ($this) {
-            self::REIKLAND_MERCENARY_CAPTAIN => 60,
-            self::REIKLAND_CHAMPION => 35,
-            self::REIKLAND_YOUNGBLOOD => 15,
-            self::REIKLAND_WARRIOR => 25,
-            self::REIKLAND_MARKSMAN => 25,
-            self::REIKLAND_SWORDSMAN => 35,
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(UpkeepFee::class);
 
-            self::MIDDENHEIM_MERCENARY_CAPTAIN => 60,
-            self::MIDDENHEIM_CHAMPION => 35,
-            self::MIDDENHEIM_YOUNGBLOOD => 15,
-            self::MIDDENHEIM_WARRIOR => 25,
-            self::MIDDENHEIM_MARKSMAN => 25,
-            self::MIDDENHEIM_SWORDSMAN => 35,
+        if (count($classAttributes) === 0)
+            return 0;
 
-            self::MARIENBURG_MERCENARY_CAPTAIN => 60,
-            self::MARIENBURG_CHAMPION => 35,
-            self::MARIENBURG_YOUNGBLOOD => 15,
-            self::MARIENBURG_WARRIOR => 25,
-            self::MARIENBURG_MARKSMAN => 25,
-            self::MARIENBURG_SWORDSMAN => 35,
-        };
+        return $classAttributes[0]->newInstance()->getValue();
+    }
+
+    public function getRating(): int
+    {
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(Rating::class);
+
+        if (count($classAttributes) === 0)
+            return 0;
+
+        return $classAttributes[0]->newInstance()->getValue();
     }
 
     public function getStartExp(): int
     {
-        return match ($this) {
-            self::REIKLAND_MERCENARY_CAPTAIN => 20,
-            self::MIDDENHEIM_MERCENARY_CAPTAIN => 20,
-            self::MARIENBURG_MERCENARY_CAPTAIN => 20,
-            self::REIKLAND_CHAMPION => 8,
-            self::MIDDENHEIM_CHAMPION => 8,
-            self::MARIENBURG_CHAMPION => 8,
-            default => 0,
-        };
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(StartExp::class);
+
+        if (count($classAttributes) === 0)
+            return 0;
+
+        return $classAttributes[0]->newInstance()->getValue();
     }
 
     /**
-     * @return Weapon[]
+     * @return EquipmentInterface[]
      */
-    public function getStartWeapons(): array
+    public function getEquipment(): array
     {
-        return match ($this) {
-            default => [Weapons::getByName('Dagger')]
-        };
-    }
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(Equipment::class);
 
-    /**
-     * @return Armor[]
-     */
-    public function getStartArmors(): array
-    {
-        return match ($this) {
-            default => []
-        };
+        if (count($classAttributes) === 0)
+            return [];
+
+        return array_map(
+            fn($attribute) => $attribute->newInstance()->getValue(),
+            $classAttributes
+        );
     }
 
     public function getMinCount(): int
     {
-        return match ($this) {
-            self::REIKLAND_MERCENARY_CAPTAIN => 1,
-            self::MIDDENHEIM_MERCENARY_CAPTAIN => 1,
-            self::MARIENBURG_MERCENARY_CAPTAIN => 1,
-            default => 0,
-        };
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(MinCount::class);
+
+        if (count($classAttributes) === 0)
+            return 0;
+
+        return $classAttributes[0]->newInstance()->getValue();
     }
 
     public function getMaxCount(): int
     {
-        return match ($this) {
-            self::REIKLAND_MERCENARY_CAPTAIN => 1,
-            self::REIKLAND_CHAMPION => 2,
-            self::REIKLAND_YOUNGBLOOD => 2,
-            self::REIKLAND_MARKSMAN => 7,
-            self::REIKLAND_SWORDSMAN => 5,
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(MaxCount::class);
 
-            self::MIDDENHEIM_MERCENARY_CAPTAIN => 1,
-            self::MIDDENHEIM_CHAMPION => 2,
-            self::MIDDENHEIM_YOUNGBLOOD => 2,
-            self::MIDDENHEIM_MARKSMAN => 7,
-            self::MIDDENHEIM_SWORDSMAN => 5,
+        if (count($classAttributes) === 0)
+            return 99;
 
-            self::MARIENBURG_MERCENARY_CAPTAIN => 1,
-            self::MARIENBURG_CHAMPION => 2,
-            self::MARIENBURG_YOUNGBLOOD => 2,
-            self::MARIENBURG_MARKSMAN => 7,
-            self::MARIENBURG_SWORDSMAN => 5,
-
-            default => 99,
-        };
+        return $classAttributes[0]->newInstance()->getValue();
     }
 
     public function isHero(): bool
     {
-        return match ($this) {
-            self::REIKLAND_MERCENARY_CAPTAIN,
-            self::REIKLAND_CHAMPION,
-            self::REIKLAND_YOUNGBLOOD,
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(Hero::class);
 
-            self::MIDDENHEIM_MERCENARY_CAPTAIN,
-            self::MIDDENHEIM_CHAMPION,
-            self::MIDDENHEIM_YOUNGBLOOD,
-
-            self::MARIENBURG_MERCENARY_CAPTAIN,
-            self::MARIENBURG_CHAMPION,
-            self::MARIENBURG_YOUNGBLOOD => true,
-
-            default => false,
-        };
+        return count($classAttributes) > 0;
     }
 
     public function isHenchman(): bool
     {
-        return !$this->isHero();
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(Henchman::class);
+
+        return count($classAttributes) > 0;
     }
 
-    public function isMercenary(): bool
+    public function isHiredSword(): bool
     {
-        return false; // TODO
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(HiredSword::class);
+
+        return count($classAttributes) > 0;
     }
 
-    public function getCharacteristics(): Characteristics
+    public function getCharacteristics(): \Mordheim\Characteristics
     {
-        return match ($this) {
-            self::REIKLAND_MERCENARY_CAPTAIN => new Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8),
-            self::REIKLAND_CHAMPION => new Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7),
-            self::REIKLAND_YOUNGBLOOD => new Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6),
-            self::REIKLAND_WARRIOR => new Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7),
-            self::REIKLAND_MARKSMAN => new Characteristics(4, 3, 4, 3, 3, 1, 3, 1, 7),
-            self::REIKLAND_SWORDSMAN => new Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7),
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(Characteristics::class);
 
-            self::MIDDENHEIM_MERCENARY_CAPTAIN => new Characteristics(4, 4, 4, 4, 3, 1, 4, 1, 8),
-            self::MIDDENHEIM_CHAMPION => new Characteristics(4, 4, 3, 4, 3, 1, 3, 1, 7),
-            self::MIDDENHEIM_YOUNGBLOOD => new Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6),
-            self::MIDDENHEIM_WARRIOR,
-            self::MIDDENHEIM_MARKSMAN,
-            self::MIDDENHEIM_SWORDSMAN => new Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7),
+        if (count($classAttributes) === 0)
+            throw new InvalidAttributesException('Invalid attributes for: ' . $this->name);
 
-            self::MARIENBURG_MERCENARY_CAPTAIN => new Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8),
-            self::MARIENBURG_CHAMPION => new Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7),
-            self::MARIENBURG_YOUNGBLOOD => new Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6),
-            self::MARIENBURG_WARRIOR,
-            self::MARIENBURG_MARKSMAN,
-            self::MARIENBURG_SWORDSMAN => new Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7),
-        };
+        return $classAttributes[0]->newInstance()->getValue();
     }
 
     public function getSpecialRules(): array
     {
-        return match ($this) {
-            self::REIKLAND_MERCENARY_CAPTAIN => [Skills::getByName('Leader')],
-            self::REIKLAND_SWORDSMAN => [Skills::getByName('Expert Swordsman')],
-            self::MIDDENHEIM_MERCENARY_CAPTAIN => [Skills::getByName('Leader')],
-            self::MIDDENHEIM_SWORDSMAN => [Skills::getByName('Expert Swordsman')],
-            self::MARIENBURG_MERCENARY_CAPTAIN => [Skills::getByName('Leader')],
-            self::MARIENBURG_SWORDSMAN => [Skills::getByName('Expert Swordsman')],
-            default => [],
-        };
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(SpecialRule::class);
+
+        if (count($classAttributes) === 0)
+            return [];
+
+        return array_map(
+            fn($attribute) => $attribute->newInstance()->getValue(),
+            $classAttributes
+        );
     }
 
     public function getEquipmentList(): EquipmentListInterface
     {
-        return match ($this) {
-            self::REIKLAND_MERCENARY_CAPTAIN => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::REIKLAND_CHAMPION => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::REIKLAND_YOUNGBLOOD => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::REIKLAND_WARRIOR => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::REIKLAND_MARKSMAN => EquipmentList::MARKSMAN_EQUIPMENT_LIST,
-            self::REIKLAND_SWORDSMAN => EquipmentList::MERCENARY_EQUIPMENT_LIST,
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(EquipmentList::class);
 
-            self::MIDDENHEIM_MERCENARY_CAPTAIN => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::MIDDENHEIM_CHAMPION => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::MIDDENHEIM_YOUNGBLOOD => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::MIDDENHEIM_WARRIOR => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::MIDDENHEIM_MARKSMAN => EquipmentList::MARKSMAN_EQUIPMENT_LIST,
-            self::MIDDENHEIM_SWORDSMAN => EquipmentList::MERCENARY_EQUIPMENT_LIST,
+        if (count($classAttributes) === 0)
+            throw new InvalidAttributesException('Invalid attributes for: ' . $this->name);
 
-            self::MARIENBURG_MERCENARY_CAPTAIN => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::MARIENBURG_CHAMPION => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::MARIENBURG_YOUNGBLOOD => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::MARIENBURG_WARRIOR => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-            self::MARIENBURG_MARKSMAN => EquipmentList::MARKSMAN_EQUIPMENT_LIST,
-            self::MARIENBURG_SWORDSMAN => EquipmentList::MERCENARY_EQUIPMENT_LIST,
-        };
+        return $classAttributes[0]->newInstance()->getValue();
     }
 
     public function getAdvancementSkillGroups(): array
     {
-        return match ($this) {
-            self::REIKLAND_MERCENARY_CAPTAIN => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::ACADEMIC, SkillGroup::STRENGTH, SkillGroup::SPEED],
-            self::REIKLAND_CHAMPION => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::STRENGTH],
-            self::REIKLAND_YOUNGBLOOD => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::SPEED],
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(SkillGroup::class);
 
-            self::MIDDENHEIM_MERCENARY_CAPTAIN => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::ACADEMIC, SkillGroup::STRENGTH, SkillGroup::SPEED],
-            self::MIDDENHEIM_CHAMPION => [SkillGroup::COMBAT, SkillGroup::STRENGTH, SkillGroup::SPEED],
-            self::MIDDENHEIM_YOUNGBLOOD => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::SPEED],
+        if (count($classAttributes) === 0)
+            return [];
 
-            self::MARIENBURG_MERCENARY_CAPTAIN => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::ACADEMIC, SkillGroup::STRENGTH, SkillGroup::SPEED],
-            self::MARIENBURG_CHAMPION => [SkillGroup::COMBAT, SkillGroup::SHOOTING, SkillGroup::SPEED],
-            self::MARIENBURG_YOUNGBLOOD => [SkillGroup::COMBAT, SkillGroup::STRENGTH, SkillGroup::SPEED],
-
-            default => [],
-        };
+        return array_map(
+            fn($attribute) => $attribute->newInstance()->getValue(),
+            $classAttributes
+        );
     }
 }

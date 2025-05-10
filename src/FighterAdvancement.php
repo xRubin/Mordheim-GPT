@@ -25,7 +25,7 @@ class FighterAdvancement implements AdvancementInterface
     }
 
     /**
-     * @return Skill[]
+     * @return SpecialRule[]
      */
     public function getSpecialRules(): array
     {
