@@ -7,23 +7,9 @@ use Mordheim\GameField;
 use Mordheim\SpecialRule;
 use Mordheim\Strategy\AggressiveStrategy;
 use Mordheim\Warband;
-use PHPUnit\Framework\TestCase;
 
-class FighterMeleeTest extends TestCase
+class FighterMeleeTest extends MordheimTestCase
 {
-    public function setUp(): void
-    {
-        \Mordheim\Dice::setTestRolls([]);
-        \Mordheim\BattleLogger::clear();
-        \Mordheim\BattleLogger::add("### Test: {$this->name()}");
-    }
-
-    public function tearDown(): void
-    {
-        \Mordheim\Dice::setTestRolls([]);
-        \Mordheim\BattleLogger::print();
-    }
-
     // Вспомогательный класс для контроля сейва
     private static function makeTestFighter(array $skills, array $weapons, int $wounds = 2, array $pos = [0, 0, 0])
     {

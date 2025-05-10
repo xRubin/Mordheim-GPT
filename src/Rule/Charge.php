@@ -93,14 +93,20 @@ class Charge
      */
     protected static function getAdjacentPositions(Battle $battle, array $position): array
     {
+        $fightersPos = array_values(
+            array_filter(
+                $battle->getFighters(),
+                fn(FighterInterface $fighter) => $fighter->getState()->getStatus()->isAlive() ? $fighter->getState()->getPosition() : null
+            )
+        );
+
         $adj = [];
         for ($dx = -1; $dx <= 1; $dx++) {
             for ($dy = -1; $dy <= 1; $dy++) {
-                for ($dz = -1; $dz <= 1; $dz++) {
-                    if ($dx === 0 && $dy === 0 && $dz === 0) continue;
-                    if ($battle->getField()->getCell($position[0] + $dx, $position[1] + $dy, $position[2] + $dz)->obstacle) continue;
-                    $adj[] = [$position[0] + $dx, $position[1] + $dy, $position[2] + $dz];
-                }
+                if ($dx === 0 && $dy === 0) continue;
+                if ($battle->getField()->getCell($position[0] + $dx, $position[1] + $dy, $position[2])->obstacle) continue;
+                if (in_array([$position[0] + $dx, $position[1] + $dy, $position[2]], $fightersPos)) continue;
+                $adj[] = [$position[0] + $dx, $position[1] + $dy, $position[2]];
             }
         }
         return $adj;

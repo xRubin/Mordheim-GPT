@@ -3,9 +3,8 @@
 use Mordheim\FieldCell;
 use Mordheim\GameField;
 use Mordheim\PathFinder;
-use PHPUnit\Framework\TestCase;
 
-class PathFinderTest extends TestCase
+class PathFinderTest extends MordheimTestCase
 {
     private function getMovementWeights(): callable
     {

@@ -2,14 +2,14 @@
 
 namespace Mordheim;
 
-enum Status: string
+enum Status
 {
-    case STANDING = 'standing';
-    case KNOCKED_DOWN = 'knocked_down';
-    case STUNNED = 'stunned';
-    case OUT_OF_ACTION = 'out_of_action';
-    case PANIC = 'panic';
-    case FRENZY = 'frenzy';
+    case STANDING;
+    case KNOCKED_DOWN;
+    case STUNNED;
+    case OUT_OF_ACTION;
+    case PANIC;
+    case FRENZY;
 
     public function canAct(): bool
     {

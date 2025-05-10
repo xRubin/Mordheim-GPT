@@ -306,23 +306,14 @@ class FighterShootingTest extends TestCase
         $target->method('getState')->willReturn($targetState);
 
         $target->method('getArmorSave')->willReturn(5);
-        $this->assertFalse(Attack::tryArmorSaveRanged($source, $target, $weapon, function() { return 3; }));
-    }
-}
-
-class AttackPublicMethodsTest extends \PHPUnit\Framework\TestCase
-{
-    public function setUp(): void
-    {
-        // Можно добавить инициализацию, если потребуется
+        \Mordheim\Dice::setTestRolls([3]);
+        $this->assertFalse(Attack::tryArmorSaveRanged($source, $target, $weapon));
     }
 
     public function testSelectRangedWeaponReturnsNullIfNoWeapon()
     {
         $source = $this->createMock(FighterInterface::class);
-        $source->method('getEquipmentManager')->willReturn(new class {
-            public function getItemsBySlot($slot) { return []; }
-        });
+        $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager());
         $target = $this->createMock(FighterInterface::class);
         $this->assertNull(Attack::selectRangedWeapon($source, $target, false));
     }
@@ -332,13 +323,10 @@ class AttackPublicMethodsTest extends \PHPUnit\Framework\TestCase
         $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
         $weapon->method('getRange')->willReturn(24);
         $weapon->method('hasSpecialRule')->willReturn(false);
+        $weapon->method('getSlot')->willReturn(\Mordheim\Slot::RANGED);
         $source = $this->createMock(FighterInterface::class);
-        $source->method('getEquipmentManager')->willReturn(new class($weapon) {
-            private $weapon;
-            public function __construct($weapon) { $this->weapon = $weapon; }
-            public function getItemsBySlot($slot) { return [$this->weapon]; }
-        });
-        $source->method('getDistance')->willReturn(10);
+        $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager([$weapon]));
+        $source->method('getDistance')->willReturn(10.0);
         $target = $this->createMock(FighterInterface::class);
         $this->assertSame($weapon, Attack::selectRangedWeapon($source, $target, false));
     }
@@ -349,12 +337,8 @@ class AttackPublicMethodsTest extends \PHPUnit\Framework\TestCase
         $weapon->method('getRange')->willReturn(12);
         $weapon->method('hasSpecialRule')->willReturn(false);
         $source = $this->createMock(FighterInterface::class);
-        $source->method('getEquipmentManager')->willReturn(new class($weapon) {
-            private $weapon;
-            public function __construct($weapon) { $this->weapon = $weapon; }
-            public function getItemsBySlot($slot) { return [$this->weapon]; }
-        });
-        $source->method('getDistance')->willReturn(20);
+        $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager());
+        $source->method('getDistance')->willReturn(20.0);
         $target = $this->createMock(FighterInterface::class);
         $this->assertNull(Attack::selectRangedWeapon($source, $target, false));
     }
@@ -365,15 +349,22 @@ class AttackPublicMethodsTest extends \PHPUnit\Framework\TestCase
         $battle->method('hasObstacleBetween')->willReturn(false);
         $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
         $weapon->method('getRange')->willReturn(24);
+        $weapon->method('getSlot')->willReturn(\Mordheim\Slot::RANGED);
         $source = $this->createMock(FighterInterface::class);
         $source->method('getBallisticSkill')->willReturn(4); // 4+ to hit
-        $source->method('getDistance')->willReturn(10);
+        $source->method('getDistance')->willReturn(10.0);
         $source->method('hasSpecialRule')->willReturn(false);
         $source->method('getHitModifier')->willReturn(0);
+        $sourceState = $this->createMock(\Mordheim\FighterState::class);
+        $sourceState->method('getPosition')->willReturn([0, 0, 0]);
+        $source->method('getState')->willReturn($sourceState);
         $target = $this->createMock(FighterInterface::class);
         $target->method('hasSpecialRule')->willReturn(false);
+        $targetState = $this->createMock(\Mordheim\FighterState::class);
+        $targetState->method('getPosition')->willReturn([10, 0, 0]);
+        $target->method('getState')->willReturn($targetState);
         [$toHit, $shots] = Attack::calculateRangedParams($battle, $source, $target, $weapon, false);
-        $this->assertEquals(4, $toHit);
+        $this->assertEquals(3, $toHit);
         $this->assertEquals(1, $shots);
     }
 
@@ -383,17 +374,24 @@ class AttackPublicMethodsTest extends \PHPUnit\Framework\TestCase
         $battle->method('hasObstacleBetween')->willReturn(false);
         $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
         $weapon->method('getRange')->willReturn(24);
+        $weapon->method('getSlot')->willReturn(\Mordheim\Slot::RANGED);
         $source = $this->createMock(FighterInterface::class);
         $source->method('getBallisticSkill')->willReturn(4);
-        $source->method('getDistance')->willReturn(10);
+        $source->method('getDistance')->willReturn(10.0);
         $source->method('hasSpecialRule')->willReturnCallback(function($rule) {
             return $rule === SpecialRule::QUICK_SHOT;
         });
         $source->method('getHitModifier')->willReturn(0);
+        $sourceState = $this->createMock(\Mordheim\FighterState::class);
+        $sourceState->method('getPosition')->willReturn([0, 0, 0]);
+        $source->method('getState')->willReturn($sourceState);
         $target = $this->createMock(FighterInterface::class);
         $target->method('hasSpecialRule')->willReturn(false);
+        $targetState = $this->createMock(\Mordheim\FighterState::class);
+        $targetState->method('getPosition')->willReturn([10, 0, 0]);
+        $target->method('getState')->willReturn($targetState);
         [$toHit, $shots] = Attack::calculateRangedParams($battle, $source, $target, $weapon, false);
-        $this->assertEquals(4, $toHit);
+        $this->assertEquals(3, $toHit);
         $this->assertEquals(2, $shots);
     }
 }

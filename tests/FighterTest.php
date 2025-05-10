@@ -2,23 +2,9 @@
 
 use Mordheim\Data\Equipment;
 use Mordheim\Rule\AvoidStun;
-use PHPUnit\Framework\TestCase;
 
-class FighterTest extends TestCase
+class FighterTest extends MordheimTestCase
 {
-    public function setUp(): void
-    {
-        \Mordheim\Dice::setTestRolls([]);
-        \Mordheim\BattleLogger::clear();
-        \Mordheim\BattleLogger::add("### Test: {$this->name()}");
-    }
-
-    public function tearDown(): void
-    {
-        \Mordheim\Dice::setTestRolls([]);
-        \Mordheim\BattleLogger::print();
-    }
-
     public function testAcrobatIgnoresDanger()
     {
         // Для простоты: если бы была опасная местность, Acrobat игнорирует штраф

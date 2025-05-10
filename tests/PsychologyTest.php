@@ -1,31 +1,25 @@
 <?php
 
-use Mordheim\Characteristics;
 use Mordheim\EquipmentManager;
 use Mordheim\Rule\Psychology;
-use PHPUnit\Framework\TestCase;
 
-class PsychologyTest extends TestCase
+class PsychologyTest extends MordheimTestCase
 {
-    public function makeFighter($ws, $ld)
+    private function makeFighterMock($ws, $ld)
     {
-        return new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_MERCENARY_CAPTAIN,
-            new \Mordheim\FighterAdvancement(
-                new Characteristics(0, $ws - 2, 0, 0, 0, 0, 0, 0, $ld - 6)
-            ),
-            new EquipmentManager(),
-            new \Mordheim\FighterState(
-                [0, 0, 0],
-                $this->createMock(Mordheim\BattleStrategyInterface::class),
-                2
-            )
+        $fighter = $this->createMock(\Mordheim\FighterInterface::class);
+        $fighter->method('getWeaponSkill')->willReturn($ws);
+        $fighter->method('getLeadership')->willReturn($ld);
+        $fighter->method('getEquipmentManager')->willReturn(new EquipmentManager());
+        $fighter->method('getState')->willReturn(
+            new \Mordheim\FighterState([0, 0, 0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1)
         );
+        return $fighter;
     }
 
     public function testLeadershipPass()
     {
-        $fighter = $this->makeFighter(3, 12); // Ld 12, всегда успех
+        $fighter = $this->makeFighterMock(3, 12); // Ld 12, всегда успех
         $success = false;
         for ($i = 0; $i < 10; $i++) {
             if (Psychology::leadershipTest($fighter)) {
@@ -38,7 +32,7 @@ class PsychologyTest extends TestCase
 
     public function testLeadershipFail()
     {
-        $fighter = $this->makeFighter(3, 2); // Ld 2, почти всегда провал
+        $fighter = $this->makeFighterMock(3, 2); // Ld 2, почти всегда провал
         $fail = false;
         for ($i = 0; $i < 10; $i++) {
             if (!Psychology::leadershipTest($fighter)) {
@@ -51,15 +45,15 @@ class PsychologyTest extends TestCase
 
     public function testFear()
     {
-        $a = $this->makeFighter(2, 7);
-        $d = $this->makeFighter(4, 7);
+        $a = $this->makeFighterMock(2, 7);
+        $d = $this->makeFighterMock(4, 7);
         $result = Psychology::testFear($a, $d);
         $this->assertIsBool($result);
     }
 
     public function testRout()
     {
-        $f = $this->makeFighter(3, 7);
+        $f = $this->makeFighterMock(3, 7);
         $result = Psychology::testRout($f);
         $this->assertIsBool($result);
     }
