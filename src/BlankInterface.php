@@ -2,7 +2,7 @@
 
 namespace Mordheim;
 
-interface BlankInterface
+interface BlankInterface extends HasSpecialRuleInterface
 {
     public function getWarband(): ?WarbandInterface;
 

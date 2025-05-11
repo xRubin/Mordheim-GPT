@@ -1,7 +1,7 @@
 <?php
 
 namespace Mordheim;
-interface FighterAdvancementInterface
+interface FighterAdvancementInterface extends HasSpecialRuleInterface
 {
     public function getCharacteristics(): CharacteristicsInterface;
 

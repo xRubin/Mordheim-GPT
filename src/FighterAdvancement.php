@@ -31,4 +31,13 @@ class FighterAdvancement implements FighterAdvancementInterface
     {
         return $this->specialRules;
     }
+
+    /**
+     * @param SpecialRule $specialRule
+     * @return bool
+     */
+    public function hasSpecialRule(SpecialRule $specialRule): bool
+    {
+        return in_array($specialRule, $this->getSpecialRules());
+    }
 }

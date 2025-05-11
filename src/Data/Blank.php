@@ -602,4 +602,13 @@ enum Blank implements BlankInterface
             $classAttributes
         );
     }
+
+    /**
+     * @param \Mordheim\SpecialRule $specialRule
+     * @return bool
+     */
+    public function hasSpecialRule(\Mordheim\SpecialRule $specialRule): bool
+    {
+        return in_array($specialRule, $this->getSpecialRules());
+    }
 }

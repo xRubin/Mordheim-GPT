@@ -2,7 +2,7 @@
 
 namespace Mordheim;
 
-interface EquipmentInterface
+interface EquipmentInterface extends HasSpecialRuleInterface
 {
     public function getName(): string;
     public function getRange(): int;
@@ -13,5 +13,4 @@ interface EquipmentInterface
      */
     public function getSpecialRules(): array;
     public function getSlot(): Slot;
-    public function hasSpecialRule(SpecialRuleInterface $rule): bool;
 }

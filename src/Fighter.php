@@ -180,8 +180,8 @@ class Fighter implements FighterInterface
      */
     public function hasSpecialRule(SpecialRule $specialRule): bool
     {
-        return in_array($specialRule, $this->blank->getSpecialRules())
-            || in_array($specialRule, $this->advancement->getSpecialRules())
+        return $this->blank->hasSpecialRule($specialRule)
+            || $this->advancement->hasSpecialRule($specialRule)
             || $this->equipmentManager->hasSpecialRule($specialRule);
     }
 }
