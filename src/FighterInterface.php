@@ -27,6 +27,11 @@ interface FighterInterface extends CharacteristicsInterface, HasSpecialRuleInter
     public function getHitModifier(?EquipmentInterface $attackerWeapon): int;
 
     /**
+     * Максимальная дистанция для обычного передвижения
+     */
+    public function getMoveRange(): int;
+
+    /**
      * Максимальная диистанция для бега
      */
     public function getRunRange(): int;

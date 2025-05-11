@@ -5,6 +5,7 @@ namespace Mordheim;
 interface BattleStrategyInterface
 {
     public function resetOnTurn(): static;
+    public function spentAll(): static;
 
     /**
      * Фаза движения

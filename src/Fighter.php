@@ -40,15 +40,9 @@ class Fighter implements FighterInterface
     {
         return $this->fighterState;
     }
-
-    /**
-     * Получить итоговое движение с учетом экипировки
-     */
     public function getMovement(): int
     {
-        $base = $this->blank->getCharacteristics()->getMovement() + $this->advancement->getCharacteristics()->getMovement();
-        $penalty = $this->equipmentManager->getMovementPenalty();
-        return max(1, $base + $penalty); // движение не может быть меньше 1
+        return $this->blank->getCharacteristics()->getMovement() + $this->advancement->getCharacteristics()->getMovement();
     }
 
     public function getStrength(): int
@@ -151,15 +145,24 @@ class Fighter implements FighterInterface
     }
 
     /**
+     * Получить итоговое движение с учетом экипировки
+     */
+    public function getMoveRange(): int
+    {
+        $penalty = $this->equipmentManager->getMovementPenalty();
+        return max(1, $this->getMovement() + $penalty); // движение не может быть меньше 1
+    }
+
+    /**
      * Максимальная диистанция для бега
      * @return int
      */
     public function getRunRange(): int
     {
         $moveMultiplier = 2;
+        $penalty = $this->equipmentManager->getMovementPenalty();
         $movePoints = $this->getMovement() * $moveMultiplier;
-        \Mordheim\BattleLogger::add("{$this->getName()} может бежать на: $movePoints, множитель: $moveMultiplier");
-        return $movePoints;
+        return max(1, $movePoints + $penalty); // движение не может быть меньше 1
     }
 
     /**
@@ -169,9 +172,9 @@ class Fighter implements FighterInterface
     public function getChargeRange(): int
     {
         $moveMultiplier = $this->hasSpecialRule(SpecialRule::SPRINT) ? 3 : 2;
+        $penalty = $this->equipmentManager->getMovementPenalty();
         $movePoints = $this->getMovement() * $moveMultiplier;
-        \Mordheim\BattleLogger::add("{$this->getName()} может Charge на: $movePoints, множитель: $moveMultiplier");
-        return $movePoints;
+        return max(1, $movePoints + $penalty); // движение не может быть меньше 1
     }
 
     /**

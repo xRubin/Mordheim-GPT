@@ -64,10 +64,33 @@ class RecoveryPhaseTest extends TestCase
             $this->makeFighter(Status::OUT_OF_ACTION),
         ];
         $warband = new Warband('Test', $fighters);
-        \Mordheim\Rule\RecoveryPhase::apply($warband, [$warband]);
+        $result = \Mordheim\Rule\RecoveryPhase::applyRoutTest($warband, [$warband]);
+        $this->assertFalse($result);
         $this->assertEquals(Status::PANIC, $fighters[0]->getState()->getStatus());
         $this->assertEquals(Status::PANIC, $fighters[1]->getState()->getStatus());
         $this->assertEquals(Status::PANIC, $fighters[2]->getState()->getStatus());
         $this->assertEquals(Status::OUT_OF_ACTION, $fighters[3]->getState()->getStatus());
+    }
+
+    public function testApplyPsychologyPanicRecovery()
+    {
+        $fighter = $this->makeFighter(Status::PANIC);
+        $warband = new Warband('Test', [$fighter]);
+        // эмулируем успешный тест лидерства
+        \Mordheim\Dice::setTestRolls([1, 1]);
+        $result = \Mordheim\Rule\RecoveryPhase::applyPsychology($fighter, $warband, [$warband]);
+        $this->assertTrue($result);
+        $this->assertEquals(Status::STANDING, $fighter->getState()->getStatus());
+    }
+
+    public function testApplyPsychologyPanicFail()
+    {
+        $fighter = $this->makeFighter(Status::PANIC);
+        $warband = new Warband('Test', [$fighter]);
+        // эмулируем провал теста лидерства
+        \Mordheim\Dice::setTestRolls([6, 6]);
+        $result = \Mordheim\Rule\RecoveryPhase::applyPsychology($fighter, $warband, [$warband]);
+        $this->assertFalse($result);
+        $this->assertEquals(Status::PANIC, $fighter->getState()->getStatus());
     }
 }

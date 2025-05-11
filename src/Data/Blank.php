@@ -13,6 +13,7 @@ use Mordheim\Data\Attributes\Henchman;
 use Mordheim\Data\Attributes\Hero;
 use Mordheim\Data\Attributes\HiredSword;
 use Mordheim\Data\Attributes\HireFee;
+use Mordheim\Data\Attributes\MaxCharacteristics;
 use Mordheim\Data\Attributes\MaxCount;
 use Mordheim\Data\Attributes\MinCount;
 use Mordheim\Data\Attributes\Rating;
@@ -32,7 +33,7 @@ enum Blank implements BlankInterface
     #[HireFee(60)]
     #[StartExp(20)]
     #[MinCount(1), MaxCount(1)]
-    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8)]
+    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SpecialRule('LEADER')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
@@ -41,32 +42,32 @@ enum Blank implements BlankInterface
     #[HireFee(35)]
     #[StartExp(8)]
     #[MaxCount(2)]
-    #[Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('STRENGTH')]
     case REIKLAND_CHAMPION;
     #[Warband('REIKLAND'), Hero]
     #[HireFee(15)]
     #[MaxCount(2)]
-    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('SPEED')]
     case REIKLAND_YOUNGBLOOD;
     #[Warband('REIKLAND'), Henchman]
     #[HireFee(25)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 4, 4, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     case REIKLAND_WARRIOR;
     #[Warband('REIKLAND'), Henchman]
     #[HireFee(25)]
     #[MaxCount(7)]
-    #[Characteristics(4, 3, 4, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 4, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 4, 5, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('MARKSMAN_EQUIPMENT_LIST')]
     case REIKLAND_MARKSMAN;
     #[Warband('REIKLAND'), Henchman]
     #[HireFee(35)]
     #[MaxCount(5)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 4, 4, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SpecialRule('EXPERT_SWORDSMAN')]
     case REIKLAND_SWORDSMAN;
@@ -75,7 +76,7 @@ enum Blank implements BlankInterface
     #[HireFee(60)]
     #[StartExp(20)]
     #[MinCount(1), MaxCount(1)]
-    #[Characteristics(4, 4, 4, 4, 3, 1, 4, 1, 8)]
+    #[Characteristics(4, 4, 4, 4, 3, 1, 4, 1, 8), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SpecialRule('LEADER')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
@@ -84,32 +85,32 @@ enum Blank implements BlankInterface
     #[HireFee(35)]
     #[StartExp(8)]
     #[MaxCount(2)]
-    #[Characteristics(4, 4, 3, 4, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 4, 3, 4, 3, 1, 3, 1, 7), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SkillGroup('COMBAT'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
     case MIDDENHEIM_CHAMPION;
     #[Warband('MIDDENHEIM'), Hero]
     #[HireFee(15)]
     #[MaxCount(2)]
-    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('SPEED')]
     case MIDDENHEIM_YOUNGBLOOD;
     #[Warband('MIDDENHEIM'), Henchman]
     #[HireFee(25)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 4, 4, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     case MIDDENHEIM_WARRIOR;
     #[Warband('MIDDENHEIM'), Henchman]
     #[HireFee(25)]
     #[MaxCount(7)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 4, 4, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('MARKSMAN_EQUIPMENT_LIST')]
     case MIDDENHEIM_MARKSMAN;
     #[Warband('MIDDENHEIM'), Henchman]
     #[HireFee(35)]
     #[MaxCount(5)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 4, 4, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SpecialRule('EXPERT_SWORDSMAN')]
     case MIDDENHEIM_SWORDSMAN;
@@ -118,7 +119,7 @@ enum Blank implements BlankInterface
     #[HireFee(60)]
     #[StartExp(20)]
     #[MinCount(1), MaxCount(1)]
-    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8)]
+    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SpecialRule('LEADER')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
@@ -127,32 +128,32 @@ enum Blank implements BlankInterface
     #[HireFee(35)]
     #[StartExp(8)]
     #[MaxCount(2)]
-    #[Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('SPEED')]
     case MARIENBURG_CHAMPION;
     #[Warband('MARIENBURG'), Hero]
     #[HireFee(15)]
     #[MaxCount(2)]
-    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SkillGroup('COMBAT'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
     case MARIENBURG_YOUNGBLOOD;
     #[Warband('MARIENBURG'), Henchman]
     #[HireFee(25)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 4, 4, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     case MARIENBURG_WARRIOR;
     #[Warband('MARIENBURG'), Henchman]
     #[HireFee(25)]
     #[MaxCount(7)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 4, 4, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('MARKSMAN_EQUIPMENT_LIST')]
     case MARIENBURG_MARKSMAN;
     #[Warband('MARIENBURG'), Henchman]
     #[HireFee(35)]
     #[MaxCount(5)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 4, 4, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('MERCENARY_EQUIPMENT_LIST')]
     #[SpecialRule('EXPERT_SWORDSMAN')]
     case MARIENBURG_SWORDSMAN;
@@ -160,7 +161,7 @@ enum Blank implements BlankInterface
     #[Warband('CULT_OF_THE_POSSESSED'), Hero]
     #[HireFee(70)]
     #[MinCount(1), MaxCount(1)]
-    #[Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 8)]
+    #[Characteristics(4, 4, 4, 3, 3, 1, 3, 1, 8), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('POSSESSED_EQUIPMENT_LIST')]
     #[SpecialRule('LEADER'), SpecialRule('WIZARD_CHAOS_RITUALS')]
     #[SkillGroup('COMBAT'), SkillGroup('ACADEMIC'), SkillGroup('SPEED')]
@@ -168,7 +169,7 @@ enum Blank implements BlankInterface
     #[Warband('CULT_OF_THE_POSSESSED'), Hero]
     #[HireFee(90)]
     #[MaxCount(2)]
-    #[Characteristics(5, 4, 0, 4, 4, 2, 4, 2, 7)]
+    #[Characteristics(5, 4, 0, 4, 4, 2, 4, 2, 7), MaxCharacteristics(6, 8, 0, 6, 6, 4, 7 ,5 , 10)]
     #[EquipmentList('EMPTY')]
     #[SpecialRule('CAUSE_FEAR'), SpecialRule('MUTATIONS')]
     #[SkillGroup('COMBAT'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
@@ -176,7 +177,7 @@ enum Blank implements BlankInterface
     #[Warband('CULT_OF_THE_POSSESSED'), Hero]
     #[HireFee(25)]
     #[MaxCount(2)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('POSSESSED_EQUIPMENT_LIST')]
     #[SpecialRule('MUTATIONS')]
     #[SkillGroup('COMBAT'), SkillGroup('SPEED')]
@@ -184,19 +185,19 @@ enum Blank implements BlankInterface
     #[Warband('CULT_OF_THE_POSSESSED'), Henchman]
     #[HireFee(35)]
     #[MaxCount(5)]
-    #[Characteristics(4, 2, 2, 4, 3, 1, 3, 1, 6)]
+    #[Characteristics(4, 2, 2, 4, 3, 1, 3, 1, 6), MaxCharacteristics(4, 3, 3, 5, 4, 2, 4, 2, 7)]
     #[EquipmentList('DARKSOUL_EQUIPMENT_LIST')]
     #[SpecialRule('CRAZED')]
     case CULT_DARKSOUL;
     #[Warband('CULT_OF_THE_POSSESSED'), Henchman]
     #[HireFee(25)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 4, 4, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('POSSESSED_EQUIPMENT_LIST')]
     case CULT_BROTHER;
     #[Warband('CULT_OF_THE_POSSESSED'), Henchman]
     #[HireFee(45)]
     #[MaxCount(3)]
-    #[Characteristics(4, 4, 3, 3, 4, 2, 3, 1, 7)]
+    #[Characteristics(4, 4, 3, 3, 4, 2, 3, 1, 7), MaxCharacteristics(4, 5, 4, 4, 5, 3, 4, 2, 8)]
     #[EquipmentList('DARKSOUL_EQUIPMENT_LIST')]
     case CULT_BEASTMAN;
 
@@ -204,7 +205,7 @@ enum Blank implements BlankInterface
     #[HireFee(60)]
     #[StartExp(20)]
     #[MinCount(1), MaxCount(1)]
-    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8)]
+    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('WITCH_HUNTER_EQUIPMENT_LIST')]
     #[SpecialRule('LEADER'), SpecialRule('BURN_THE_WITCH')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
@@ -213,29 +214,29 @@ enum Blank implements BlankInterface
     #[HireFee(40)]
     #[StartExp(12)]
     #[MaxCount(1)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 8)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 8), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('WITCH_HUNTER_EQUIPMENT_LIST')]
-    #[SpecialRule('PRAYERS')]
+    #[SpecialRule('PRAYERS_OF_SIGMAR')]
     #[SkillGroup('COMBAT'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH')]
     case WARRIOR_PRIEST;
     #[Warband('WITCH_HUNTERS'), Hero]
     #[HireFee(25)]
     #[StartExp(8)]
     #[MaxCount(3)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('WITCH_HUNTER_EQUIPMENT_LIST')]
     #[SpecialRule('BURN_THE_WITCH')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('SPEED')]
     case WITCH_HUNTER;
     #[Warband('WITCH_HUNTERS'), Henchman]
     #[HireFee(20)]
-    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 3, 3, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('ZEALOT_EQUIPMENT_LIST')]
     case ZEALOT;
     #[Warband('WITCH_HUNTERS'), Henchman]
     #[HireFee(40)]
     #[MaxCount(5)]
-    #[Characteristics(4, 3, 3, 4, 4, 1, 3, 1, 10)]
+    #[Characteristics(4, 3, 3, 4, 4, 1, 3, 1, 10), MaxCharacteristics(4, 4, 4, 4, 4, 2, 4, 2, 9)]
     #[EquipmentList('FLAGELLANT_EQUIPMENT_LIST')]
     #[SpecialRule('FANATICAL')]
     case FLAGELLANT;
@@ -251,7 +252,7 @@ enum Blank implements BlankInterface
     #[HireFee(70)]
     #[StartExp(20)]
     #[MinCount(1), MaxCount(1)]
-    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8)]
+    #[Characteristics(4, 4, 4, 3, 3, 1, 4, 1, 8), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('SISTERS_OF_SIGMAR_HERO_EQUIPMENT_LIST')]
     #[SpecialRule('LEADER'), SpecialRule('PRAYERS_OF_SIGMAR')]
     #[SkillGroup('COMBAT'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
@@ -260,34 +261,34 @@ enum Blank implements BlankInterface
     #[HireFee(35)]
     #[StartExp(8)]
     #[MaxCount(3)]
-    #[Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 4, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('SISTERS_OF_SIGMAR_HERO_EQUIPMENT_LIST')]
     #[SkillGroup('COMBAT'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
     case SIGMARITE_SISTER_SUPERIOR;
     #[Warband('SISTERS_OF_SIGMAR'), Hero]
     #[HireFee(25)]
     #[MaxCount(1)]
-    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('SISTERS_OF_SIGMAR_HERO_EQUIPMENT_LIST')]
     #[SpecialRule('BLESSED_SIGHT')]
     #[SkillGroup('ACADEMIC'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
     case SIGMARITE_AUGUR;
     #[Warband('SISTERS_OF_SIGMAR'), Henchman]
     #[HireFee(25)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 4, 4, 4, 4, 2, 4, 2, 8)]
     #[EquipmentList('SISTERS_OF_SIGMAR_EQUIPMENT_LIST')]
     case SIGMARITE_SISTER;
     #[Warband('SISTERS_OF_SIGMAR'), Henchman]
     #[HireFee(15)]
     #[MaxCount(10)]
-    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 6), MaxCharacteristics(4, 3, 3, 4, 4, 2, 4, 2, 7)]
     #[EquipmentList('SISTERS_OF_SIGMAR_EQUIPMENT_LIST')]
     case SIGMARITE_NOVICE;
 
     #[Warband('UNDEAD'), Hero]
     #[HireFee(110)]
     #[MinCount(1), MaxCount(1)]
-    #[Characteristics(6, 4, 4, 4, 4, 2, 5, 2, 8)]
+    #[Characteristics(6, 4, 4, 4, 4, 2, 5, 2, 8), MaxCharacteristics(6, 8, 6, 7, 6, 4, 9, 4, 10)]
     #[EquipmentList('UNDEAD_EQUIPMENT_LIST')]
     #[SpecialRule('LEADER'), SpecialRule('CAUSE_FEAR'), SpecialRule('IMMUNE_TO_PSYCHOLOGY'), SpecialRule('IMMUNE_TO_POISON'), SpecialRule('NO_PAIN')]
     #[SkillGroup('COMBAT'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
@@ -295,27 +296,28 @@ enum Blank implements BlankInterface
     #[Warband('UNDEAD'), Hero]
     #[HireFee(35)]
     #[MaxCount(1)]
-    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 3, 3, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('UNDEAD_EQUIPMENT_LIST')]
-    #[SpecialRule('WIZARD_NECROMANCER')]
+    #[SpecialRule('WIZARD_NECROMANCY')]
     #[SkillGroup('ACADEMIC'), SkillGroup('SPEED')]
     case UNDEAD_NECROMANCER;
     #[Warband('UNDEAD'), Hero]
     #[HireFee(20)]
     #[MaxCount(3)]
-    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 7)]
+    #[Characteristics(4, 2, 2, 3, 3, 1, 3, 1, 7), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[EquipmentList('UNDEAD_EQUIPMENT_LIST')]
     #[SkillGroup('COMBAT'), SkillGroup('STRENGTH')]
     case UNDEAD_DREG;
     #[Warband('UNDEAD'), Henchman]
     #[HireFee(15)]
-    #[Characteristics(4, 2, 0, 3, 3, 1, 1, 1, 5)]
+    #[Characteristics(4, 2, 0, 3, 3, 1, 1, 1, 5), MaxCharacteristics(5, 3, 0, 4, 4, 2, 2, 2, 6)]
     #[EquipmentList('EMPTY')]
-    #[SpecialRule('CAUSE_FEAR'), SpecialRule('MAY_NOT_RUN'), SpecialRule('IMMUNE_TO_PSYCHOLOGY'), SpecialRule('IMMUNE_TO_POISON'), SpecialRule('NO_PAIN'), SpecialRule('NO_BRAIN')]
+    #[SpecialRule('CAUSE_FEAR'), SpecialRule('MAY_NOT_RUN'), SpecialRule('IMMUNE_TO_PSYCHOLOGY')]
+    #[SpecialRule('IMMUNE_TO_POISON'), SpecialRule('NO_PAIN'), SpecialRule('NO_BRAIN')]
     case UNDEAD_ZOMBIE;
     #[Warband('UNDEAD'), Henchman]
     #[HireFee(40)]
-    #[Characteristics(4, 2, 2, 3, 4, 1, 3, 2, 5)]
+    #[Characteristics(4, 2, 2, 3, 4, 1, 3, 2, 5), MaxCharacteristics(5, 3, 2, 4, 5, 2, 4, 3, 6)]
     #[EquipmentList('EMPTY')]
     #[SpecialRule('CAUSE_FEAR')]
     case UNDEAD_GHOUL;
@@ -324,14 +326,15 @@ enum Blank implements BlankInterface
     #[MaxCount(5)]
     #[Characteristics(9, 3, 0, 4, 3, 1, 2, 1, 4)]
     #[EquipmentList('EMPTY')]
-    #[SpecialRule('CHARGE'), SpecialRule('CAUSE_FEAR'), SpecialRule('MAY_NOT_RUN'), SpecialRule('IMMUNE_TO_PSYCHOLOGY'), SpecialRule('IMMUNE_TO_POISON'), SpecialRule('UNLIVING'), SpecialRule('NO_PAIN')]
+    #[SpecialRule('CHARGE'), SpecialRule('CAUSE_FEAR'), SpecialRule('MAY_NOT_RUN'), SpecialRule('IMMUNE_TO_PSYCHOLOGY')]
+    #[SpecialRule('IMMUNE_TO_POISON'), SpecialRule('UNLIVING'), SpecialRule('NO_PAIN')]
     case UNDEAD_DIRE_WOLF;
 
     #[Warband('SKAVEN'), Hero]
     #[HireFee(60)]
     #[MinCount(1), MaxCount(1)]
     #[StartExp(20)]
-    #[Characteristics(6, 4, 4, 4, 3, 1, 5, 1, 7)]
+    #[Characteristics(6, 4, 4, 4, 3, 1, 5, 1, 7), MaxCharacteristics(6, 6, 6, 4, 4, 3, 7, 4, 7)]
     #[EquipmentList('SKAVEN_HEROES_EQUIPMENT_LIST')]
     #[SpecialRule('LEADER'), SpecialRule('PERFECT_KILLER')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('ACADEMIC'), SkillGroup('STRENGTH'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
@@ -340,7 +343,7 @@ enum Blank implements BlankInterface
     #[HireFee(45)]
     #[MaxCount(1)]
     #[StartExp(8)]
-    #[Characteristics(5, 3, 3, 3, 3, 1, 4, 1, 6)]
+    #[Characteristics(5, 3, 3, 3, 3, 1, 4, 1, 6), MaxCharacteristics(6, 6, 6, 4, 4, 3, 7, 4, 7)]
     #[EquipmentList('SKAVEN_HEROES_EQUIPMENT_LIST')]
     #[SpecialRule('WIZARD_MAGIC_OF_THE_HORNED_RAT')]
     #[SkillGroup('ACADEMIC'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
@@ -349,20 +352,20 @@ enum Blank implements BlankInterface
     #[HireFee(40)]
     #[MaxCount(2)]
     #[StartExp(8)]
-    #[Characteristics(6, 4, 3, 4, 3, 1, 5, 1, 6)]
+    #[Characteristics(6, 4, 3, 4, 3, 1, 5, 1, 6), MaxCharacteristics(6, 6, 6, 4, 4, 3, 7, 4, 7)]
     #[EquipmentList('SKAVEN_HEROES_EQUIPMENT_LIST')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('STRENGTH'), SkillGroup('SPEED'), SkillGroup('SPECIAL')]
     case SKAVEN_BLACK_SKAVEN;
     #[Warband('SKAVEN'), Hero]
     #[HireFee(20)]
     #[MaxCount(2)]
-    #[Characteristics(6, 2, 3, 3, 3, 1, 4, 1, 4)]
+    #[Characteristics(6, 2, 3, 3, 3, 1, 4, 1, 4), MaxCharacteristics(6, 6, 6, 4, 4, 3, 7, 4, 7)]
     #[EquipmentList('SKAVEN_HENCHMEN_EQUIPMENT_LIST')]
     #[SkillGroup('COMBAT'), SkillGroup('SHOOTING'), SkillGroup('SPECIAL')]
     case SKAVEN_NIGHT_RUNNER;
     #[Warband('SKAVEN'), Henchman]
     #[HireFee(20)]
-    #[Characteristics(5, 3, 3, 3, 3, 1, 4, 1, 5)]
+    #[Characteristics(5, 3, 3, 3, 3, 1, 4, 1, 5), MaxCharacteristics(6, 4, 4, 4, 4, 2, 5, 2, 6)]
     #[EquipmentList('SKAVEN_HENCHMEN_EQUIPMENT_LIST')]
     case SKAVEN_VERMINKIN;
     #[Warband('SKAVEN'), Henchman]
@@ -383,7 +386,7 @@ enum Blank implements BlankInterface
     #[ExceptWarband('SKAVEN'), ExceptWarband('UNDEAD'), ExceptWarband('CULT_OF_THE_POSSESSED')]
     #[HireFee(150)]
     #[MaxCount(1)]
-    #[Characteristics(5, 8, 4, 4, 3, 2, 7, 3, 8)]
+    #[Characteristics(5, 8, 4, 4, 3, 2, 7, 3, 8), MaxCharacteristics(5, 8, 7, 4, 4, 3, 9, 4, 10)]
     #[Equipment('ITHILMAR_ARMOR'), Equipment('ELVEN_CLOAK'), Equipment('SWORD_IENH_KHAIN')]
     #[SpecialRule('STRIKE_TO_INJURE'), SpecialRule('EXPERT_SWORDSMAN'), SpecialRule('STEP_ASIDE')]
     #[SpecialRule('SPRINT'), SpecialRule('LIGHTNING_REFLEXES'), SpecialRule('DODGE'), SpecialRUle('MIGHTY_BLOW')]
@@ -394,7 +397,7 @@ enum Blank implements BlankInterface
     #[ExceptWarband('SKAVEN'), ExceptWarband('UNDEAD'), ExceptWarband('CULT_OF_THE_POSSESSED')]
     #[HireFee(70), UpkeepFee(30)]
     #[MaxCount(1)]
-    #[Characteristics(4, 3, 6, 4, 3, 2, 6, 1, 7)]
+    #[Characteristics(4, 3, 6, 4, 3, 2, 6, 1, 7), MaxCharacteristics(4, 6, 6, 4, 4, 3, 6, 4, 9)]
     #[Equipment('DAGGER'), Equipment('DAGGER'), Equipment('THROWING_KNIVES')]
     #[SpecialRule('DODGE'), SpecialRule('SCALE_SHEER_SURFACES'), SpecialRule('QUICK_SHOT'), SpecialRUle('EAGLE_EYES')]
     #[SpecialRule('KNIFE_FIGHTER'), SpecialRule('KNIFE_FIGHTER_EXTRAORDINAIRE')]
@@ -404,7 +407,7 @@ enum Blank implements BlankInterface
     #[AllowedWarband('SKAVEN')]
     #[HireFee(80), UpkeepFee(35)]
     #[MaxCount(1)]
-    #[Characteristics(5, 5, 4, 4, 4, 2, 5, 4, 8)]
+    #[Characteristics(5, 5, 4, 4, 4, 2, 5, 4, 8), MaxCharacteristics(6, 6, 6, 4, 4, 3, 7, 4, 7)]
     #[Equipment('ESHIN_FIGHTING_CLAWS')]
     #[SpecialRule('UNFEELING'), SpecialRule('NO_PAIN'), SpecialRUle('UNBLINKING_EYE'), SpecialRUle('METALLIC_BODY')]
     case VESKIT;
@@ -560,6 +563,17 @@ enum Blank implements BlankInterface
 
         if (count($classAttributes) === 0)
             throw new InvalidAttributesException('Invalid attributes for: ' . $this->name);
+
+        return $classAttributes[0]->newInstance()->getValue();
+    }
+
+    public function getMaxCharacteristics(): ?CharacteristicsInterface
+    {
+        $ref = new \ReflectionClassConstant(self::class, $this->name);
+        $classAttributes = $ref->getAttributes(MaxCharacteristics::class);
+
+        if (count($classAttributes) === 0)
+            return null;
 
         return $classAttributes[0]->newInstance()->getValue();
     }

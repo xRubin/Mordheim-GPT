@@ -2,6 +2,8 @@
 
 namespace Mordheim;
 
+use Mordheim\Rule\RecoveryPhase;
+
 /**
  * Класс для управления боем по правилам Mordheim 1999
  */
@@ -68,17 +70,27 @@ class Battle
     public function playTurn(): void
     {
         \Mordheim\BattleLogger::add("Ход #{$this->turn}");
+        $actWarbands = $this->warbands;
 
-        foreach ($this->warbands as $warband)
-            \Mordheim\Rule\RecoveryPhase::apply($warband, $this->warbands);
+        foreach ($actWarbands as $warband) {
+            if (!RecoveryPhase::applyRoutTest($warband, $this->warbands)) {
+                $actWarbands = array_diff($actWarbands, [$warband]);
+            } else {
+                foreach ($warband->fighters as $fighter) {
+                    if (!RecoveryPhase::applyPsychology($fighter, $warband, $this->warbands)) {
+                        $fighter->getState()->getBattleStrategy()->spentAll();
+                    }
+                }
+            }
+        }
 
-        foreach ($this->warbands as $warband)
+        foreach ($actWarbands as $warband)
             $this->phaseMove($warband);
 
-        foreach ($this->warbands as $warband)
+        foreach ($actWarbands as $warband)
             $this->phaseShoot($warband);
 
-        foreach ($this->warbands as $warband)
+        foreach ($actWarbands as $warband)
             $this->phaseMagic($warband);
 
         $this->phaseCloseCombat();

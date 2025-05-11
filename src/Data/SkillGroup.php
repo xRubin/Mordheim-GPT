@@ -18,7 +18,7 @@ enum SkillGroup implements SkillGroupInterface
     case SPEED;
     case SPECIAL;
 
-    public function getSkills(WarbandInterface $warband): array
+    public function getSpecialRules(WarbandInterface $warband): array
     {
         return match ($this) {
             self::COMBAT => [

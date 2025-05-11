@@ -32,7 +32,7 @@ class Attack
         $success = false;
         for ($i = 0; $i < $source->getAttacks(); $i++) {
             $weapon = $source->getEquipmentManager()->getWeaponByAttackIdx(Slot::MELEE, $i);
-            \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->getState()->getWounds()}, state={$target->getState()->getStatus()->value}, weapon={$weapon->getName()}");
+            \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->getState()->getWounds()}, state={$target->getState()->getStatus()->name}, weapon={$weapon->getName()}");
 
             if ($result = self::handleSpecialStates($battle, $source, $target, $weapon)) {
                 $success = $result;
@@ -43,7 +43,7 @@ class Attack
 
             if (!self::rollToHit($source, $target, $weapon, $combat, $i, $hitRoll, $parried)) continue;
             if ($parried) continue;
-            if (!self::rollToWoundAndSave($battle, $source, $target, $weapon, $hitRoll, $success)) continue;
+            if (!self::rollToWoundAndSave($battle, $source, $target, $weapon, $success)) continue;
 
             if (!$target->getState()->getStatus()->isAlive()) break;
         }
@@ -66,7 +66,7 @@ class Attack
 
         $hit = false;
         for ($i = 0; $i < $shots; $i++) {
-            \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->getState()->getWounds()}, state={$target->getState()->getStatus()->value}, weapon={$weapon->getName()}");
+            \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->getState()->getWounds()}, state={$target->getState()->getStatus()->name}, weapon={$weapon->getName()}");
             $roll = \Mordheim\Dice::roll(6);
             if ($roll === 6) {
                 // Critical
@@ -164,7 +164,7 @@ class Attack
      * Бросок на ранение, обработка критов, сэйва, уменьшения ран
      * Возвращает true если нанесён урон
      */
-    private static function rollToWoundAndSave(Battle $battle, FighterInterface $source, FighterInterface $target, $weapon, $hitRoll, &$success): bool
+    private static function rollToWoundAndSave(Battle $battle, FighterInterface $source, FighterInterface $target, $weapon, &$success): bool
     {
         $woundResult = RollToWound::roll($source, $target, $weapon);
         \Mordheim\BattleLogger::add("[DEBUG][Attack] woundResult: " . json_encode($woundResult));
@@ -176,7 +176,7 @@ class Attack
         if ($woundResult['isCritical']) {
             \Mordheim\BattleLogger::add("[DEBUG][Attack] Критическое ранение! Перед InjuryRoll");
             $success = Injuries::roll($battle, $source, $target, $weapon, true);
-            \Mordheim\BattleLogger::add("[DEBUG][Attack] После InjuryRoll: статус цели=" . $target->getState()->getStatus()->value);
+            \Mordheim\BattleLogger::add("[DEBUG][Attack] После InjuryRoll: статус цели=" . $target->getState()->getStatus()->name);
             return true;
         } else {
             if ($armorSave > 0) {
@@ -197,9 +197,9 @@ class Attack
                 \Mordheim\BattleLogger::add("У {$target->getName()} осталось {$target->getState()->getWounds()} ран(а/ий)");
                 $success = true;
             }
-            \Mordheim\BattleLogger::add("[DEBUG][Attack] После InjuryRoll: статус цели=" . $target->getState()->getStatus()->value);
+            \Mordheim\BattleLogger::add("[DEBUG][Attack] После InjuryRoll: статус цели=" . $target->getState()->getStatus()->name);
         }
-        \Mordheim\BattleLogger::add("[DEBUG] После атаки: wounds={$target->getState()->getWounds()}, state={$target->getState()->getStatus()->value}");
+        \Mordheim\BattleLogger::add("[DEBUG] После атаки: wounds={$target->getState()->getWounds()}, state={$target->getState()->getStatus()->name}");
         return true;
     }
 

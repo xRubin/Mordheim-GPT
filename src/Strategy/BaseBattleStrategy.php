@@ -30,6 +30,16 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         return $this;
     }
 
+    public function spentAll(): static
+    {
+        $this->spentMove = true;
+        $this->spentCharge = true;
+        $this->spentShoot = true;
+        $this->spentMagic = true;
+        $this->spentCloseCombat = true;
+        return $this;
+    }
+
     /**
      * Найти ближайшего врага
      */
@@ -45,7 +55,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
      */
     protected function canActAgainst(Battle $battle, FighterInterface $fighter, FighterInterface $target): bool
     {
-        if ($fighter->getState()->getStatus() === Status::FRENZY && ($this->getDistance($fighter, $target) < $fighter->getMovement() * 2)) {
+        if ($fighter->getState()->getStatus() === Status::FRENZY && ($this->getDistance($fighter, $target) < $fighter->getRunRange())) {
             return true;
         } else {
             $allies = $battle->getAlliesFor($fighter);

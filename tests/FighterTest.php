@@ -27,7 +27,7 @@ class FighterTest extends MordheimTestCase
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager()
         );
-        $this->assertEquals(4, $fighter->getMovement());
+        $this->assertEquals(4, $fighter->getMoveRange());
 
         // Только Heavy Armor с MOVEMENT
         $fighter = new \Mordheim\Fighter(
@@ -35,14 +35,14 @@ class FighterTest extends MordheimTestCase
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::HEAVY_ARMOR])
         );
-        $this->assertEquals(4, $fighter->getMovement());
+        $this->assertEquals(4, $fighter->getMoveRange());
 
         $fighter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::SHIELD])
         );
-        $this->assertEquals(4, $fighter->getMovement());
+        $this->assertEquals(4, $fighter->getMoveRange());
 
         // Heavy Armor с MOVEMENT и Shield
         $fighter = new \Mordheim\Fighter(
@@ -50,7 +50,7 @@ class FighterTest extends MordheimTestCase
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::HEAVY_ARMOR, Equipment::SHIELD])
         );
-        $this->assertEquals(3, $fighter->getMovement());
+        $this->assertEquals(3, $fighter->getMoveRange());
     }
 
     public function testTryAvoidStunWithHelmet()

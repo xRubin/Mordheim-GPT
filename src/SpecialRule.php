@@ -54,12 +54,11 @@ enum SpecialRule implements SpecialRuleInterface
     case CAUSE_FEAR;
     case CRAZED;
     case BURN_THE_WITCH;
-    case PRAYERS;
     case FANATICAL;
     case ANIMAL;
     case PRAYERS_OF_SIGMAR;
     case BLESSED_SIGHT;
-    case WIZARD_NECROMANCER;
+    case WIZARD_NECROMANCY;
     case CHARGE;
     case MAY_NOT_RUN;
     case IMMUNE_TO_PSYCHOLOGY;
@@ -110,6 +109,7 @@ enum SpecialRule implements SpecialRuleInterface
     case UNFEELING;
     case UNBLINKING_EYE;
     case METALLIC_BODY;
+    case WIZARD_LESSER_MAGIC;
 
     case MUTATION_DAEMON_SOUL;
     case MUTATION_GREAT_CLAW;

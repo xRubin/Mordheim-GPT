@@ -11,7 +11,7 @@ class MoveTest extends MordheimTestCase
     {
         $fighterMock = $this->createMock(\Mordheim\FighterInterface::class);
 
-        $fighterMock->method('getMovement')->willReturn($move);
+        $fighterMock->method('getMoveRange')->willReturn($move);
         $fighterMock->method('getInitiative')->willReturn($initiative);
         $fighterMock->method('getClimbInitiative')->willReturn($initiative);
         $fighterMock->method('getState')->willReturn(

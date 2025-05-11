@@ -22,7 +22,7 @@ class Move
     public static function common(Battle $battle, FighterInterface $fighter, array $target, float $aggressiveness): void
     {
         $blockers = self::prepareBlockers($battle, $fighter);
-        $movePoints = $fighter->getMovement();
+        $movePoints = $fighter->getMoveRange();
         [$path, $lastReachableIdx] = self::findPathAndReachableIndex($battle, $fighter, $target, $aggressiveness, $blockers, $movePoints);
         self::moveAlongPath($battle, $fighter, $path, $lastReachableIdx);
     }
@@ -101,7 +101,7 @@ class Move
     protected static function moveAlongPath(Battle $battle, FighterInterface $fighter, array $path, int $lastReachableIdx, bool $run = false): void
     {
         $cur = $fighter->getState()->getPosition();
-        $movePoints = $run ? $fighter->getRunRange() : $fighter->getMovement();
+        $movePoints = $run ? $fighter->getRunRange() : $fighter->getMoveRange();
         for ($i = 1; $i <= $lastReachableIdx && $movePoints > 0; $i++) {
             [$x, $y, $z] = $path[$i]['pos'];
             if (!is_int($x) || !is_int($y) || !is_int($z)) {

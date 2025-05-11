@@ -33,6 +33,7 @@ interface BlankInterface extends HasSpecialRuleInterface
     public function isHiredSword(): bool;
 
     public function getCharacteristics(): CharacteristicsInterface;
+    public function getMaxCharacteristics(): ?CharacteristicsInterface;
 
     /**
      * @return SpecialRuleInterface[]

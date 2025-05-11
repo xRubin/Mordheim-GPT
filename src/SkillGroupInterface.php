@@ -4,5 +4,5 @@ namespace Mordheim;
 
 interface SkillGroupInterface
 {
-    public function getSkills(WarbandInterface $warband): array;
+    public function getSpecialRules(WarbandInterface $warband): array;
 }
