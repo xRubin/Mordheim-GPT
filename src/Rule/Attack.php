@@ -193,7 +193,9 @@ class Attack
                 \Mordheim\BattleLogger::add("Особое правило: дубина/конкашн — всегда injury table");
                 $success = Injuries::roll($battle, $source, $target, $weapon);
             } else {
-                $target->getState()->decreaseWounds();
+                $target->getState()->decreaseWounds(
+                    $source->hasSpecialRule(SpecialRule::DOUBLE_DAMAGE) ? 2 : 1
+                );
                 \Mordheim\BattleLogger::add("У {$target->getName()} осталось {$target->getState()->getWounds()} ран(а/ий)");
                 $success = true;
             }

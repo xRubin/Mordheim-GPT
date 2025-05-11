@@ -4,6 +4,12 @@ namespace Mordheim;
 
 class FighterState implements FighterStateInterface
 {
+    /**
+     * Активные заклинания на персонаже
+     * @var SpellInterface[]
+     */
+    private array $activeSpells = [];
+
     public function __construct(
         private array                   $position,
         private BattleStrategyInterface $battleStrategy,
@@ -66,5 +72,72 @@ class FighterState implements FighterStateInterface
     {
         $this->wounds -= $step;
         return $this;
+    }
+
+    public function setWounds(int $wounds): static
+    {
+        $this->wounds = $wounds;
+        return $this;
+    }
+
+    /**
+     * Получить активные заклинания
+     * @return SpellInterface[]
+     */
+    public function getActiveSpells(): array
+    {
+        return $this->activeSpells;
+    }
+
+    public function hasActiveSpell(SpellInterface $spell): bool
+    {
+        return in_array($spell, $this->activeSpells, true);
+    }
+
+    /**
+     * Установить активные заклинания
+     * @param SpellInterface[] $spells
+     * @return $this
+     */
+    public function setActiveSpells(array $spells): static
+    {
+        $this->activeSpells = $spells;
+        return $this;
+    }
+
+    /**
+     * Добавить заклинание
+     * @param SpellInterface $spell
+     * @return $this
+     */
+    public function addActiveSpell(SpellInterface $spell): static
+    {
+        if (!in_array($spell, $this->activeSpells, true)) {
+            $this->activeSpells[] = $spell;
+        }
+        return $this;
+    }
+
+    /**
+     * Удалить заклинание
+     * @param SpellInterface $spell
+     * @return $this
+     */
+    public function removeActiveSpell(SpellInterface $spell): static
+    {
+        $this->activeSpells = array_filter(
+            $this->activeSpells,
+            fn($s) => $s !== $spell
+        );
+        return $this;
+    }
+
+    public function hasSpecialRule(SpecialRule $specialRule): bool
+    {
+        foreach ($this->getActiveSpells() as $spell) {
+            if (in_array($specialRule, $spell->getStateRules()))
+                return true;
+        }
+        return false;
     }
 }

@@ -52,7 +52,7 @@ enum SkillGroup implements SkillGroupInterface
                 SpecialRule::MIGHTY_BLOW,
                 SpecialRule::PIT_FIGHTER,
                 SpecialRule::RESILIENT,
-                SpecialRule::CAUSE_FEAR,
+                SpecialRule::FEARSOME,
                 SpecialRule::STRONGMAN,
                 SpecialRule::UNSTOPPABLE_CHARGE,
             ],

@@ -19,6 +19,8 @@ class RollToWound
     public static function roll(FighterInterface $source, FighterInterface $target, EquipmentInterface $weapon): array
     {
         $attackerS = $weapon->getStrength($source->getStrength());
+        if ($source->hasSpecialRule(SpecialRule::PLUS_2_STRENGTH))
+            $attackerS += 2;
         $resilientMod = (int)$source->getEquipmentManager()->hasSpecialRule(SpecialRule::RESILIENT);
         $defenderT = $target->getToughness() + $resilientMod;
         $toWound = 4;

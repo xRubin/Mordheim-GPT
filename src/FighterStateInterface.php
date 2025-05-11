@@ -2,7 +2,7 @@
 
 namespace Mordheim;
 
-interface FighterStateInterface
+interface FighterStateInterface extends HasSpecialRuleInterface
 {
     public function getPosition(): array;
     public function setPosition(array $position): static;
@@ -19,4 +19,6 @@ interface FighterStateInterface
 
     public function getWounds(): int;
     public function decreaseWounds(int $step = 1): static;
+    public function setWounds(int $wounds): static;
+    public function hasActiveSpell(SpellInterface $spell): bool;
 }

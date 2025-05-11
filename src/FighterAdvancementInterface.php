@@ -9,4 +9,10 @@ interface FighterAdvancementInterface extends HasSpecialRuleInterface
      * @return SpecialRuleInterface[]
      */
     public function getSpecialRules(): array;
+    public function addSpecialRule(SpecialRule $specialRule): static;
+
+    /**
+     * @return WizardSpellInterface[] Список доступных заклинаний
+     */
+    public function getSpells(): array;
 }

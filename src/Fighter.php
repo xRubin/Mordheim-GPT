@@ -40,6 +40,7 @@ class Fighter implements FighterInterface
     {
         return $this->fighterState;
     }
+
     public function getMovement(): int
     {
         return $this->blank->getCharacteristics()->getMovement() + $this->advancement->getCharacteristics()->getMovement();
@@ -124,11 +125,24 @@ class Fighter implements FighterInterface
     }
 
     /**
-     * Расчёт сейва с учётом всей экипировки через менеджер
+     * Расчёт сейва с учётом всей экипировки и состояний
      */
     public function getArmorSave(?EquipmentInterface $attackerWeapon): int
     {
-        return $this->equipmentManager->getArmorSave($attackerWeapon);
+        if ($this->hasSpecialRule(SpecialRule::SAVE_2))
+            return 2;
+        if ($this->hasSpecialRule(SpecialRule::SAVE_3))
+            return 2;
+        if ($this->hasSpecialRule(SpecialRule::METALLIC_BODY))
+            return 3;
+        if ($this->hasSpecialRule(SpecialRule::SAVE_4))
+            return 4;
+        if ($this->hasSpecialRule(SpecialRule::SAVE_5))
+            return 5;
+        if ($this->hasSpecialRule(SpecialRule::SAVE_6))
+            return 6;
+
+        return 0;
     }
 
     public function getHitModifier(?EquipmentInterface $attackerWeapon): int
@@ -183,9 +197,10 @@ class Fighter implements FighterInterface
      */
     public function hasSpecialRule(SpecialRule $specialRule): bool
     {
-        return $this->blank->hasSpecialRule($specialRule)
-            || $this->advancement->hasSpecialRule($specialRule)
-            || $this->equipmentManager->hasSpecialRule($specialRule);
+        return $this->getBlank()->hasSpecialRule($specialRule)
+            || $this->getAdvancement()->hasSpecialRule($specialRule)
+            || $this->getEquipmentManager()->hasSpecialRule($specialRule)
+            || $this->getState()?->hasSpecialRule($specialRule);
     }
 }
 

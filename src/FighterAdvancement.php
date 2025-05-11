@@ -7,6 +7,7 @@ class FighterAdvancement implements FighterAdvancementInterface
     public function __construct(
         private CharacteristicsInterface $characteristics,
         private array $specialRules = [],
+        private array $spells = [], // WizardSpellInterface[]
     )
     {
 
@@ -39,5 +40,23 @@ class FighterAdvancement implements FighterAdvancementInterface
     public function hasSpecialRule(SpecialRule $specialRule): bool
     {
         return in_array($specialRule, $this->getSpecialRules());
+    }
+
+    /**
+     * @param SpecialRule $specialRule
+     * @return static
+     */
+    public function addSpecialRule(SpecialRule $specialRule): static
+    {
+        $this->specialRules = array_unique(array_merge($this->specialRules, [$specialRule]));
+        return $this;
+    }
+
+    /**
+     * @return WizardSpellInterface[]
+     */
+    public function getSpells(): array
+    {
+        return $this->spells;
     }
 }

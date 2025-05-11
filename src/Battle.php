@@ -2,7 +2,9 @@
 
 namespace Mordheim;
 
+use Mordheim\Data\Spell;
 use Mordheim\Rule\RecoveryPhase;
+use SplObjectStorage;
 
 /**
  * Класс для управления боем по правилам Mordheim 1999
@@ -21,12 +23,18 @@ class Battle
     protected array $warbands = [];
     /** @var int Индекс активной банды */
     protected int $activeWarbandIndex = 0;
+    /**
+     * Активные заклинания на поле боя
+     * @var SplObjectStorage<FighterInterface, SpellInterface[]>
+     */
+    protected SplObjectStorage $activeSpells;
 
     public function __construct(GameField $field, array $warbands)
     {
         $this->field = $field;
         $this->warbands = $warbands;
         $this->activeCombats = new CloseCombatCollection();
+        $this->activeSpells = new SplObjectStorage();
         foreach ($warbands as $wb) {
             foreach ($wb->fighters as $f) {
                 $this->fighters[] = $f;
@@ -118,6 +126,9 @@ class Battle
     protected function phaseShoot(Warband $warband): void
     {
         \Mordheim\BattleLogger::add("Фаза стрельбы: {$warband->name}");
+        foreach ($warband->fighters as $fighter) {
+            Spell::onPhaseShoot($this, $fighter);
+        }
         foreach ($warband->fighters as $fighter) {
             if ($fighter->getState()->getStatus()->canAct()) {
                 $enemies = $this->getEnemiesFor($fighter);
@@ -311,5 +322,48 @@ class Battle
         }
 
         return false;
+    }
+
+    /**
+     * Получить активные заклинания для бойца
+     * @param FighterInterface $fighter
+     * @return SpellInterface[]
+     */
+    public function getActiveSpellsFor(FighterInterface $fighter): array
+    {
+        return $this->activeSpells->contains($fighter) ? $this->activeSpells[$fighter] : [];
+    }
+
+    /**
+     * Добавить активное заклинание для бойца
+     * @param FighterInterface $fighter
+     * @param SpellInterface $spell
+     */
+    public function addActiveSpell(FighterInterface $fighter, SpellInterface $spell): void
+    {
+        $spells = $this->activeSpells->contains($fighter) ? $this->activeSpells[$fighter] : [];
+        $spells[] = $spell;
+        $this->activeSpells[$fighter] = $spells;
+        $fighter->getState()->addActiveSpell($spell);
+    }
+
+    /**
+     * Удалить активное заклинание для бойца
+     * @param FighterInterface $fighter
+     * @param SpellInterface $spell
+     */
+    public function removeActiveSpell(FighterInterface $fighter, SpellInterface $spell): void
+    {
+        if (!$this->activeSpells->contains($fighter)) return;
+        $spells = array_filter(
+            $this->activeSpells[$fighter],
+            fn($s) => $s !== $spell
+        );
+        if (empty($spells)) {
+            $this->activeSpells->detach($fighter);
+        } else {
+            $this->activeSpells[$fighter] = $spells;
+        }
+        $fighter->getState()->removeActiveSpell($spell);
     }
 }

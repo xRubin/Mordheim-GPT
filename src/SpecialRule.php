@@ -30,6 +30,8 @@ enum SpecialRule implements SpecialRuleInterface
     case HAND_TO_HAND;
     case ACCURACY;
     case PICK_TARGET;
+    case SAVE_2;
+    case SAVE_3;
     case SAVE_4;
     case SAVE_5;
     case SAVE_6;
@@ -110,6 +112,10 @@ enum SpecialRule implements SpecialRuleInterface
     case UNBLINKING_EYE;
     case METALLIC_BODY;
     case WIZARD_LESSER_MAGIC;
+    case FEARSOME;
+    case IMMUNE_TO_SPELLS; // Shield of Faith
+    case DOUBLE_DAMAGE; // The Hammer of Sigmar
+    case PLUS_2_STRENGTH; // The Hammer of Sigmar
 
     case MUTATION_DAEMON_SOUL;
     case MUTATION_GREAT_CLAW;

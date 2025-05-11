@@ -139,23 +139,6 @@ class EquipmentManager
     }
 
     /**
-     * Итоговый сейв с учётом всей брони
-     */
-    public function getArmorSave(?EquipmentInterface $attackerWeapon): int
-    {
-        if ($this->hasSpecialRule(SpecialRule::METALLIC_BODY))
-            return 3;
-        if ($this->hasSpecialRule(SpecialRule::SAVE_4))
-            return 4;
-        if ($this->hasSpecialRule(SpecialRule::SAVE_5))
-            return 5;
-        if ($this->hasSpecialRule(SpecialRule::SAVE_6))
-            return 6;
-
-        return 0;
-    }
-
-    /**
      * @param SpecialRule $specialRule
      * @return bool
      */

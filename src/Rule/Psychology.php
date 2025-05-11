@@ -56,6 +56,8 @@ class Psychology
      */
     public static function testFear(FighterInterface $attacker, FighterInterface $defender, array $allies = []): bool
     {
+        if ($defender->hasSpecialRule(SpecialRule::FEARSOME))
+            return true;
         if ($attacker->getWeaponSkill() < $defender->getWeaponSkill()) {
             $res = self::leadershipTest($attacker, $allies);
             \Mordheim\BattleLogger::add("{$attacker->getName()} проходит тест страха против {$defender->getName()}: " . ($res ? 'успех' : 'провал'));
