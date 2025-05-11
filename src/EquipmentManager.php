@@ -14,8 +14,6 @@ class EquipmentManager
     {
         foreach ($items as $item) {
             $this->addItem($item);
-            $names = array_map(fn($equipment) => $equipment->getName(), $this->items);
-            \Mordheim\BattleLogger::add("[DEBUG] Оружие после добавления: " . implode(',', $names));
         }
     }
 
@@ -43,6 +41,8 @@ class EquipmentManager
         if ($slotRanged < 0 || $slotMelee < 0 || $slotArmor < 0 || $slotHelmet < 0)
             throw new EquipmentManagerAddItemException();
         $this->items[] = $item;
+        $names = array_map(fn($equipment) => $equipment->getName(), $this->items);
+        \Mordheim\BattleLogger::add("[DEBUG] Оружие после добавления: " . implode(',', $names));
         return $this;
     }
 

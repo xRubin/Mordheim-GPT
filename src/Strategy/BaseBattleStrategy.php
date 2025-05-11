@@ -5,6 +5,7 @@ namespace Mordheim\Strategy;
 use Mordheim\Battle;
 use Mordheim\BattleStrategyInterface;
 use Mordheim\FighterInterface;
+use Mordheim\Ruler;
 use Mordheim\Slot;
 use Mordheim\SpecialRule;
 use Mordheim\Status;
@@ -35,7 +36,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
     protected function getNearestEnemy(FighterInterface $fighter, array $enemies): ?FighterInterface
     {
         if (empty($enemies)) return null;
-        usort($enemies, fn($a, $b) => $fighter->getDistance($a) <=> $fighter->getDistance($b));
+        usort($enemies, fn($a, $b) => $this->getDistance($fighter, $a) <=> $this->getDistance($fighter, $b));
         return $enemies[0];
     }
 
@@ -44,7 +45,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
      */
     protected function canActAgainst(Battle $battle, FighterInterface $fighter, FighterInterface $target): bool
     {
-        if ($fighter->getState()->getStatus() === Status::FRENZY && ($fighter->getDistance($target) < $fighter->getMovement() * 2)) {
+        if ($fighter->getState()->getStatus() === Status::FRENZY && ($this->getDistance($fighter, $target) < $fighter->getMovement() * 2)) {
             return true;
         } else {
             $allies = $battle->getAlliesFor($fighter);
@@ -133,4 +134,14 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
     abstract protected function onMagicPhase(Battle $battle, FighterInterface $fighter, array $enemies): void;
 
     abstract protected function onCloseCombatPhase(Battle $battle, FighterInterface $fighter, array $enemies): void;
+
+    public function isAdjacent(FighterInterface $source, FighterInterface $target): bool
+    {
+        return Ruler::isAdjacent($source->getState()->getPosition(), $target->getState()->getPosition());
+    }
+
+    public function getDistance(FighterInterface $source, FighterInterface $target): float
+    {
+        return Ruler::distance($source->getState()->getPosition(), $target->getState()->getPosition());
+    }
 }

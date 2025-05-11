@@ -3,13 +3,12 @@
 use Mordheim\Battle;
 use Mordheim\Characteristics;
 use Mordheim\Data\Equipment;
+use Mordheim\FighterInterface;
 use Mordheim\GameField;
+use Mordheim\Rule\Attack;
 use Mordheim\SpecialRule;
 use Mordheim\Warband;
 use PHPUnit\Framework\TestCase;
-use Mordheim\Rule\Attack;
-use Mordheim\FighterInterface;
-use Mordheim\Slot;
 
 class FighterShootingTest extends TestCase
 {
@@ -77,7 +76,7 @@ class FighterShootingTest extends TestCase
 
         $target = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
-            new \Mordheim\FighterAdvancement(Characteristics::empty(), [SpecialRule::DODGE]),
+            new \Mordheim\FighterAdvancement(new Characteristics(), [SpecialRule::DODGE]),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
                 [2, 0, 0],
@@ -95,7 +94,7 @@ class FighterShootingTest extends TestCase
     {
         $shooter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
-            new \Mordheim\FighterAdvancement(Characteristics::empty(), [SpecialRule::QUICK_SHOT]),
+            new \Mordheim\FighterAdvancement(new Characteristics(), [SpecialRule::QUICK_SHOT]),
             new \Mordheim\EquipmentManager([Equipment::SLING]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
@@ -240,12 +239,11 @@ class FighterShootingTest extends TestCase
     {
         $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
         $weapon->method('getRange')->willReturn(24);
-        $weapon->method('hasSpecialRule')->willReturnCallback(function($rule) {
+        $weapon->method('hasSpecialRule')->willReturnCallback(function ($rule) {
             return $rule === SpecialRule::MOVE_OR_FIRE;
         });
         $source = $this->createMock(FighterInterface::class);
         $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager());
-        $source->method('getDistance')->willReturn(10.0);
         $target = $this->createMock(FighterInterface::class);
         $this->assertNull(Attack::selectRangedWeapon($source, $target, true));
     }
@@ -263,7 +261,6 @@ class FighterShootingTest extends TestCase
 
         $source = $this->createMock(FighterInterface::class);
         $source->method('getBallisticSkill')->willReturn(3); // 5+ to hit
-        $source->method('getDistance')->willReturn(15.0); // дальний выстрел
         $source->method('hasSpecialRule')->willReturn(false);
         $source->method('getHitModifier')->willReturn(2);
         $source->method('getState')->willReturn($sourceState);
@@ -272,7 +269,7 @@ class FighterShootingTest extends TestCase
         $targetState->method('getPosition')->willReturn([10, 0, 0]);
 
         $target = $this->createMock(FighterInterface::class);
-        $target->method('hasSpecialRule')->willReturnCallback(function($rule) {
+        $target->method('hasSpecialRule')->willReturnCallback(function ($rule) {
             return $rule === SpecialRule::LARGE_TARGET;
         });
         $target->method('getState')->willReturn($targetState);
@@ -292,7 +289,9 @@ class FighterShootingTest extends TestCase
         $target->method('getArmorSave')->willReturn(4);
         \Mordheim\Dice::setTestRolls([5]);
         // Здесь имитируем saveRoll >= armorSave
-        $this->assertTrue(Attack::tryArmorSaveRanged($source, $target, $weapon, function() { return 5; }));
+        $this->assertTrue(Attack::tryArmorSaveRanged($source, $target, $weapon, function () {
+            return 5;
+        }));
     }
 
     public function testTryArmorSaveRangedReturnsFalseIfSaveRollInsufficient()
@@ -326,8 +325,13 @@ class FighterShootingTest extends TestCase
         $weapon->method('getSlot')->willReturn(\Mordheim\Slot::RANGED);
         $source = $this->createMock(FighterInterface::class);
         $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager([$weapon]));
-        $source->method('getDistance')->willReturn(10.0);
+        $source->method('getState')->willReturn(
+            new \Mordheim\FighterState([0,0,0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1)
+        );
         $target = $this->createMock(FighterInterface::class);
+        $target->method('getState')->willReturn(
+            new \Mordheim\FighterState([3,0,0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1)
+        );
         $this->assertSame($weapon, Attack::selectRangedWeapon($source, $target, false));
     }
 
@@ -338,7 +342,6 @@ class FighterShootingTest extends TestCase
         $weapon->method('hasSpecialRule')->willReturn(false);
         $source = $this->createMock(FighterInterface::class);
         $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager());
-        $source->method('getDistance')->willReturn(20.0);
         $target = $this->createMock(FighterInterface::class);
         $this->assertNull(Attack::selectRangedWeapon($source, $target, false));
     }
@@ -352,7 +355,6 @@ class FighterShootingTest extends TestCase
         $weapon->method('getSlot')->willReturn(\Mordheim\Slot::RANGED);
         $source = $this->createMock(FighterInterface::class);
         $source->method('getBallisticSkill')->willReturn(4); // 4+ to hit
-        $source->method('getDistance')->willReturn(10.0);
         $source->method('hasSpecialRule')->willReturn(false);
         $source->method('getHitModifier')->willReturn(0);
         $sourceState = $this->createMock(\Mordheim\FighterState::class);
@@ -377,8 +379,7 @@ class FighterShootingTest extends TestCase
         $weapon->method('getSlot')->willReturn(\Mordheim\Slot::RANGED);
         $source = $this->createMock(FighterInterface::class);
         $source->method('getBallisticSkill')->willReturn(4);
-        $source->method('getDistance')->willReturn(10.0);
-        $source->method('hasSpecialRule')->willReturnCallback(function($rule) {
+        $source->method('hasSpecialRule')->willReturnCallback(function ($rule) {
             return $rule === SpecialRule::QUICK_SHOT;
         });
         $source->method('getHitModifier')->willReturn(0);

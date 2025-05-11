@@ -13,17 +13,6 @@ class PsychologyExtraTest extends MordheimTestCase
         $fighter->method('getAttacks')->willReturn($attacks);
         $fighter->method('getWeaponSkill')->willReturn(3); // по умолчанию, если нужно — можно расширить
         $fighter->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager([]));
-        $fighter->method('getDistance')->willReturnCallback(function ($target) use ($pos) {
-            if (method_exists($target, 'getState')) {
-                $targetPos = $target->getState()->getPosition();
-                return sqrt(
-                    pow($pos[0] - $targetPos[0], 2) +
-                    pow($pos[1] - $targetPos[1], 2) +
-                    pow($pos[2] - $targetPos[2], 2)
-                );
-            }
-            return 0;
-        });
         $fighter->method('getChargeRange')->willReturn(8);
         $fighter->method('getState')->willReturn(
             new \Mordheim\FighterState($pos, $this->createMock(\Mordheim\BattleStrategyInterface::class), 1, $state)

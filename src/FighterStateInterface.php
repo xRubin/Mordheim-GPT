@@ -5,7 +5,6 @@ namespace Mordheim;
 interface FighterStateInterface
 {
     public function getPosition(): array;
-
     public function setPosition(array $position): static;
 
     public function getBattleStrategy(): BattleStrategyInterface;

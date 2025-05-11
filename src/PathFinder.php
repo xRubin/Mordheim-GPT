@@ -15,9 +15,16 @@ class PathFinder
     {
         [$x, $y, $z] = $start;
         [$nx, $ny, $nz] = $goal;
+        // Проверка координат
+        if (!is_int($x) || !is_int($y) || !is_int($z) || !is_int($nx) || !is_int($ny) || !is_int($nz)) {
+            throw new \Exception('Некорректные координаты в canClimb: ' . var_export([$x, $y, $z, $nx, $ny, $nz], true));
+        }
         // Лазание только на строго соседнюю клетку по x или y (не по диагонали!), вверх на 1 уровень
         if (abs($nx - $x) + abs($ny - $y) != 1 || $nz - $z != 1) return false;
         // В целевой ячейке не должно быть препятствия
+        if (!is_int($nx) || !is_int($ny) || !is_int($nz)) {
+            throw new \Exception('Некорректные координаты в canClimb (целевой ячейки): ' . var_export([$nx, $ny, $nz], true));
+        }
         if ($field->getCell($nx, $ny, $nz)->obstacle) return false;
         // Под целевой ячейкой должен быть obstacle=TRUE (явно выставлен)
         $cellBelow = $nz == 0 ? null : $field->getCell($nx, $ny, $nz - 1);
@@ -133,15 +140,24 @@ class PathFinder
         while (!$queue->isEmpty()) {
             if (++$iteration > $maxIterations) return null;
             $path = $queue->extract();
+            if (empty($path) || !is_array($path)) {
+                throw new \Exception('Из очереди извлечён невалидный путь: ' . var_export($path, true));
+            }
             $lastStep = end($path);
             $pos = $lastStep['pos'];
             if ($pos === $goal) return $path;
             [$x, $y, $z] = $pos;
+            if (!is_int($x) || !is_int($y) || !is_int($z)) {
+                throw new \Exception('Некорректные координаты в findPath (pos): ' . var_export($pos, true));
+            }
             $currCost = $lastStep['cost'];
             foreach ($dirs as [$dx, $dy, $dz]) {
                 $nx = $x + $dx;
                 $ny = $y + $dy;
                 $nz = $z + $dz;
+                if (!is_int($nx) || !is_int($ny) || !is_int($nz)) {
+                    throw new \Exception('Некорректные координаты в findPath (dirs): ' . var_export([$nx, $ny, $nz], true));
+                }
                 if ($field->isOutOfBounds($nx, $ny, $nz) || self::isBlocked($blockSet, [$nx, $ny, $nz])) continue;
                 $cell = $field->getCell($nx, $ny, $nz);
                 $fromCell = $field->getCell($x, $y, $z);
@@ -167,6 +183,10 @@ class PathFinder
                 $key = self::getCostKey([$nx, $ny, $nz]);
                 if (isset($costSoFar[$key]) && $newCost >= $costSoFar[$key]) continue;
                 $costSoFar[$key] = $newCost;
+                // Проверка перед вставкой в очередь
+                if (empty($path) || !is_array($path)) {
+                    throw new \Exception('В очередь пытаются вставить невалидный путь: ' . var_export($path, true));
+                }
                 $queue->insert(array_merge($path, [[
                     'pos' => [$nx, $ny, $nz],
                     'cost' => $newCost
@@ -180,6 +200,9 @@ class PathFinder
                 $nx = $x + $dx;
                 $ny = $y + $dy;
                 $nz = $z + $dz;
+                if (!is_int($nx) || !is_int($ny) || !is_int($nz)) {
+                    throw new \Exception('Некорректные координаты в findPath (climbDirs): ' . var_export([$nx, $ny, $nz], true));
+                }
                 if ($field->isOutOfBounds($nx, $ny, $nz) || self::isBlocked($blockSet, [$nx, $ny, $nz])) continue;
                 if (!self::canClimb($field, [$x, $y, $z], [$nx, $ny, $nz])) continue;
                 $moveCost = $weights($dx, $dy, $dz) * 2; // лазание обычно дороже обычного шага
@@ -187,6 +210,10 @@ class PathFinder
                 $key = self::getCostKey([$nx, $ny, $nz]);
                 if (isset($costSoFar[$key]) && $newCost >= $costSoFar[$key]) continue;
                 $costSoFar[$key] = $newCost;
+                // Проверка перед вставкой в очередь
+                if (empty($path) || !is_array($path)) {
+                    throw new \Exception('В очередь пытаются вставить невалидный путь (climb): ' . var_export($path, true));
+                }
                 $queue->insert(array_merge($path, [[
                     'pos' => [$nx, $ny, $nz],
                     'cost' => $newCost
@@ -200,6 +227,9 @@ class PathFinder
                     $nx = $x + $dx * $len;
                     $ny = $y + $dy * $len;
                     $nz = $z;
+                    if (!is_int($nx) || !is_int($ny) || !is_int($nz)) {
+                        throw new \Exception('Некорректные координаты в findPath (jump_gap): ' . var_export([$nx, $ny, $nz], true));
+                    }
                     if ($field->isOutOfBounds($nx, $ny, $nz) || self::isBlocked($blockSet, [$nx, $ny, $nz])) continue;
                     if (!self::canJumpOverGap($field, [$x, $y, $z], [$nx, $ny, $nz])) continue;
                     $moveCost = $weights($dx * $len, $dy * $len, 0) * 2.0; // стоимость прыжка через gap (можно скорректировать)
@@ -207,6 +237,10 @@ class PathFinder
                     $key = self::getCostKey([$nx, $ny, $nz]);
                     if (isset($costSoFar[$key]) && $newCost >= $costSoFar[$key]) continue;
                     $costSoFar[$key] = $newCost;
+                    // Проверка перед вставкой в очередь
+                    if (empty($path) || !is_array($path)) {
+                        throw new \Exception('В очередь пытаются вставить невалидный путь (jump_gap): ' . var_export($path, true));
+                    }
                     $queue->insert(array_merge($path, [[
                         'pos' => [$nx, $ny, $nz],
                         'cost' => $newCost

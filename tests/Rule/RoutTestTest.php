@@ -78,6 +78,7 @@ class RoutTestTest extends TestCase
 
     public function testRoutTestFailsWhenOOAOver25Percent()
     {
+        \Mordheim\Dice::setTestRolls([3, 4]); // 3+4=7 > 2, тест должен провалиться
         $fighters = [
             $this->makeFighter(Status::OUT_OF_ACTION),
             $this->makeFighter(Status::OUT_OF_ACTION),

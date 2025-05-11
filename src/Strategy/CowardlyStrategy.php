@@ -19,7 +19,7 @@ class CowardlyStrategy extends BaseBattleStrategy
         // Ищем лидера в радиусе 6" (Ld bubble)
         $leader = null;
         foreach ($battle->getAlliesFor($fighter) as $ally) {
-            if ($ally->hasSpecialRule(SpecialRule::LEADER) && $fighter->getDistance($ally) <= 6) {
+            if ($ally->hasSpecialRule(SpecialRule::LEADER) && $this->getDistance($fighter, $ally) <= 6) {
                 $leader = $ally;
                 break;
             }
@@ -29,8 +29,8 @@ class CowardlyStrategy extends BaseBattleStrategy
             $nearest = null;
             $minDist = PHP_INT_MAX;
             foreach ($battle->getAlliesFor($fighter) as $ally) {
-                if ($ally->hasSpecialRule(SpecialRule::LEADER) && $ally->getDistance($ally) <= 6) {
-                    $dist = $fighter->getDistance($ally);
+                if ($ally->hasSpecialRule(SpecialRule::LEADER) && $this->getDistance($fighter, $ally) <= 6) {
+                    $dist = $this->getDistance($fighter, $ally);
                     if ($dist < $minDist) {
                         $minDist = $dist;
                         $nearest = $ally;
@@ -50,7 +50,7 @@ class CowardlyStrategy extends BaseBattleStrategy
             // Не прошёл тест — не действует
             return;
         }
-        if ($fighter->getDistance($target) < 4) {
+        if ($this->getDistance($fighter, $target) < 4) {
             // Уходит от врага
             [$fx, $fy, $fz] = $fighter->getState()->getPosition(); // остальная логика ниже
             [$tx, $ty, $tz] = $target->getState()->getPosition();
@@ -59,14 +59,16 @@ class CowardlyStrategy extends BaseBattleStrategy
             $dz = $fz - $tz;
             $move = [$fx + ($dx !== 0 ? ($dx > 0 ? 1 : -1) : 0), $fy + ($dy !== 0 ? ($dy > 0 ? 1 : -1) : 0), $fz + ($dz !== 0 ? ($dz > 0 ? 1 : -1) : 0)];
             if ($move[0] >= 0 && $move[1] >= 0 && $move[2] >= 0 && $move[0] < 64 && $move[1] < 64 && $move[2] < 4 && !$battle->getField()->getCell($move[0], $move[1], $move[2])->obstacle) {
-                $fighter->getState()->setPosition($move);
+                \Mordheim\Rule\Move::common($battle, $fighter, $move, $this->aggressiveness);
+                return;
             }
         } else {
             // Проверяем наличие стрелкового оружия и его дальность
             $ranged = $fighter->getEquipmentManager()->getMainWeapon(Slot::RANGED);
-            if ($ranged && $fighter->getDistance($target) > $ranged->getRange()) {
+            if ($ranged && $this->getDistance($fighter, $target) > $ranged->getRange()) {
                 // Если не в радиусе, двигаемся к цели
                 \Mordheim\Rule\Move::common($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
+                return;
             }
         }
     }
@@ -77,7 +79,7 @@ class CowardlyStrategy extends BaseBattleStrategy
         $ranged = $fighter->getEquipmentManager()->getMainWeapon(Slot::RANGED);
         if (!$ranged) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
-        if ($target && $fighter->getDistance($target) <= $ranged->getRange()) {
+        if ($target && $this->getDistance($fighter, $target) <= $ranged->getRange()) {
             \Mordheim\Rule\Attack::ranged($battle, $fighter, $target, $this->spentMove);
         }
     }

@@ -3,6 +3,7 @@
 namespace Mordheim\Data\Attributes;
 
 use Attribute;
+use Mordheim\CharacteristicsInterface;
 
 #[Attribute(Attribute::TARGET_CLASS_CONSTANT)]
 readonly class Characteristics
@@ -17,21 +18,22 @@ readonly class Characteristics
         private int $initiative,
         private int $attacks,
         private int $leadership,
-    ) {
+    )
+    {
     }
 
-    public function getValue(): \Mordheim\Characteristics
+    public function getValue(): CharacteristicsInterface
     {
         return new \Mordheim\Characteristics(
-            $this->movement,
-            $this->weaponSkill,
-            $this->ballisticSkill,
-            $this->strength,
-            $this->toughness,
-            $this->wounds,
-            $this->initiative,
-            $this->attacks,
-            $this->leadership
+            movement: $this->movement,
+            weaponSkill: $this->weaponSkill,
+            ballisticSkill: $this->ballisticSkill,
+            strength: $this->strength,
+            toughness: $this->toughness,
+            wounds: $this->wounds,
+            initiative: $this->initiative,
+            attacks: $this->attacks,
+            leadership: $this->leadership
         );
     }
 }

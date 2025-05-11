@@ -32,7 +32,7 @@ interface BlankInterface
 
     public function isHiredSword(): bool;
 
-    public function getCharacteristics(): Characteristics;
+    public function getCharacteristics(): CharacteristicsInterface;
 
     /**
      * @return SpecialRuleInterface[]

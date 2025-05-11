@@ -4,6 +4,7 @@ namespace Mordheim\Rule;
 
 use Mordheim\Dice;
 use Mordheim\FighterInterface;
+use Mordheim\Ruler;
 use Mordheim\SpecialRule;
 
 /**
@@ -29,7 +30,7 @@ class Psychology
                 $ally->hasSpecialRule(SpecialRule::LEADER) &&
                 $ally->getState()->getStatus()->canAct()
             ) {
-                if ($fighter->getDistance($ally) <= 6) {
+                if (Ruler::distance($fighter->getState()->getPosition(), $ally->getState()->getPosition()) <= 6) {
                     if ($ally->getLeadership() > $usedLd) {
                         $usedLd = $ally->getLeadership();
                         $usedLeader = $ally;
@@ -113,9 +114,10 @@ class Psychology
     {
         if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
             return true;
-        $closeEnemies = array_filter($enemies, fn($enemy) => $fighter->getDistance($enemy) <= 1.99);
+        $closeEnemies = array_filter($enemies, fn($enemy) => Ruler::distance($fighter->getState()->getPosition(), $enemy->getState()->getPosition()) <= 1.99);
         if (count($closeEnemies) < 2) return true;
-        $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->getState()->getStatus()->canAct() && $fighter->getDistance($ally) <= 6);
+        $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->getState()->getStatus()->canAct()
+            && Ruler::distance($fighter->getState()->getPosition(), $ally->getState()->getPosition()) <= 6);
         if (count($closeAllies) > 0) return true;
         $roll = \Mordheim\Dice::roll(6) + \Mordheim\Dice::roll(6);
         $success = $roll <= $fighter->getLeadership();
@@ -148,7 +150,7 @@ class Psychology
      */
     public static function frenzyEffect(FighterInterface $fighter, array $enemies): array
     {
-        $inRange = array_filter($enemies, fn($enemy) => $fighter->getDistance($enemy) <= $fighter->getChargeRange());
+        $inRange = array_filter($enemies, fn($enemy) => Ruler::distance($fighter->getState()->getPosition(), $enemy->getState()->getPosition()) <= $fighter->getChargeRange());
         $mustCharge = count($inRange) > 0;
         $attacks = $fighter->getAttacks() * 2;
         \Mordheim\BattleLogger::add("DEBUG: FrenzyEffect baseAttacks={$fighter->getAttacks()}, resultAttacks=$attacks");

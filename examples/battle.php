@@ -24,7 +24,7 @@ $battle = new Battle($field, [
             new \Mordheim\FighterState(
                 [0, 0, 0],
                 new AggressiveStrategy(),
-                \Mordheim\Data\Blank::MARIENBURG_MERCENARY_CAPTAIN->getCharacteristics()->wounds
+                \Mordheim\Data\Blank::MARIENBURG_MERCENARY_CAPTAIN->getCharacteristics()->getWounds()
             )
         ),
         new \Mordheim\Fighter(
@@ -34,7 +34,7 @@ $battle = new Battle($field, [
             new \Mordheim\FighterState(
                 [0, 2, 0],
                 new AggressiveStrategy(),
-                \Mordheim\Data\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->wounds
+                \Mordheim\Data\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->getWounds()
             )
         ),
         new \Mordheim\Fighter(
@@ -44,7 +44,7 @@ $battle = new Battle($field, [
             new \Mordheim\FighterState(
                 [0, 4, 0],
                 new AggressiveStrategy(),
-                \Mordheim\Data\Blank::MARIENBURG_MARKSMAN->getCharacteristics()->wounds
+                \Mordheim\Data\Blank::MARIENBURG_MARKSMAN->getCharacteristics()->getWounds()
             )
         ),
     ]),
@@ -56,7 +56,7 @@ $battle = new Battle($field, [
             new \Mordheim\FighterState(
                 [7, 0, 0],
                 new AggressiveStrategy(),
-                \Mordheim\Data\Blank::MIDDENHEIM_MERCENARY_CAPTAIN->getCharacteristics()->wounds
+                \Mordheim\Data\Blank::MIDDENHEIM_MERCENARY_CAPTAIN->getCharacteristics()->getWounds()
             )
         ),
         new \Mordheim\Fighter(
@@ -66,7 +66,7 @@ $battle = new Battle($field, [
             new \Mordheim\FighterState(
                 [7, 2, 0],
                 new AggressiveStrategy(),
-                \Mordheim\Data\Blank::MIDDENHEIM_YOUNGBLOOD->getCharacteristics()->wounds
+                \Mordheim\Data\Blank::MIDDENHEIM_YOUNGBLOOD->getCharacteristics()->getWounds()
             )
         ),
         new \Mordheim\Fighter(
@@ -76,7 +76,7 @@ $battle = new Battle($field, [
             new \Mordheim\FighterState(
                 [7, 4, 0],
                 new AggressiveStrategy(),
-                \Mordheim\Data\Blank::MIDDENHEIM_WARRIOR->getCharacteristics()->wounds
+                \Mordheim\Data\Blank::MIDDENHEIM_WARRIOR->getCharacteristics()->getWounds()
             )
         ),
     ])

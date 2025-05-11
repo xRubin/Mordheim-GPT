@@ -7,6 +7,7 @@ use Mordheim\CloseCombat;
 use Mordheim\Data\Equipment;
 use Mordheim\EquipmentInterface;
 use Mordheim\FighterInterface;
+use Mordheim\Ruler;
 use Mordheim\Slot;
 use Mordheim\SpecialRule;
 use Mordheim\Status;
@@ -24,7 +25,7 @@ class Attack
     public static function melee(Battle $battle, FighterInterface $source, FighterInterface $target, ?\Mordheim\CloseCombat $combat = null): bool
     {
         if (!self::canAttack($source, $target)) return false;
-        if (!$source->isAdjacent($target)) return false;
+        if (!Ruler::isAdjacent($source->getState()->getPosition(), $target->getState()->getPosition())) return false;
         \Mordheim\BattleLogger::add("{$source->getName()} атакует melee {$target->getName()}!");
         \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: " . implode(',', array_map(fn($weapon) => $weapon->getName(), $source->getEquipmentManager()->getItemsBySlot(Slot::MELEE))));
 
@@ -230,7 +231,7 @@ class Attack
     {
         $weapons = $source->getEquipmentManager()->getItemsBySlot(Slot::RANGED);
         if (!($weapon = reset($weapons))) return null;
-        if ($source->getDistance($target) > $weapon->getRange()) return null;
+        if (Ruler::distance($source->getState()->getPosition(), $target->getState()->getPosition()) > $weapon->getRange()) return null;
         if ($moved && $weapon->hasSpecialRule(SpecialRule::MOVE_OR_FIRE)) {
             \Mordheim\BattleLogger::add("{$source->getName()} не может стрелять из {$weapon->getName()} после движения (Move or Fire).");
             return null;
@@ -246,7 +247,7 @@ class Attack
         if ($toHitBase > 6) $toHitBase = 6;
         $shots = ($source->hasSpecialRule(SpecialRule::QUICK_SHOT) && !$moved) ? 2 : 1;
         $mod = 0;
-        if ($source->getDistance($target) > $weapon->getRange() / 2) $mod += 1;
+        if (Ruler::distance($source->getState()->getPosition(), $target->getState()->getPosition()) > $weapon->getRange() / 2) $mod += 1;
         if ($moved) $mod += 1;
         if ($battle->hasObstacleBetween($source->getState()->getPosition(), $target->getState()->getPosition())) $mod += 1;
         if ($target->hasSpecialRule(SpecialRule::LARGE_TARGET)) $mod -= 1;

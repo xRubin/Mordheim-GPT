@@ -49,7 +49,8 @@ class Charge
         }
 
         // Проверка инициативы для скрытой цели
-        if ($attacker->getDistance($defender) && $battle->hasObstacleBetween($attacker->getState()->getPosition(), $defender->getState()->getPosition())) {
+        if (Ruler::distance($attacker->getState()->getPosition(), $defender->getState()->getPosition())
+            && $battle->hasObstacleBetween($attacker->getState()->getPosition(), $defender->getState()->getPosition())) {
             $roll = \Mordheim\Dice::roll(6);
             \Mordheim\BattleLogger::add("{$attacker->getName()} бросает Initiative для hidden цели: $roll против {$defender->getInitiative()}");
             if ($roll <= $defender->getInitiative()) {

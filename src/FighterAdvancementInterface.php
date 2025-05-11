@@ -1,9 +1,9 @@
 <?php
 
 namespace Mordheim;
-interface AdvancementInterface
+interface FighterAdvancementInterface
 {
-    public function getCharacteristics(): Characteristics;
+    public function getCharacteristics(): CharacteristicsInterface;
 
     /**
      * @return SpecialRuleInterface[]

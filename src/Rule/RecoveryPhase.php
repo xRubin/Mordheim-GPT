@@ -2,6 +2,7 @@
 
 namespace Mordheim\Rule;
 
+use Mordheim\Ruler;
 use Mordheim\SpecialRule;
 use Mordheim\Warband;
 
@@ -47,8 +48,9 @@ class RecoveryPhase
                         }
                     }
                 }
-                $closeEnemies = array_filter($enemies, fn($enemy) => $fighter->getDistance($enemy) <= 1.99);
-                $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->getState()->getStatus()->canAct() && $fighter->getDistance($ally) <= 6);
+                $closeEnemies = array_filter($enemies, fn($enemy) => Ruler::distance($fighter->getState()->getPosition(), $enemy->getState()->getPosition()) <= 1.99);
+                $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->getState()->getStatus()->canAct()
+                    && Ruler::distance($fighter->getState()->getPosition(), $ally->getState()->getPosition()) <= 6);
                 if (count($closeEnemies) >= 2 && count($closeAllies) === 0) {
                     if (!Psychology::allAloneTest($fighter, $enemies, $allies)) {
                         $fighter->getState()->setStatus(\Mordheim\Status::PANIC);
@@ -75,7 +77,7 @@ class RecoveryPhase
                 }
             }
             foreach ($enemies as $enemy) {
-                if ($enemy->hasSpecialRule(SpecialRule::CAUSE_FEAR) && $fighter->getDistance($enemy) <= 8) {
+                if ($enemy->hasSpecialRule(SpecialRule::CAUSE_FEAR) && Ruler::distance($fighter->getState()->getPosition(), $enemy->getState()->getPosition()) <= 8) {
                     Psychology::testFear($fighter, $enemy, $warband->fighters);
                 }
             }

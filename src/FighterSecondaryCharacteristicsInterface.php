@@ -2,14 +2,8 @@
 
 namespace Mordheim;
 
-interface FighterInterface extends CharacteristicsInterface, HasSpecialRuleInterface, FighterSecondaryCharacteristicsInterface
+interface FighterSecondaryCharacteristicsInterface
 {
-    public function getName(): string;
-    public function getEquipmentManager(): EquipmentManager;
-    public function getState(): ?FighterStateInterface;
-    public function getBlank(): BlankInterface;
-    public function getAdvancement(): FighterAdvancementInterface;
-
     /**
      * Получить итоговую инициативу для лазания
      */

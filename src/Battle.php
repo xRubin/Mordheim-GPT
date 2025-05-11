@@ -46,8 +46,11 @@ class Battle
             $fighter->getState()->getBattleStrategy()->resetOnTurn();
         }
 
-        $this->turn++;
-        return $this->turn;
+        foreach ($this->activeCombats as $combat) {
+            $combat->nextTurn();
+        }
+
+        return ++$this->turn;
     }
 
     /**

@@ -7,10 +7,10 @@ class Fighter implements FighterInterface
     private string $name = '';
 
     public function __construct(
-        private readonly BlankInterface       $blank,
-        private readonly AdvancementInterface $advancement,
-        private readonly EquipmentManager     $equipmentManager,
-        private ?FighterStateInterface        $fighterState = null,
+        private readonly BlankInterface              $blank,
+        private readonly FighterAdvancementInterface $advancement,
+        private readonly EquipmentManager            $equipmentManager,
+        private ?FighterStateInterface               $fighterState = null,
     )
     {
         $this->name = $blank->name;
@@ -19,6 +19,16 @@ class Fighter implements FighterInterface
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getBlank(): BlankInterface
+    {
+        return $this->blank;
+    }
+
+    public function getAdvancement(): FighterAdvancementInterface
+    {
+        return $this->advancement;
     }
 
     public function getEquipmentManager(): EquipmentManager
@@ -31,45 +41,44 @@ class Fighter implements FighterInterface
         return $this->fighterState;
     }
 
-    public function setFighterState(?FighterStateInterface $fighterState): static
-    {
-        $this->fighterState = $fighterState;
-        return $this;
-    }
-
     /**
      * Получить итоговое движение с учетом экипировки
      */
     public function getMovement(): int
     {
-        $base = $this->blank->getCharacteristics()->movement + $this->advancement->getCharacteristics()->movement;
+        $base = $this->blank->getCharacteristics()->getMovement() + $this->advancement->getCharacteristics()->getMovement();
         $penalty = $this->equipmentManager->getMovementPenalty();
         return max(1, $base + $penalty); // движение не может быть меньше 1
     }
 
     public function getStrength(): int
     {
-        return $this->blank->getCharacteristics()->strength + $this->advancement->getCharacteristics()->strength;
+        return $this->blank->getCharacteristics()->getStrength() + $this->advancement->getCharacteristics()->getStrength();
     }
 
     public function getWeaponSkill(): int
     {
-        return $this->blank->getCharacteristics()->weaponSkill + $this->advancement->getCharacteristics()->weaponSkill;
+        return $this->blank->getCharacteristics()->getWeaponSkill() + $this->advancement->getCharacteristics()->getWeaponSkill();
     }
 
     public function getBallisticSkill(): int
     {
-        return $this->blank->getCharacteristics()->ballisticSkill + $this->advancement->getCharacteristics()->ballisticSkill;
+        return $this->blank->getCharacteristics()->getBallisticSkill() + $this->advancement->getCharacteristics()->getBallisticSkill();
     }
 
     public function getToughness(): int
     {
-        return $this->blank->getCharacteristics()->toughness + $this->advancement->getCharacteristics()->toughness;
+        return $this->blank->getCharacteristics()->getToughness() + $this->advancement->getCharacteristics()->getToughness();
+    }
+
+    public function getWounds(): int
+    {
+        return $this->blank->getCharacteristics()->getWounds() + $this->advancement->getCharacteristics()->getWounds();
     }
 
     public function getLeadership(): int
     {
-        return $this->blank->getCharacteristics()->leadership + $this->advancement->getCharacteristics()->leadership;
+        return $this->blank->getCharacteristics()->getLeadership() + $this->advancement->getCharacteristics()->getLeadership();
     }
 
     /**
@@ -77,9 +86,9 @@ class Fighter implements FighterInterface
      */
     public function getAttacks(): int
     {
-        $base = $this->blank->getCharacteristics()->attacks + $this->advancement->getCharacteristics()->attacks;
+        $base = $this->blank->getCharacteristics()->getAttacks() + $this->advancement->getCharacteristics()->getAttacks();
         $bonus = 0;
-        if ($this->getState()->getStatus() === Status::FRENZY) {
+        if ($this->getState()?->getStatus() === Status::FRENZY) {
             $base *= 2;
         }
         if ($this->equipmentManager->countOneHandedMeleeWeapons() >= 2) {
@@ -93,22 +102,16 @@ class Fighter implements FighterInterface
      */
     public function getInitiative(): int
     {
-        $base = $this->blank->getCharacteristics()->initiative + $this->advancement->getCharacteristics()->initiative;
-        $bonus = 0;
-        if ($this->hasSpecialRule(SpecialRule::NIMBLE)) {  // TODO: check rules
-            $bonus = 1;
-        }
-        return $base + $bonus;
+        return $this->blank->getCharacteristics()->getInitiative() + $this->advancement->getCharacteristics()->getInitiative();
     }
 
     public function getClimbInitiative(): int
     {
-        $base = $this->blank->getCharacteristics()->initiative + $this->advancement->getCharacteristics()->initiative;
         $bonus = 0;
         if ($this->equipmentManager->hasSpecialRule(SpecialRule::CLIMB)) {
-            $bonus = 1;
+            $bonus += 1;
         }
-        return $base + $bonus;
+        return $this->getInitiative() + $bonus;
     }
 
     /**
@@ -180,16 +183,6 @@ class Fighter implements FighterInterface
         return in_array($specialRule, $this->blank->getSpecialRules())
             || in_array($specialRule, $this->advancement->getSpecialRules())
             || $this->equipmentManager->hasSpecialRule($specialRule);
-    }
-
-    public function isAdjacent(FighterInterface $target): bool
-    {
-        return Ruler::isAdjacent($this->getState()->getPosition(), $target->getState()->getPosition());
-    }
-
-    public function getDistance(FighterInterface $target): float
-    {
-        return Ruler::distance($this->getState()->getPosition(), $target->getState()->getPosition());
     }
 }
 

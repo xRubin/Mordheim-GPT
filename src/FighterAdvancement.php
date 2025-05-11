@@ -2,10 +2,10 @@
 
 namespace Mordheim;
 
-class FighterAdvancement implements AdvancementInterface
+class FighterAdvancement implements FighterAdvancementInterface
 {
     public function __construct(
-        private Characteristics $characteristics,
+        private CharacteristicsInterface $characteristics,
         private array $specialRules = [],
     )
     {
@@ -15,11 +15,11 @@ class FighterAdvancement implements AdvancementInterface
     public static function empty(): static
     {
         return new static(
-            Characteristics::empty()
+            new Characteristics()
         );
     }
 
-    public function getCharacteristics(): Characteristics
+    public function getCharacteristics(): CharacteristicsInterface
     {
         return $this->characteristics;
     }

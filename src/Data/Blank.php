@@ -3,15 +3,19 @@
 namespace Mordheim\Data;
 
 use Mordheim\BlankInterface;
+use Mordheim\CharacteristicsInterface;
 use Mordheim\Data\Attributes\AllowedWarband;
 use Mordheim\Data\Attributes\Characteristics;
+use Mordheim\Data\Attributes\Equipment;
 use Mordheim\Data\Attributes\EquipmentList;
+use Mordheim\Data\Attributes\ExceptWarband;
 use Mordheim\Data\Attributes\Henchman;
 use Mordheim\Data\Attributes\Hero;
-use Mordheim\Data\Attributes\HireFee;
 use Mordheim\Data\Attributes\HiredSword;
+use Mordheim\Data\Attributes\HireFee;
 use Mordheim\Data\Attributes\MaxCount;
 use Mordheim\Data\Attributes\MinCount;
+use Mordheim\Data\Attributes\Rating;
 use Mordheim\Data\Attributes\SkillGroup;
 use Mordheim\Data\Attributes\SpecialRule;
 use Mordheim\Data\Attributes\StartExp;
@@ -21,9 +25,6 @@ use Mordheim\EquipmentInterface;
 use Mordheim\EquipmentListInterface;
 use Mordheim\Exceptions\InvalidAttributesException;
 use Mordheim\WarbandInterface;
-use Mordheim\Data\Attributes\Equipment;
-use Mordheim\Data\Attributes\ExceptWarband;
-use Mordheim\Data\Attributes\Rating;
 
 enum Blank implements BlankInterface
 {
@@ -444,6 +445,7 @@ enum Blank implements BlankInterface
 
         return \Mordheim\Data\Warband::cases();
     }
+
     public function getHireFee(): int
     {
         $ref = new \ReflectionClassConstant(self::class, $this->name);
@@ -551,7 +553,7 @@ enum Blank implements BlankInterface
         return count($classAttributes) > 0;
     }
 
-    public function getCharacteristics(): \Mordheim\Characteristics
+    public function getCharacteristics(): CharacteristicsInterface
     {
         $ref = new \ReflectionClassConstant(self::class, $this->name);
         $classAttributes = $ref->getAttributes(Characteristics::class);

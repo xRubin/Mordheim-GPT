@@ -15,7 +15,7 @@ class FighterMeleeTest extends MordheimTestCase
     {
         return new class (
             \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
-            new \Mordheim\FighterAdvancement(Characteristics::empty(), $skills),
+            new \Mordheim\FighterAdvancement(new Characteristics(), $skills),
             new \Mordheim\EquipmentManager($weapons),
             new \Mordheim\FighterState(
                 $pos,
@@ -34,7 +34,7 @@ class FighterMeleeTest extends MordheimTestCase
     {
         return new \Mordheim\Fighter(
             \Mordheim\Data\Blank::REIKLAND_CHAMPION,
-            new \Mordheim\FighterAdvancement(Characteristics::empty(), $skills),
+            new \Mordheim\FighterAdvancement(new Characteristics(), $skills),
             new \Mordheim\EquipmentManager($weapons),
             new \Mordheim\FighterState(
                 $pos,

@@ -21,7 +21,7 @@ class CarefulStrategy extends BaseBattleStrategy
         if (!$target) return;
         $canAct = $this->canActAgainst($battle, $fighter, $target);
         if (!$canAct) return;
-        if (!$fighter->isAdjacent($target)) {
+        if (!$this->isAdjacent($fighter, $target)) {
             // Держит дистанцию
             \Mordheim\Rule\Move::common($battle, $fighter, [$fighter->getState()->getPosition()[0] + 1, $fighter->getState()->getPosition()[1] + 1, $fighter->getState()->getPosition()[2]], $this->aggressiveness);
         }
@@ -33,7 +33,7 @@ class CarefulStrategy extends BaseBattleStrategy
         $ranged = $fighter->getEquipmentManager()->getMainWeapon(Slot::RANGED);
         if (!$ranged) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
-        if ($target && $fighter->getDistance($target) <= $ranged->getRange()) {
+        if ($target && $this->getDistance($fighter, $target) <= $ranged->getRange()) {
             \Mordheim\Rule\Attack::ranged($battle, $fighter, $target, $this->spentMove);
         }
     }
@@ -48,7 +48,7 @@ class CarefulStrategy extends BaseBattleStrategy
         if (empty($enemies)) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
         $canAct = $this->canActAgainst($battle, $fighter, $target);
-        if ($target && $fighter->isAdjacent($target) && $canAct) {
+        if ($target && $this->isAdjacent($fighter, $target) && $canAct) {
             \Mordheim\Rule\Attack::melee($battle, $fighter, $target);
         }
     }

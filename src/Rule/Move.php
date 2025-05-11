@@ -6,6 +6,7 @@ use Mordheim\Battle;
 use Mordheim\Exceptions\MoveRunDeprecatedException;
 use Mordheim\Exceptions\PathfinderTargetUnreachableException;
 use Mordheim\FighterInterface;
+use Mordheim\Ruler;
 
 class Move
 {
@@ -39,7 +40,7 @@ class Move
     public static function run(Battle $battle, FighterInterface $fighter, array $target, float $aggressiveness): void
     {
         foreach ($battle->getEnemiesFor($fighter) as $enemy) {
-            if ($fighter->getDistance($enemy) < 8) { // 8 клеток = 8"
+            if (Ruler::distance($fighter->getState()->getPosition(), $enemy->getState()->getPosition()) < 8) { // 8 клеток = 8"
                 \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать: враг слишком близко (меньше 8\")");
                 throw new MoveRunDeprecatedException();
             }
@@ -103,6 +104,9 @@ class Move
         $movePoints = $run ? $fighter->getRunRange() : $fighter->getMovement();
         for ($i = 1; $i <= $lastReachableIdx && $movePoints > 0; $i++) {
             [$x, $y, $z] = $path[$i]['pos'];
+            if (!is_int($x) || !is_int($y) || !is_int($z)) {
+                throw new \Exception('Некорректные координаты в пути: ' . var_export($path[$i]['pos'], true));
+            }
             $cell = $battle->getField()->getCell($x, $y, $z);
             $fromCell = $battle->getField()->getCell($cur[0], $cur[1], $cur[2]);
             $cost = 1;
