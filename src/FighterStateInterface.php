@@ -18,7 +18,7 @@ interface FighterStateInterface extends HasSpecialRuleInterface
     public function setStatus(Status $status): static;
 
     public function getWounds(): int;
-    public function decreaseWounds(int $step = 1): static;
+    public function modifyWounds(int $step = 1): static;
     public function setWounds(int $wounds): static;
     public function hasActiveSpell(SpellInterface $spell): bool;
 }

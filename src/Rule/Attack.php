@@ -70,7 +70,7 @@ class Attack
             $roll = \Mordheim\Dice::roll(6);
             if ($roll === 6) {
                 // Critical
-                $target->getState()->decreaseWounds();
+                $target->getState()->modifyWounds(-1);
                 if ($target->getState()->getWounds() <= 0) {
                     $battle->killFighter($target);
                 }
@@ -80,7 +80,7 @@ class Attack
             if ($roll < $toHit) continue;
             if (Dodge::roll($target)) continue;
             if (!self::tryArmorSaveRanged($source, $target, $weapon)) {
-                $target->getState()->decreaseWounds();
+                $target->getState()->modifyWounds(-1);
                 if ($target->getState()->getWounds() <= 0) {
                     $battle->killFighter($target);
                 }
@@ -193,8 +193,8 @@ class Attack
                 \Mordheim\BattleLogger::add("Особое правило: дубина/конкашн — всегда injury table");
                 $success = Injuries::roll($battle, $source, $target, $weapon);
             } else {
-                $target->getState()->decreaseWounds(
-                    $source->hasSpecialRule(SpecialRule::DOUBLE_DAMAGE) ? 2 : 1
+                $target->getState()->modifyWounds(
+                    $source->hasSpecialRule(SpecialRule::DOUBLE_DAMAGE) ? -2 : -1
                 );
                 \Mordheim\BattleLogger::add("У {$target->getName()} осталось {$target->getState()->getWounds()} ран(а/ий)");
                 $success = true;

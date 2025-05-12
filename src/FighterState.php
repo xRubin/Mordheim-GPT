@@ -68,9 +68,9 @@ class FighterState implements FighterStateInterface
         return $this->wounds;
     }
 
-    public function decreaseWounds(int $step = 1): static
+    public function modifyWounds(int $step = 1): static
     {
-        $this->wounds -= $step;
+        $this->wounds += $step;
         return $this;
     }
 

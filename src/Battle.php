@@ -36,10 +36,16 @@ class Battle
         $this->activeCombats = new CloseCombatCollection();
         $this->activeSpells = new SplObjectStorage();
         foreach ($warbands as $wb) {
-            foreach ($wb->fighters as $f) {
-                $this->fighters[] = $f;
+            foreach ($wb->fighters as $fighter) {
+                $this->addFighter($fighter);
             }
         }
+    }
+
+    public function addFighter(FighterInterface $fighter): static
+    {
+        $this->fighters[] = $fighter;
+        return $this;
     }
 
     /**
@@ -244,7 +250,7 @@ class Battle
     /**
      * Проверить, союзник ли другой боец
      */
-    protected function isAlly(FighterInterface $a, FighterInterface $b): bool
+    public function isAlly(FighterInterface $a, FighterInterface $b): bool
     {
         foreach ($this->warbands as $wb) {
             if (in_array($a, $wb->fighters, true) && in_array($b, $wb->fighters, true)) {
@@ -365,5 +371,41 @@ class Battle
             $this->activeSpells[$fighter] = $spells;
         }
         $fighter->getState()->removeActiveSpell($spell);
+    }
+
+    /**
+     * Найти ближайшую свободную клетку в радиусе radius от позиции бойца
+     * @param FighterInterface $fighter
+     * @param int $radius
+     * @return array|null [x, y, z] или null если нет свободных
+     */
+    public function findUnoccupiedPosition(FighterInterface $fighter, int $radius): ?array
+    {
+        $field = $this->getField();
+        $pos = $fighter->getState()->getPosition();
+        for ($r = 1; $r <= $radius; $r++) {
+            for ($dx = -$r; $dx <= $r; $dx++) {
+                for ($dy = -$r; $dy <= $r; $dy++) {
+                    for ($dz = -$r; $dz <= $r; $dz++) {
+                        if (abs($dx) + abs($dy) + abs($dz) > $r) continue;
+                        $cell = [$pos[0]+$dx, $pos[1]+$dy, $pos[2]+$dz];
+                        if ($cell == $pos) continue;
+                        if ($field->isOutOfBounds($cell[0], $cell[1], $cell[2])) continue;
+                        if ($field->getCell($cell[0], $cell[1], $cell[2])->obstacle) continue;
+                        $occupied = false;
+                        foreach ($this->getFighters() as $f) {
+                            if ($f->getState()->getPosition() == $cell) {
+                                $occupied = true;
+                                break;
+                            }
+                        }
+                        if (!$occupied) {
+                            return $cell;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

@@ -9,9 +9,8 @@ use Mordheim\FighterAdvancement;
 use Mordheim\SpecialRule;
 use Mordheim\Status;
 use Mordheim\Strategy\AggressiveStrategy;
-use PHPUnit\Framework\TestCase;
 
-class PrayersOfSigmarTest extends TestCase
+class PrayersOfSigmarTest extends MordheimTestCase
 {
     private function makeFighterWithSpell(Spell $spell, array $pos = [0, 0, 0]): Fighter
     {
@@ -57,17 +56,15 @@ class PrayersOfSigmarTest extends TestCase
 
     public function testHealingHandHealsAndStands()
     {
-        $fighter = $this->makeFighterWithSpell(Spell::HEALING_HAND);
-        $fighter->getState()->decreaseWounds(1);
+        $fighter = $this->makeFighterWithSpell(Spell::HEALING_HAND, [0, 0, 0]);
+        $target = $this->makeFighterWithSpell(Spell::HAMMER_OF_SIGMAR, [1, 0, 0]);
+        $target->getState()->modifyWounds(-1);
         $fighter->getState()->setStatus(Status::STUNNED);
-        // Эмулируем применение Healing Hand
-        $woundsToHeal = $fighter->getWounds() - $fighter->getState()->getWounds();
-        if ($woundsToHeal > 0) {
-            $fighter->getState()->decreaseWounds(-$woundsToHeal);
-        }
-        if (in_array($fighter->getState()->getStatus(), [Status::STUNNED, Status::KNOCKED_DOWN])) {
-            $fighter->getState()->setStatus(Status::STANDING);
-        }
+        $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
+            new \Mordheim\Warband('Sigmar', [$fighter, $target])
+        ]);
+        $result = Spell::HEALING_HAND->onPhaseMagic($battle, $fighter);
+        $this->assertTrue($result);
         $this->assertEquals($fighter->getWounds(), $fighter->getState()->getWounds());
         $this->assertEquals(Status::STANDING, $fighter->getState()->getStatus());
     }
