@@ -21,4 +21,24 @@ interface FighterStateInterface extends HasSpecialRuleInterface
     public function modifyWounds(int $step = 1): static;
     public function setWounds(int $wounds): static;
     public function hasActiveSpell(SpellInterface $spell): bool;
+
+    /**
+     * @param SpellInterface[] $spells
+     * @return $this
+     */
+    public function setActiveSpells(array $spells): static;
+
+    /**
+     * Добавить заклинание
+     * @param SpellInterface $spell
+     * @return $this
+     */
+    public function addActiveSpell(SpellInterface $spell): static;
+
+    /**
+     * Удалить заклинание
+     * @param SpellInterface $spell
+     * @return $this
+     */
+    public function removeActiveSpell(SpellInterface $spell): static;
 }

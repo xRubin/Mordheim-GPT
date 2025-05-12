@@ -56,4 +56,73 @@ class BattleTest extends TestCase
         $battle->getActiveCombats()->remove($combat);
         $this->assertCount(0, $battle->getActiveCombats()->getAll());
     }
+
+    public function testRunAwayInPanic_CenterGoesToNearestEdge()
+    {
+        $field = new \Mordheim\GameField(5, 5, 1);
+        $warband = new \Mordheim\Warband('WB');
+        $fighter = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState([2, 2, 0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1, \Mordheim\Status::PANIC)
+        );
+        $warband->fighters[] = $fighter;
+        $battle = new \Mordheim\Battle($field, [$warband]);
+        $battle->runAwayInPanic($fighter);
+        $pos = $fighter->getState()->getPosition();
+        // Должен быть ближе к одному из краёв (x=0, x=4, y=0, y=4)
+        $this->assertTrue($pos[0] === 0 || $pos[0] === 4 || $pos[1] === 0 || $pos[1] === 4, 'Должен добежать до края');
+    }
+
+    public function testRunAwayInPanic_LeftEdgeStaysOrMovesAlongEdge()
+    {
+        $field = new \Mordheim\GameField(5, 5, 1);
+        $warband = new \Mordheim\Warband('WB');
+        $fighter = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState([0, 2, 0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1, \Mordheim\Status::PANIC)
+        );
+        $warband->fighters[] = $fighter;
+        $battle = new \Mordheim\Battle($field, [$warband]);
+        $battle->runAwayInPanic($fighter);
+        $pos = $fighter->getState()->getPosition();
+        $this->assertEquals(0, $pos[0], 'Должен остаться на левом краю по X');
+    }
+
+    public function testRunAwayInPanic_TopEdgeStaysOrMovesAlongEdge()
+    {
+        $field = new \Mordheim\GameField(5, 5, 1);
+        $warband = new \Mordheim\Warband('WB');
+        $fighter = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState([2, 0, 0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1, \Mordheim\Status::PANIC)
+        );
+        $warband->fighters[] = $fighter;
+        $battle = new \Mordheim\Battle($field, [$warband]);
+        $battle->runAwayInPanic($fighter);
+        $pos = $fighter->getState()->getPosition();
+        $this->assertEquals(0, $pos[1], 'Должен остаться на верхнем краю по Y');
+    }
+
+    public function testRunAwayInPanic_RightEdgeStaysOrMovesAlongEdge()
+    {
+        $field = new \Mordheim\GameField(5, 5, 1);
+        $warband = new \Mordheim\Warband('WB');
+        $fighter = new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            \Mordheim\FighterAdvancement::empty(),
+            new \Mordheim\EquipmentManager(),
+            new \Mordheim\FighterState([4, 2, 0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1, \Mordheim\Status::PANIC)
+        );
+        $warband->fighters[] = $fighter;
+        $battle = new \Mordheim\Battle($field, [$warband]);
+        $battle->runAwayInPanic($fighter);
+        $pos = $fighter->getState()->getPosition();
+        $this->assertEquals(4, $pos[0], 'Должен остаться на правом краю по X');
+    }
 }

@@ -1,14 +1,16 @@
 <?php
+
 namespace Mordheim;
 
 class GameField
 {
-    private int $width = 64;
-    private int $length = 64;
-    private int $height = 4;
     private array $cells = [];
 
-    public function __construct()
+    public function __construct(
+        private int $width = 64,
+        private int $length = 64,
+        private int $height = 4,
+    )
     {
         for ($x = 0; $x < $this->width; $x++) {
             for ($y = 0; $y < $this->length; $y++) {

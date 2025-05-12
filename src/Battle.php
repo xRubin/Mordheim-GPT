@@ -89,6 +89,7 @@ class Battle
         foreach ($actWarbands as $warband) {
             if (!RecoveryPhase::applyRoutTest($warband, $this->warbands)) {
                 $actWarbands = array_diff($actWarbands, [$warband]);
+                $this->phaseMove($warband);
             } else {
                 foreach ($warband->fighters as $fighter) {
                     if (!RecoveryPhase::applyPsychology($fighter, $warband, $this->warbands)) {
@@ -119,10 +120,36 @@ class Battle
     {
         \Mordheim\BattleLogger::add("Фаза движения: {$warband->name}");
         foreach ($warband->fighters as $fighter) {
-            if ($fighter->getState()->getStatus()->canAct()) {
+            $status = $fighter->getState()->getStatus();
+            if ($status === Status::PANIC) {
+                // --- Паника: бежим к ближайшему краю ---
+                self::runAwayInPanic($fighter);
+                continue;
+            }
+            if ($status->canAct()) {
                 $enemies = $this->getEnemiesFor($fighter);
                 $fighter->getState()->getBattleStrategy()->movePhase($this, $fighter, $enemies);
             }
+        }
+    }
+
+    public function runAwayInPanic(FighterInterface $fighter): void
+    {
+        [$x, $y, $z] = $fighter->getState()->getPosition();
+        // Края: x=0, x=width-1, y=0, y=length-1
+        $dists = [
+            [0, $y, $z, abs($x - 0)],
+            [$this->getField()->getWidth() - 1, $y, $z, abs($x - ($this->getField()->getWidth() - 1))],
+            [$x, 0, $z, abs($y - 0)],
+            [$x, $this->getField()->getLength() - 1, $z, abs($y - ($this->getField()->getLength() - 1))],
+        ];
+        usort($dists, fn($a, $b) => $a[3] <=> $b[3]);
+        // Берём ближайший край
+        $target = [$dists[0][0], $dists[0][1], $dists[0][2]];
+        try {
+            \Mordheim\Rule\Move::run($this, $fighter, $target, 0.4); // минимальная агрессивность
+        } catch (\Throwable $e) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать в панике: " . $e->getMessage());
         }
     }
 
@@ -256,6 +283,8 @@ class Battle
             if (in_array($a, $wb->fighters, true) && in_array($b, $wb->fighters, true)) {
                 return true;
             }
+            if ($b->getState()->hasActiveSpell(Spell::LURE_OD_CHAOS))
+                return true;
         }
         return false;
     }
@@ -265,6 +294,8 @@ class Battle
         $fighter->getState()->setStatus(Status::OUT_OF_ACTION);
         foreach ($this->getActiveCombats()->getByFighter($fighter) as $combat)
             $this->getActiveCombats()->remove($combat);
+        $this->activeSpells->detach($fighter);
+        $fighter->getState()->setActiveSpells([]);
     }
 
     /**
@@ -388,7 +419,7 @@ class Battle
                 for ($dy = -$r; $dy <= $r; $dy++) {
                     for ($dz = -$r; $dz <= $r; $dz++) {
                         if (abs($dx) + abs($dy) + abs($dz) > $r) continue;
-                        $cell = [$pos[0]+$dx, $pos[1]+$dy, $pos[2]+$dz];
+                        $cell = [$pos[0] + $dx, $pos[1] + $dy, $pos[2] + $dz];
                         if ($cell == $pos) continue;
                         if ($field->isOutOfBounds($cell[0], $cell[1], $cell[2])) continue;
                         if ($field->getCell($cell[0], $cell[1], $cell[2])->obstacle) continue;
