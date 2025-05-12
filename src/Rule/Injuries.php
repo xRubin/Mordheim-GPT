@@ -67,7 +67,7 @@ class Injuries
         if ($target->hasSpecialRule(SpecialRule::NO_PAIN)) {
             if ($roll == 6) {
                 $battle->killFighter($target);
-                \Mordheim\BattleLogger::add("[DEBUG][InjuryRoll] NO_PAIN: После killFighter: статус цели=" . $target->getState()->getStatus()->value);
+                \Mordheim\BattleLogger::add("[DEBUG][InjuryRoll] NO_PAIN: После killFighter: статус цели=" . $target->getState()->getStatus()->name);
             }
             return true;
         }
@@ -75,7 +75,7 @@ class Injuries
         // Обычная таблица
         if ($roll == 1 || $roll == 2) {
             $target->getState()->setStatus(Status::KNOCKED_DOWN);
-            \Mordheim\BattleLogger::add("[DEBUG][InjuryRoll] Обычная таблица: После setStatus KNOCKED_DOWN: статус цели=" . $target->getState()->getStatus()->value);
+            \Mordheim\BattleLogger::add("[DEBUG][InjuryRoll] Обычная таблица: После setStatus KNOCKED_DOWN: статус цели=" . $target->getState()->getStatus()->name);
         } elseif ($roll == 3 || $roll == 4) {
             $target->getState()->setStatus(AvoidStun::roll($target) ? Status::KNOCKED_DOWN : Status::STUNNED);
             \Mordheim\BattleLogger::add("[DEBUG][InjuryRoll] Обычная таблица: После setStatus STUNNED/KNOCKED_DOWN: статус цели=" . $target->getState()->getStatus()->name);

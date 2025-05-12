@@ -2,6 +2,7 @@
 
 namespace Mordheim\Rule;
 
+use Mordheim\Battle;
 use Mordheim\Ruler;
 use Mordheim\SpecialRule;
 use Mordheim\Warband;
@@ -32,7 +33,7 @@ class RecoveryPhase
      * Применяет психологические проверки к бойцу
      * @return bool true — если боец может действовать после всех проверок
      */
-    public static function applyPsychology(FighterInterface $fighter, Warband $warband, array $warbands): bool
+    public static function applyPsychology(Battle $battle, FighterInterface $fighter, Warband $warband, array $warbands): bool
     {
         if (!$fighter->getState()->getStatus()->isAlive()) return false;
         // --- PANIC recovery ---
@@ -44,6 +45,17 @@ class RecoveryPhase
             } else {
                 \Mordheim\BattleLogger::add("{$fighter->getName()} всё ещё в панике!");
                 return false;
+            }
+        }
+        // --- Lure of Chaos спасбросок ---
+        if ($fighter->getState()->hasActiveSpell(\Mordheim\Data\Spell::LURE_OD_CHAOS)) {
+            $roll = \Mordheim\Dice::roll(6) + \Mordheim\Dice::roll(6);
+            $success = $roll <= $fighter->getLeadership();
+            if ($success) {
+                $battle->removeActiveSpell($fighter, \Mordheim\Data\Spell::LURE_OD_CHAOS);
+                \Mordheim\BattleLogger::add("{$fighter->getName()} проходит тест Лидерства и освобождается от контроля Lure of Chaos (бросок $roll против {$fighter->getLeadership()}).");
+            } else {
+                \Mordheim\BattleLogger::add("{$fighter->getName()} не прошёл тест Лидерства и остаётся под контролем Lure of Chaos (бросок $roll против {$fighter->getLeadership()}).");
             }
         }
         // --- All Alone ---

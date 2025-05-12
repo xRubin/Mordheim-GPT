@@ -3,6 +3,7 @@
 namespace Mordheim\Data;
 
 use Mordheim\Battle;
+use Mordheim\CloseCombat;
 use Mordheim\Data\Attributes\Difficulty;
 use Mordheim\Data\Attributes\StateSpecialRule;
 use Mordheim\Data\Attributes\WizardSpecialRule;
@@ -12,11 +13,13 @@ use Mordheim\Exceptions\ChargeFailedException;
 use Mordheim\Exceptions\InvalidAttributesException;
 use Mordheim\FighterInterface;
 use Mordheim\FighterState;
+use Mordheim\Rule\AvoidStun;
 use Mordheim\Rule\Charge;
 use Mordheim\Rule\Injuries;
 use Mordheim\Ruler;
 use Mordheim\SpecialRuleInterface;
 use Mordheim\SpellInterface;
+use Mordheim\Status;
 use Mordheim\Strategy\AggressiveStrategy;
 
 enum Spell implements SpellInterface
@@ -380,6 +383,192 @@ enum Spell implements SpellInterface
                 $battle->addActiveSpell($fighter, $this);
                 \Mordheim\BattleLogger::add("{$fighter->getName()} поднимает героя-зомби ({$zombieHero->getName()}) с помощью Spell of Awakening!");
                 return true;
+            case self::VISION_OF_TORMENT:
+            {
+                // Ближайший враг в 6" — оглушить (или сбить с ног)
+                $enemies = $battle->getEnemiesFor($fighter);
+                if (empty($enemies))
+                    return false;
+                // К ближайшему врагу
+                usort($enemies, fn($a, $b) => Ruler::distance($fighter->getState()->getPosition(), $a->getState()->getPosition()) <=> Ruler::distance($fighter->getState()->getPosition(), $b->getState()->getPosition()));
+                $closest = $enemies[0];
+                if (Ruler::distance($fighter->getState()->getPosition(), $closest->getState()->getPosition()) > 6) {
+                    \Mordheim\BattleLogger::add("Нет врагов в 6\" для Vision of Torment.");
+                    return false;
+                }
+                // Если в рукопашной — только из base contact
+                if ($battle->getActiveCombats()->isFighterInCombat($fighter)) {
+                    $inBase = array_filter($enemies, fn($e) => Ruler::isAdjacent($fighter->getState()->getPosition(), $e->getState()->getPosition()));
+                    if (count($inBase)) {
+                        $closest = reset($inBase);
+                    }
+                }
+                if (AvoidStun::roll($closest)) {
+                    \Mordheim\BattleLogger::add("{$closest->getName()} сбит с ног Vision of Torment.");
+                    $closest->getState()->setStatus(Status::KNOCKED_DOWN);
+                } else {
+                    \Mordheim\BattleLogger::add("{$closest->getName()} оглушён Vision of Torment.");
+                    $closest->getState()->setStatus(Status::STUNNED);
+                }
+                return true;
+            }
+            case self::EYE_OF_GOD:
+            {
+                // Раз в бой, цель в 6", d6: 1 — выбыл, 2-5 — +1 к характеристике, 6 — +1 ко всем
+                if ($fighter->getState()->hasActiveSpell(self::EYE_OF_GOD)) {
+                    \Mordheim\BattleLogger::add("Eye of God уже был использован этим магом в этом бою.");
+                    return false;
+                }
+                $target = null;
+                foreach ($battle->getAlliesFor($fighter) as $ally) {
+                    if (Ruler::distance($fighter->getState()->getPosition(), $ally->getState()->getPosition()) <= 6) {
+                        $target = $ally;
+                    }
+                }
+                if (!$target) {
+                    \Mordheim\BattleLogger::add("Нет цели для Eye of God в 6\".");
+                    return false;
+                }
+
+                $roll = Dice::roll(6);
+                if ($roll == 1) {
+                    $battle->killFighter($target);
+                    \Mordheim\BattleLogger::add("{$target->getName()} поражён гневом богов (Eye of God) и выбывает из боя!");
+                } elseif ($roll >= 2 && $roll <= 5) {
+                    // +1 к одной характеристике
+                    $characteristics = [
+                        'movement' => $target->getMovement(),
+                        'weaponSkill' => $target->getWeaponSkill(),
+                        'ballisticSkill' => $target->getBallisticSkill(),
+                        'strength' => $target->getStrength(),
+                        'toughness' => $target->getToughness(),
+                        'initiative' => $target->getInitiative(),
+                        'attacks' => $target->getAttacks(),
+                        'leadership' => $target->getLeadership(),
+
+                    ];
+                    arsort($characteristics);
+                    $selected = array_key_first($characteristics);
+                    $target->getAdvancement()->getCharacteristics()->$selected += 1;
+                    \Mordheim\BattleLogger::add("{$target->getName()} получает +1 к {$selected} до конца боя (Eye of God).");
+                } else {
+                    // +1 ко всем характеристикам
+                    foreach ([
+                                 'movement', 'weaponSkill', 'ballisticSkill', 'strength', 'toughness', 'wounds', 'initiative', 'attacks', 'leadership'
+                             ] as $char) {
+                        if (property_exists($target->getAdvancement()->getCharacteristics(), $char)) {
+                            $target->getAdvancement()->getCharacteristics()->$char += 1;
+                        }
+                    }
+                    \Mordheim\BattleLogger::add("{$target->getName()} получает +1 ко всем характеристикам до конца боя (Eye of God)!");
+                }
+                $battle->addActiveSpell($fighter, $this);
+                return true;
+            }
+            case self::DARK_BLOOD:
+            {
+                // 8", D3 попадания S5 по первой цели на линии, маг кидает на травму себе
+                $target = null;
+                foreach ($battle->getAlliesFor($fighter) as $ally) {
+                    if (Ruler::distance($fighter->getState()->getPosition(), $ally->getState()->getPosition()) <= 8) {
+                        $target = $ally;
+                    }
+                }
+                if (!$target) {
+                    \Mordheim\BattleLogger::add("Нет цели для Dark Blood в 8\".");
+                    return false;
+                }
+                $hits = Dice::roll(3); // D3
+                for ($i = 0; $i < $hits; $i++) {
+                    $target->getState()->modifyWounds(-5);
+                }
+                \Mordheim\BattleLogger::add("{$target->getName()} получает {$hits} попаданий силой 5 от Dark Blood.");
+                if ($target->getState()->getWounds() <= 0) {
+                    $battle->killFighter($target);
+                }
+                // Маг кидает на травму себе
+                \Mordheim\Rule\Injuries::roll($battle, $fighter, $fighter); // TODO treat out of action as stunned
+                return true;
+            }
+            case self::LURE_OD_CHAOS:
+            {
+                // 12", ближайший враг, сравнение Лидерства, если маг выиграл — контроль
+                // К ближайшему врагу
+                $enemies = $battle->getEnemiesFor($fighter);
+                usort($enemies, fn($a, $b) => Ruler::distance($fighter->getState()->getPosition(), $a->getState()->getPosition()) <=> Ruler::distance($fighter->getState()->getPosition(), $b->getState()->getPosition()));
+                $closest = $enemies[0];
+                if (Ruler::distance($fighter->getState()->getPosition(), $closest->getState()->getPosition()) > 12) {
+                    \Mordheim\BattleLogger::add("Нет врагов в 12\" для Lure of Chaos.");
+                    return false;
+                }
+
+                $mageRoll = Dice::roll(6) + $fighter->getLeadership();
+                $targetRoll = Dice::roll(6) + $closest->getLeadership();
+                if ($mageRoll > $targetRoll) {
+                    $closest->getState()->addActiveSpell($this);
+                    \Mordheim\BattleLogger::add("{$fighter->getName()} получает контроль над {$closest->getName()} (Lure of Chaos)!");
+                    foreach ($battle->getActiveCombats()->getByFighter($closest) as $combat)
+                        $battle->getActiveCombats()->remove($combat);
+                } else {
+                    \Mordheim\BattleLogger::add("{$closest->getName()} устоял против Lure of Chaos.");
+                }
+                return true;
+            }
+            case self::WINGS_OF_DARKNESS:
+            {
+                // Перемещение на 12", можно в контакт (атака), если догнал бегущего — автохит
+                $enemies = $battle->getEnemiesFor($fighter);
+                if (empty($enemies)) {
+                    \Mordheim\BattleLogger::add("Нет врагов для Wings of Darkness.");
+                    return false;
+                }
+                // К ближайшему врагу в 12"
+                usort($enemies, fn($a, $b) => Ruler::distance($fighter->getState()->getPosition(), $a->getState()->getPosition()) <=> Ruler::distance($fighter->getState()->getPosition(), $b->getState()->getPosition()));
+                $closest = $enemies[0];
+                $dist = Ruler::distance($fighter->getState()->getPosition(), $closest->getState()->getPosition());
+                if ($dist > 12) {
+                    \Mordheim\BattleLogger::add("Нет врагов в 12\" для Wings of Darkness.");
+                    return false;
+                }
+                // Найти свободную adjacent клетку
+                $adj = \Mordheim\Rule\Charge::getNearestChargePosition($battle, $fighter, $closest);
+                if (empty($adj)) {
+                    \Mordheim\BattleLogger::add("Нет свободных клеток рядом с врагом для Wings of Darkness.");
+                    return false;
+                }
+                $fighter->getState()->setPosition($adj);
+                \Mordheim\BattleLogger::add("{$fighter->getName()} перемещается к {$closest->getName()} с помощью Wings of Darkness.");
+                // Charge/Close Combat
+                if ($closest->getState()->getStatus() === Status::PANIC) {
+                    \Mordheim\BattleLogger::add("{$fighter->getName()} наносит автоматический удар по бегущему {$closest->getName()} (Wings of Darkness).");
+                    $closest->getState()->modifyWounds(-1); // Пример: 1 урон
+                    if ($closest->getState()->getWounds() <= 0) {
+                        $battle->killFighter($closest);
+                    }
+                } else {
+                    $battle->getActiveCombats()->add(new CloseCombat($fighter, $closest));
+                }
+                return true;
+            }
+            case self::WORD_OF_PAIN:
+            {
+                // Все в 3" получают 1 попадание S3, без сейва
+                $fighters = $battle->getFighters();
+                $count = 0;
+                foreach ($fighters as $target) {
+                    if (Ruler::distance($fighter->getState()->getPosition(), $target->getState()->getPosition()) <= 3) {
+                        if ($target === $fighter)
+                            continue;
+                        $target->getState()->modifyWounds(-3); // S3, но просто -3 ран
+                        if ($target->getState()->getWounds() <= 0) {
+                            $battle->killFighter($target);
+                        }
+                        $count++;
+                    }
+                }
+                \Mordheim\BattleLogger::add("{$count} моделей получают урон от Word of Pain (без сейва).");
+                return true;
+            }
         }
 
         return false;

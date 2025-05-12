@@ -76,9 +76,12 @@ class RecoveryPhaseTest extends TestCase
     {
         $fighter = $this->makeFighter(Status::PANIC);
         $warband = new Warband('Test', [$fighter]);
+        $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
+            $warband
+        ]);
         // эмулируем успешный тест лидерства
         \Mordheim\Dice::setTestRolls([1, 1]);
-        $result = \Mordheim\Rule\RecoveryPhase::applyPsychology($fighter, $warband, [$warband]);
+        $result = \Mordheim\Rule\RecoveryPhase::applyPsychology($battle, $fighter, $warband, [$warband]);
         $this->assertTrue($result);
         $this->assertEquals(Status::STANDING, $fighter->getState()->getStatus());
     }
@@ -87,9 +90,12 @@ class RecoveryPhaseTest extends TestCase
     {
         $fighter = $this->makeFighter(Status::PANIC);
         $warband = new Warband('Test', [$fighter]);
+        $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
+            $warband
+        ]);
         // эмулируем провал теста лидерства
         \Mordheim\Dice::setTestRolls([6, 6]);
-        $result = \Mordheim\Rule\RecoveryPhase::applyPsychology($fighter, $warband, [$warband]);
+        $result = \Mordheim\Rule\RecoveryPhase::applyPsychology($battle, $fighter, $warband, [$warband]);
         $this->assertFalse($result);
         $this->assertEquals(Status::PANIC, $fighter->getState()->getStatus());
     }

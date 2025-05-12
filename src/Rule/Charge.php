@@ -73,7 +73,7 @@ class Charge
      * @param FighterInterface $defender
      * @return array|null
      */
-    protected static function getNearestChargePosition(Battle $battle, FighterInterface $attacker, FighterInterface $defender): ?array
+    public static function getNearestChargePosition(Battle $battle, FighterInterface $attacker, FighterInterface $defender): ?array
     {
         // Определить клетки adjacent к цели
         $adjacent = self::getAdjacentPositions($battle, $defender->getState()->getPosition());
@@ -92,7 +92,7 @@ class Charge
     /**
      * Получить список позиций, смежных с данной
      */
-    protected static function getAdjacentPositions(Battle $battle, array $position): array
+    public static function getAdjacentPositions(Battle $battle, array $position): array
     {
         $fightersPos = array_values(
             array_filter(

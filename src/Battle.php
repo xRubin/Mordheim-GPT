@@ -92,7 +92,7 @@ class Battle
                 $this->phaseMove($warband);
             } else {
                 foreach ($warband->fighters as $fighter) {
-                    if (!RecoveryPhase::applyPsychology($fighter, $warband, $this->warbands)) {
+                    if (!RecoveryPhase::applyPsychology($this, $fighter, $warband, $this->warbands)) {
                         $fighter->getState()->getBattleStrategy()->spentAll();
                     }
                 }
@@ -190,7 +190,7 @@ class Battle
     protected function phaseCloseCombat(): void
     {
         \Mordheim\BattleLogger::add("Фаза рукопашного боя");
-        foreach ($this->activeCombats->getAll() as $combat) {
+        foreach ($this->getActiveCombats()->getAll() as $combat) {
             $fighters = $combat->fighters;
             usort($fighters, function (FighterInterface $a, FighterInterface $b) use ($combat) {
                 if ($combat->getBonus($a, CloseCombat::BONUS_CHARGED))

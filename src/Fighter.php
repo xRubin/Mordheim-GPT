@@ -21,6 +21,12 @@ class Fighter implements FighterInterface
         return $this->name;
     }
 
+    public function setName(string $name): FighterInterface
+    {
+        $this->name = $name;
+        return $this;
+    }
+
     public function getBlank(): BlankInterface
     {
         return $this->blank;
