@@ -2,7 +2,7 @@
 
 namespace Mordheim\Rule;
 
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
 
 class AvoidStun
 {
@@ -10,7 +10,7 @@ class AvoidStun
      * Попытка избежать стана с помощью шлема (Avoid stun, 4+)
      * @return bool true — спасся (stun превращается в knockdown), false — не спасся
      */
-    public static function roll(FighterInterface $fighter): bool
+    public static function roll(Fighter $fighter): bool
     {
         if ($fighter->getEquipmentManager()->hasHelmetProtection()) {
             $roll = \Mordheim\Dice::roll(6);

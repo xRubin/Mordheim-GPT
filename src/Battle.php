@@ -13,7 +13,7 @@ class Battle
 {
     /** @var GameField */
     protected GameField $field;
-    /** @var FighterInterface[] */
+    /** @var Fighter[] */
     protected array $fighters = [];
     /** @var int */
     protected int $turn = 1;
@@ -25,7 +25,7 @@ class Battle
     protected int $activeWarbandIndex = 0;
     /**
      * Активные заклинания на поле боя
-     * @var SplObjectStorage<FighterInterface, SpellInterface[]>
+     * @var SplObjectStorage<Fighter, SpellInterface[]>
      */
     protected SplObjectStorage $activeSpells;
 
@@ -42,7 +42,7 @@ class Battle
         }
     }
 
-    public function addFighter(FighterInterface $fighter): static
+    public function addFighter(Fighter $fighter): static
     {
         $this->fighters[] = $fighter;
         return $this;
@@ -133,7 +133,7 @@ class Battle
         }
     }
 
-    public function runAwayInPanic(FighterInterface $fighter): void
+    public function runAwayInPanic(Fighter $fighter): void
     {
         [$x, $y, $z] = $fighter->getState()->getPosition();
         // Края: x=0, x=width-1, y=0, y=length-1
@@ -160,7 +160,8 @@ class Battle
     {
         \Mordheim\BattleLogger::add("Фаза стрельбы: {$warband->name}");
         foreach ($warband->fighters as $fighter) {
-            Spell::onPhaseShoot($this, $fighter);
+            foreach ($fighter->getState()->getActiveSpells() as $spell)
+                $spell->getProcessor()?->onPhaseShoot($this, $fighter);
         }
         foreach ($warband->fighters as $fighter) {
             if ($fighter->getState()->getStatus()->canAct()) {
@@ -192,7 +193,7 @@ class Battle
         \Mordheim\BattleLogger::add("Фаза рукопашного боя");
         foreach ($this->getActiveCombats()->getAll() as $combat) {
             $fighters = $combat->fighters;
-            usort($fighters, function (FighterInterface $a, FighterInterface $b) use ($combat) {
+            usort($fighters, function (Fighter $a, Fighter $b) use ($combat) {
                 if ($combat->getBonus($a, CloseCombat::BONUS_CHARGED))
                     return ($b->hasSpecialRule(SpecialRule::LIGHTNING_REFLEXES) && !$a->hasSpecialRule(SpecialRule::LIGHTNING_REFLEXES)) ? 1 : -1;
 
@@ -241,9 +242,9 @@ class Battle
 
     /**
      * Получить врагов для бойца
-     * @return FighterInterface[]
+     * @return Fighter[]
      */
-    public function getEnemiesFor(FighterInterface $target): array
+    public function getEnemiesFor(Fighter $target): array
     {
         $enemies = [];
         foreach ($this->warbands as $wb) {
@@ -258,10 +259,10 @@ class Battle
 
     /**
      * Получить союзников для бойца
-     * @param FighterInterface $target
-     * @return FighterInterface[]
+     * @param Fighter $target
+     * @return Fighter[]
      */
-    public function getAlliesFor(FighterInterface $target): array
+    public function getAlliesFor(Fighter $target): array
     {
         $allies = [];
         foreach ($this->warbands as $wb) {
@@ -277,7 +278,7 @@ class Battle
     /**
      * Проверить, союзник ли другой боец
      */
-    public function isAlly(FighterInterface $a, FighterInterface $b): bool
+    public function isAlly(Fighter $a, Fighter $b): bool
     {
         foreach ($this->warbands as $wb) {
             if (in_array($a, $wb->fighters, true) && in_array($b, $wb->fighters, true)) {
@@ -289,7 +290,7 @@ class Battle
         return false;
     }
 
-    public function killFighter(FighterInterface $fighter): void
+    public function killFighter(Fighter $fighter): void
     {
         $fighter->getState()->setStatus(Status::OUT_OF_ACTION);
         foreach ($this->getActiveCombats()->getByFighter($fighter) as $combat)
@@ -363,20 +364,20 @@ class Battle
 
     /**
      * Получить активные заклинания для бойца
-     * @param FighterInterface $fighter
+     * @param Fighter $fighter
      * @return SpellInterface[]
      */
-    public function getActiveSpellsFor(FighterInterface $fighter): array
+    public function getActiveSpellsFor(Fighter $fighter): array
     {
         return $this->activeSpells->contains($fighter) ? $this->activeSpells[$fighter] : [];
     }
 
     /**
      * Добавить активное заклинание для бойца
-     * @param FighterInterface $fighter
+     * @param Fighter $fighter
      * @param SpellInterface $spell
      */
-    public function addActiveSpell(FighterInterface $fighter, SpellInterface $spell): void
+    public function addActiveSpell(Fighter $fighter, SpellInterface $spell): void
     {
         $spells = $this->activeSpells->contains($fighter) ? $this->activeSpells[$fighter] : [];
         $spells[] = $spell;
@@ -386,10 +387,10 @@ class Battle
 
     /**
      * Удалить активное заклинание для бойца
-     * @param FighterInterface $fighter
+     * @param Fighter $fighter
      * @param SpellInterface $spell
      */
-    public function removeActiveSpell(FighterInterface $fighter, SpellInterface $spell): void
+    public function removeActiveSpell(Fighter $fighter, SpellInterface $spell): void
     {
         if (!$this->activeSpells->contains($fighter)) return;
         $spells = array_filter(
@@ -406,11 +407,11 @@ class Battle
 
     /**
      * Найти ближайшую свободную клетку в радиусе radius от позиции бойца
-     * @param FighterInterface $fighter
+     * @param Fighter $fighter
      * @param int $radius
      * @return array|null [x, y, z] или null если нет свободных
      */
-    public function findUnoccupiedPosition(FighterInterface $fighter, int $radius): ?array
+    public function findUnoccupiedPosition(Fighter $fighter, int $radius): ?array
     {
         $field = $this->getField();
         $pos = $fighter->getState()->getPosition();

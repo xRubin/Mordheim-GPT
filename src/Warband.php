@@ -5,7 +5,7 @@ namespace Mordheim;
 class Warband
 {
     public string $name;
-    /** @var FighterInterface[] */
+    /** @var Fighter[] */
     public array $fighters = [];
 
     public function __construct(string $name, array $fighters = [])

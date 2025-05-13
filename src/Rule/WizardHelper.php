@@ -3,7 +3,7 @@
 namespace Mordheim\Rule;
 
 use Mordheim\BlankInterface;
-use Mordheim\FighterAdvancementInterface;
+use Mordheim\FighterAdvancement;
 use Mordheim\SpecialRule;
 
 class WizardHelper
@@ -22,7 +22,10 @@ class WizardHelper
         return false;
     }
 
-    public static function getUnlearnedSpells(BlankInterface $blank, FighterAdvancementInterface $advancement): array
+    /**
+     * TODO
+     */
+    public static function getUnlearnedSpells(BlankInterface $blank, FighterAdvancement $advancement): array
     {
         if (!self::isWizard($blank))
             return [];

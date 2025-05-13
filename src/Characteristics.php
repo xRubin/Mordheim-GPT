@@ -2,7 +2,7 @@
 
 namespace Mordheim;
 
-class Characteristics implements CharacteristicsInterface
+class Characteristics
 {
     public function __construct(
         public int $movement = 0,

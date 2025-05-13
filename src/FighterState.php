@@ -2,7 +2,7 @@
 
 namespace Mordheim;
 
-class FighterState implements FighterStateInterface
+class FighterState
 {
     /**
      * Активные заклинания на персонаже

@@ -3,12 +3,12 @@
 use Mordheim\BattleStrategyInterface;
 use Mordheim\EquipmentManager;
 use Mordheim\Rule\Psychology;
-
+use Mordheim\Fighter;
 class LeaderRuleTest extends MordheimTestCase
 {
     private function makeFighterMock($name, $ld, $pos, $hasLeaderRule, $status,)
     {
-        $fighter = $this->createMock(\Mordheim\FighterInterface::class);
+        $fighter = $this->createMock(Fighter::class);
         $fighter->method('getName')->willReturn($name);
         $fighter->method('getLeadership')->willReturn($ld);
         $fighter->method('hasSpecialRule')->willReturnCallback(function ($rule) use ($hasLeaderRule) {

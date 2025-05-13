@@ -4,7 +4,7 @@ namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
 use Mordheim\BattleStrategyInterface;
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
 use Mordheim\Ruler;
 use Mordheim\Slot;
 use Mordheim\SpecialRule;
@@ -43,19 +43,19 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
     /**
      * Найти ближайшего врага
      */
-    protected function getNearestEnemy(FighterInterface $fighter, array $enemies): ?FighterInterface
+    protected function getNearestEnemy(Fighter $fighter, array $enemies): ?Fighter
     {
         if (empty($enemies)) return null;
-        usort($enemies, fn($a, $b) => $this->getDistance($fighter, $a) <=> $this->getDistance($fighter, $b));
+        usort($enemies, fn($a, $b) => Ruler::distance($fighter, $a) <=> Ruler::distance($fighter, $b));
         return $enemies[0];
     }
 
     /**
      * Проверить страх/ужас. Вернёт true если можно действовать
      */
-    protected function canActAgainst(Battle $battle, FighterInterface $fighter, FighterInterface $target): bool
+    protected function canActAgainst(Battle $battle, Fighter $fighter, Fighter $target): bool
     {
-        if ($fighter->getState()->getStatus() === Status::FRENZY && ($this->getDistance($fighter, $target) < $fighter->getRunRange())) {
+        if ($fighter->getState()->getStatus() === Status::FRENZY && (Ruler::distance($fighter, $target) < $fighter->getRunRange())) {
             return true;
         } else {
             $allies = $battle->getAlliesFor($fighter);
@@ -65,7 +65,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         return true;
     }
 
-    public function movePhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    public function movePhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if ($fighter->getState()->getStatus() === Status::KNOCKED_DOWN) {
             if ($this->spentMove = \Mordheim\Rule\StandUp::apply($fighter)) {
@@ -89,7 +89,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         $this->spentMove = true;
     }
 
-    public function shootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    public function shootPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if (!$fighter->getState()->getStatus()->canAct()) {
             \Mordheim\BattleLogger::add("{$fighter->getName()} не может действовать из-за состояния {$fighter->getState()->getStatus()->value}.");
@@ -108,7 +108,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         $this->spentShoot = true;
     }
 
-    public function magicPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    public function magicPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if (!$fighter->getState()->getStatus()->canAct()) {
             \Mordheim\BattleLogger::add("{$fighter->getName()} не может действовать из-за состояния {$fighter->getState()->getStatus()->value}.");
@@ -121,7 +121,7 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         $this->spentMagic = true;
     }
 
-    public function closeCombatPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    public function closeCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if (!$fighter->getState()->getStatus()->canAct()) {
             \Mordheim\BattleLogger::add("{$fighter->getName()} не может действовать из-за состояния {$fighter->getState()->getStatus()->value}.");
@@ -137,21 +137,11 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         $this->spentCloseCombat = true;
     }
 
-    abstract protected function onMovePhase(Battle $battle, FighterInterface $fighter, array $enemies): void;
+    abstract protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void;
 
-    abstract protected function onShootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void;
+    abstract protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void;
 
-    abstract protected function onMagicPhase(Battle $battle, FighterInterface $fighter, array $enemies): void;
+    abstract protected function onMagicPhase(Battle $battle, Fighter $fighter, array $enemies): void;
 
-    abstract protected function onCloseCombatPhase(Battle $battle, FighterInterface $fighter, array $enemies): void;
-
-    public function isAdjacent(FighterInterface $source, FighterInterface $target): bool
-    {
-        return Ruler::isAdjacent($source->getState()->getPosition(), $target->getState()->getPosition());
-    }
-
-    public function getDistance(FighterInterface $source, FighterInterface $target): float
-    {
-        return Ruler::distance($source->getState()->getPosition(), $target->getState()->getPosition());
-    }
+    abstract protected function onCloseCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void;
 }

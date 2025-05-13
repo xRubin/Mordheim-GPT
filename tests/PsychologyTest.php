@@ -2,12 +2,13 @@
 
 use Mordheim\EquipmentManager;
 use Mordheim\Rule\Psychology;
+use Mordheim\Fighter;
 
 class PsychologyTest extends MordheimTestCase
 {
     private function makeFighterMock($ws, $ld)
     {
-        $fighter = $this->createMock(\Mordheim\FighterInterface::class);
+        $fighter = $this->createMock(Fighter::class);
         $fighter->method('getWeaponSkill')->willReturn($ws);
         $fighter->method('getLeadership')->willReturn($ld);
         $fighter->method('getEquipmentManager')->willReturn(new EquipmentManager());

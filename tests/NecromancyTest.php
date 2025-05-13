@@ -60,7 +60,8 @@ class NecromancyTest extends MordheimTestCase
             new Warband('Undead', [$necromancer]),
             new Warband('Mercs', [$enemy])
         ]);
-        $result = Spell::LIFESTEALER->onPhaseMagic($battle, $necromancer);
+        \Mordheim\Dice::setTestRolls([6, 6]);
+        $result = Spell::LIFESTEALER->getProcessor()->onPhaseMagic($battle, $necromancer);
         $this->assertTrue($result);
         $this->assertEquals(1, $enemy->getState()->getWounds());
         $this->assertEquals(2, $necromancer->getState()->getWounds());
@@ -73,7 +74,8 @@ class NecromancyTest extends MordheimTestCase
         $battle = new Battle(new \Mordheim\GameField(), [
             new Warband('Undead', [$necromancer, $zombie])
         ]);
-        $result = Spell::RE_ANIMATION->onPhaseMagic($battle, $necromancer);
+        \Mordheim\Dice::setTestRolls([6, 6]);
+        $result = Spell::RE_ANIMATION->getProcessor()->onPhaseMagic($battle, $necromancer);
         $this->assertTrue($result);
         $this->assertEquals(Status::STANDING, $zombie->getState()->getStatus());
         $this->assertNotEquals([1, 0, 0], $zombie->getState()->getPosition()); // Должен появиться не на старой позиции
@@ -85,7 +87,8 @@ class NecromancyTest extends MordheimTestCase
         $battle = new Battle(new \Mordheim\GameField(), [
             new Warband('Undead', [$necromancer])
         ]);
-        $result = Spell::DEATH_VISION->onPhaseMagic($battle, $necromancer);
+        \Mordheim\Dice::setTestRolls([6, 6]);
+        $result = Spell::DEATH_VISION->getProcessor()->onPhaseMagic($battle, $necromancer);
         $this->assertTrue($result);
         $this->assertTrue($necromancer->getState()->hasActiveSpell(Spell::DEATH_VISION));
         $this->assertTrue($necromancer->hasSpecialRule(SpecialRule::CAUSE_FEAR));
@@ -99,8 +102,8 @@ class NecromancyTest extends MordheimTestCase
             new Warband('Undead', [$necromancer]),
             new Warband('Mercs', [$enemy])
         ]);
-        \Mordheim\Dice::setTestRolls([6]); // Провалить проверку силы
-        $result = Spell::SPELL_OF_DOOM->onPhaseMagic($battle, $necromancer);
+        \Mordheim\Dice::setTestRolls([6, 6, 6]); // Провалить проверку силы
+        $result = Spell::SPELL_OF_DOOM->getProcessor()->onPhaseMagic($battle, $necromancer);
         $this->assertTrue($result);
         // Проверяем, что враг получил травму (можно проверить статус или логи)
     }
@@ -115,7 +118,8 @@ class NecromancyTest extends MordheimTestCase
             new Warband('Mercs', [$enemy])
         ]);
         $oldPos = $zombie->getState()->getPosition();
-        $result = Spell::CALL_OF_VANHEL->onPhaseMagic($battle, $necromancer);
+        \Mordheim\Dice::setTestRolls([6, 6]);
+        $result = Spell::CALL_OF_VANHEL->getProcessor()->onPhaseMagic($battle, $necromancer);
         $this->assertTrue($result);
         $this->assertNotEquals($oldPos, $zombie->getState()->getPosition());
     }
@@ -126,7 +130,7 @@ class NecromancyTest extends MordheimTestCase
         $battle = new Battle(new \Mordheim\GameField(), [
             new Warband('Undead', [$necromancer])
         ]);
-        $result = Spell::SPELL_OF_AWAKENING->onPhaseMagic($battle, $necromancer);
+        $result = Spell::SPELL_OF_AWAKENING->getProcessor()->onPhaseMagic($battle, $necromancer);
         $this->assertTrue($result);
         $this->assertCount(2, $battle->getFighters(), 'Зомби-герой должен быть добавлен на поле');
     }

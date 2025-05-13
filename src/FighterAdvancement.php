@@ -2,10 +2,10 @@
 
 namespace Mordheim;
 
-class FighterAdvancement implements FighterAdvancementInterface
+class FighterAdvancement
 {
     public function __construct(
-        private CharacteristicsInterface $characteristics,
+        private Characteristics $characteristics,
         private array $specialRules = [],
         private array $spells = [], // WizardSpellInterface[]
     )
@@ -20,7 +20,7 @@ class FighterAdvancement implements FighterAdvancementInterface
         );
     }
 
-    public function getCharacteristics(): CharacteristicsInterface
+    public function getCharacteristics(): Characteristics
     {
         return $this->characteristics;
     }

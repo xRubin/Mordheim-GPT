@@ -4,12 +4,13 @@ use Mordheim\Battle;
 use Mordheim\GameField;
 use Mordheim\SpecialRule;
 use Mordheim\Warband;
+use Mordheim\Fighter;
 
 class MoveTest extends MordheimTestCase
 {
     private function makeFighterMock($pos, $move = 3, $initiative = 3, $skills = [])
     {
-        $fighterMock = $this->createMock(\Mordheim\FighterInterface::class);
+        $fighterMock = $this->createMock(Fighter::class);
 
         $fighterMock->method('getMoveRange')->willReturn($move);
         $fighterMock->method('getInitiative')->willReturn($initiative);

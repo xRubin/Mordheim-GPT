@@ -3,7 +3,6 @@
 namespace Mordheim\Data\Attributes;
 
 use Attribute;
-use Mordheim\CharacteristicsInterface;
 
 #[Attribute(Attribute::TARGET_CLASS_CONSTANT)]
 readonly class Characteristics
@@ -22,7 +21,7 @@ readonly class Characteristics
     {
     }
 
-    public function getValue(): CharacteristicsInterface
+    public function getValue(): \Mordheim\Characteristics
     {
         return new \Mordheim\Characteristics(
             movement: $this->movement,

@@ -5,7 +5,7 @@ namespace Mordheim\Rule;
 use Mordheim\Battle;
 use Mordheim\Exceptions\MoveRunDeprecatedException;
 use Mordheim\Exceptions\PathfinderTargetUnreachableException;
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
 use Mordheim\Ruler;
 
 class Move
@@ -14,12 +14,12 @@ class Move
      * Продвинутое движение по правилам Mordheim: поверхность, труднопроходимость, опасность, прыжки, вода, лестницы, высота
      * Возвращает подробный лог хода
      * @param Battle $battle
-     * @param FighterInterface $fighter
+     * @param Fighter $fighter
      * @param array $target
      * @param float $aggressiveness
      * @return void
      */
-    public static function common(Battle $battle, FighterInterface $fighter, array $target, float $aggressiveness): void
+    public static function common(Battle $battle, Fighter $fighter, array $target, float $aggressiveness): void
     {
         $blockers = self::prepareBlockers($battle, $fighter);
         $movePoints = $fighter->getMoveRange();
@@ -30,17 +30,17 @@ class Move
     /**
      * Бег по правилам Mordheim 1999: удвоенное движение, нельзя бежать если в начале хода есть враг в 8" (20.32 см), нельзя бежать по воде
      * @param Battle $battle
-     * @param FighterInterface $fighter
+     * @param Fighter $fighter
      * @param array $target
      * @param float $aggressiveness
      * @return void
      * @throws PathfinderTargetUnreachableException
      * @throws MoveRunDeprecatedException
      */
-    public static function run(Battle $battle, FighterInterface $fighter, array $target, float $aggressiveness): void
+    public static function run(Battle $battle, Fighter $fighter, array $target, float $aggressiveness): void
     {
         foreach ($battle->getEnemiesFor($fighter) as $enemy) {
-            if (Ruler::distance($fighter->getState()->getPosition(), $enemy->getState()->getPosition()) < 8) { // 8 клеток = 8"
+            if (Ruler::distance($fighter, $enemy) < 8) { // 8 клеток = 8"
                 \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать: враг слишком близко (меньше 8\")");
                 throw new MoveRunDeprecatedException();
             }
@@ -68,11 +68,11 @@ class Move
     /**
      * Подготовка массива блокирующих позиций
      */
-    protected static function prepareBlockers(Battle $battle, FighterInterface $fighter): array
+    protected static function prepareBlockers(Battle $battle, Fighter $fighter): array
     {
         return array_filter(
             array_map(
-                fn(FighterInterface $fighter) => $fighter->getState()->getStatus()->isAlive() ? $fighter->getState()->getPosition() : null,
+                fn(Fighter $fighter) => $fighter->getState()->getStatus()->isAlive() ? $fighter->getState()->getPosition() : null,
                 $battle->getFighters()
             )
         );
@@ -81,7 +81,7 @@ class Move
     /**
      * Поиск пути и определение индекса достижимой точки
      */
-    protected static function findPathAndReachableIndex(Battle $battle, FighterInterface $fighter, array $target, float $aggressiveness, array $blockers, int $movePoints): array
+    protected static function findPathAndReachableIndex(Battle $battle, Fighter $fighter, array $target, float $aggressiveness, array $blockers, int $movePoints): array
     {
         $path = \Mordheim\PathFinder::findPath($battle->getField(), $fighter->getState()->getPosition(), $target, $fighter->getMovementWeights(), $aggressiveness, $blockers);
         if (!$path || count($path) < 2)
@@ -98,7 +98,7 @@ class Move
      * Движение по пути до lastReachableIdx (включительно)
      * Если reachedTarget == true, то это бег/движение до максимума, иначе обычное движение
      */
-    protected static function moveAlongPath(Battle $battle, FighterInterface $fighter, array $path, int $lastReachableIdx, bool $run = false): void
+    protected static function moveAlongPath(Battle $battle, Fighter $fighter, array $path, int $lastReachableIdx, bool $run = false): void
     {
         $cur = $fighter->getState()->getPosition();
         $movePoints = $run ? $fighter->getRunRange() : $fighter->getMoveRange();
@@ -128,7 +128,7 @@ class Move
     /**
      * Обработка особенностей клетки (вода, труднопроходимость, опасность, прыжки, лестницы, лазание)
      */
-    protected static function processCellFeatures(Battle $battle, FighterInterface $fighter, $cell, $fromCell, $x, $y, $z, $cur, &$cost, &$desc): void
+    protected static function processCellFeatures(Battle $battle, Fighter $fighter, $cell, $fromCell, $x, $y, $z, $cur, &$cost, &$desc): void
     {
         // Difficult terrain: double cost
         if ($cell->difficultTerrain) {

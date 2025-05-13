@@ -3,7 +3,6 @@
 namespace Mordheim\Data;
 
 use Mordheim\BlankInterface;
-use Mordheim\CharacteristicsInterface;
 use Mordheim\Data\Attributes\AllowedWarband;
 use Mordheim\Data\Attributes\Characteristics;
 use Mordheim\Data\Attributes\Equipment;
@@ -169,7 +168,7 @@ enum Blank implements BlankInterface
     #[Warband('CULT_OF_THE_POSSESSED'), Hero]
     #[HireFee(90)]
     #[MaxCount(2)]
-    #[Characteristics(5, 4, 0, 4, 4, 2, 4, 2, 7), MaxCharacteristics(6, 8, 0, 6, 6, 4, 7 ,5 , 10)]
+    #[Characteristics(5, 4, 0, 4, 4, 2, 4, 2, 7), MaxCharacteristics(6, 8, 0, 6, 6, 4, 7, 5, 10)]
     #[EquipmentList('EMPTY')]
     #[SpecialRule('CAUSE_FEAR'), SpecialRule('MUTATIONS')]
     #[SkillGroup('COMBAT'), SkillGroup('STRENGTH'), SkillGroup('SPEED')]
@@ -556,7 +555,7 @@ enum Blank implements BlankInterface
         return count($classAttributes) > 0;
     }
 
-    public function getCharacteristics(): CharacteristicsInterface
+    public function getCharacteristics(): \Mordheim\Characteristics
     {
         $ref = new \ReflectionClassConstant(self::class, $this->name);
         $classAttributes = $ref->getAttributes(Characteristics::class);
@@ -567,7 +566,7 @@ enum Blank implements BlankInterface
         return $classAttributes[0]->newInstance()->getValue();
     }
 
-    public function getMaxCharacteristics(): ?CharacteristicsInterface
+    public function getMaxCharacteristics(): ?\Mordheim\Characteristics
     {
         $ref = new \ReflectionClassConstant(self::class, $this->name);
         $classAttributes = $ref->getAttributes(MaxCharacteristics::class);

@@ -3,12 +3,13 @@
 use Mordheim\Dice;
 use Mordheim\Rule\Psychology;
 use Mordheim\Status;
+use Mordheim\Fighter;
 
 class PsychologyExtraTest extends MordheimTestCase
 {
     private function makeFighterMock($ld, $state = Status::STANDING, $attacks = 1, $pos = [0, 0, 0])
     {
-        $fighter = $this->createMock(\Mordheim\FighterInterface::class);
+        $fighter = $this->createMock(Fighter::class);
         $fighter->method('getLeadership')->willReturn($ld);
         $fighter->method('getAttacks')->willReturn($attacks);
         $fighter->method('getWeaponSkill')->willReturn(3); // по умолчанию, если нужно — можно расширить

@@ -3,7 +3,7 @@
 namespace Mordheim\Rule;
 
 use Mordheim\Dice;
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
 use Mordheim\Ruler;
 use Mordheim\SpecialRule;
 
@@ -15,11 +15,11 @@ class Psychology
     /**
      * Проверка теста на лидерство (Leadership test, 2d6 <= Ld)
      * Тест на лидерство с учётом спецправила Leader (Ld-бабл 6 дюймов)
-     * @param FighterInterface $fighter
-     * @param FighterInterface[] $allies союзники на поле (можно пустой массив)
+     * @param Fighter $fighter
+     * @param Fighter[] $allies союзники на поле (можно пустой массив)
      * @return bool
      */
-    public static function leadershipTest(FighterInterface $fighter, array $allies = []): bool
+    public static function leadershipTest(Fighter $fighter, array $allies = []): bool
     {
         $usedLd = $fighter->getLeadership();
         $usedLeader = null;
@@ -30,7 +30,7 @@ class Psychology
                 $ally->hasSpecialRule(SpecialRule::LEADER) &&
                 $ally->getState()->getStatus()->canAct()
             ) {
-                if (Ruler::distance($fighter->getState()->getPosition(), $ally->getState()->getPosition()) <= 6) {
+                if (Ruler::distance($fighter, $ally) <= 6) {
                     if ($ally->getLeadership() > $usedLd) {
                         $usedLd = $ally->getLeadership();
                         $usedLeader = $ally;
@@ -49,12 +49,12 @@ class Psychology
 
     /**
      * Тест на страх (Fear) с учётом спецправила Leader
-     * @param FighterInterface $attacker
-     * @param FighterInterface $defender
-     * @param FighterInterface[] $allies
+     * @param Fighter $attacker
+     * @param Fighter $defender
+     * @param Fighter[] $allies
      * @return bool
      */
-    public static function testFear(FighterInterface $attacker, FighterInterface $defender, array $allies = []): bool
+    public static function testFear(Fighter $attacker, Fighter $defender, array $allies = []): bool
     {
         if ($defender->hasSpecialRule(SpecialRule::FEARSOME))
             return true;
@@ -68,11 +68,11 @@ class Psychology
 
     /**
      * Тест на панику/бегство (Rout/Panic) с учётом спецправила Leader
-     * @param FighterInterface $fighter
-     * @param FighterInterface[] $allies
+     * @param Fighter $fighter
+     * @param Fighter[] $allies
      * @return bool
      */
-    public static function testRout(FighterInterface $fighter, array $allies = []): bool
+    public static function testRout(Fighter $fighter, array $allies = []): bool
     {
         if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
             return true;
@@ -84,11 +84,11 @@ class Psychology
     /**
      * Rout Test (тест на бегство)
      * Проверяет, нужно ли делать тест (1/4 warband out of action), и проводит тест по Ld лидера или максимальному Ld оставшихся.
-     * @param FighterInterface[] $warband
-     * @param FighterInterface|null $leader
+     * @param Fighter[] $warband
+     * @param Fighter|null $leader
      * @return bool true — тест пройден, false — warband бежит
      */
-    public static function routTest(array $warband, ?FighterInterface $leader): bool
+    public static function routTest(array $warband, ?Fighter $leader): bool
     {
         $total = count($warband);
         $out = array_filter($warband, fn($f) => !$f->getState()->getStatus()->isAlive());
@@ -107,19 +107,19 @@ class Psychology
 
     /**
      * All Alone Test (тест одиночества)
-     * @param FighterInterface $fighter
-     * @param FighterInterface[] $enemies
-     * @param FighterInterface[] $allies
+     * @param Fighter $fighter
+     * @param Fighter[] $enemies
+     * @param Fighter[] $allies
      * @return bool true — выдержал, false — бежит
      */
-    public static function allAloneTest(FighterInterface $fighter, array $enemies, array $allies): bool
+    public static function allAloneTest(Fighter $fighter, array $enemies, array $allies): bool
     {
         if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
             return true;
-        $closeEnemies = array_filter($enemies, fn($enemy) => Ruler::distance($fighter->getState()->getPosition(), $enemy->getState()->getPosition()) <= 1.99);
+        $closeEnemies = array_filter($enemies, fn($enemy) => Ruler::distance($fighter, $enemy) <= 1.99);
         if (count($closeEnemies) < 2) return true;
         $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->getState()->getStatus()->canAct()
-            && Ruler::distance($fighter->getState()->getPosition(), $ally->getState()->getPosition()) <= 6);
+            && Ruler::distance($fighter, $ally) <= 6);
         if (count($closeAllies) > 0) return true;
         $roll = \Mordheim\Dice::roll(6) + \Mordheim\Dice::roll(6);
         $success = $roll <= $fighter->getLeadership();
@@ -130,10 +130,10 @@ class Psychology
 
     /**
      * Fear Test (тест страха)
-     * @param FighterInterface $fighter
+     * @param Fighter $fighter
      * @return bool true — преодолел страх, false — поддался
      */
-    public static function fearTest(FighterInterface $fighter): bool
+    public static function fearTest(Fighter $fighter): bool
     {
         if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
             return true;
@@ -146,13 +146,13 @@ class Psychology
 
     /**
      * Frenzy Effect (ярость): возвращает true, если воин в ярости должен обязательно атаковать и получает удвоенные атаки.
-     * @param FighterInterface $fighter
-     * @param FighterInterface[] $enemies
+     * @param Fighter $fighter
+     * @param Fighter[] $enemies
      * @return array [mustCharge=>bool, attacks=>int]
      */
-    public static function frenzyEffect(FighterInterface $fighter, array $enemies): array
+    public static function frenzyEffect(Fighter $fighter, array $enemies): array
     {
-        $inRange = array_filter($enemies, fn($enemy) => Ruler::distance($fighter->getState()->getPosition(), $enemy->getState()->getPosition()) <= $fighter->getChargeRange());
+        $inRange = array_filter($enemies, fn($enemy) => Ruler::distance($fighter, $enemy) <= $fighter->getChargeRange());
         $mustCharge = count($inRange) > 0;
         $attacks = $fighter->getAttacks() * 2;
         \Mordheim\BattleLogger::add("DEBUG: FrenzyEffect baseAttacks={$fighter->getAttacks()}, resultAttacks=$attacks");
@@ -175,10 +175,10 @@ class Psychology
 
     /**
      * Stupidity Test
-     * @param FighterInterface $fighter
+     * @param Fighter $fighter
      * @return bool true — преодолел тупость, false — не может действовать
      */
-    public static function stupidityTest(FighterInterface $fighter): bool
+    public static function stupidityTest(Fighter $fighter): bool
     {
         if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
             return true;

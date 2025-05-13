@@ -4,7 +4,7 @@ namespace Mordheim\Rule;
 
 use Mordheim\Battle;
 use Mordheim\EquipmentInterface;
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
 use Mordheim\SpecialRule;
 use Mordheim\Status;
 
@@ -29,13 +29,13 @@ class Injuries
      * 5-6 Out of action (The target has been badly hurt and falls to the ground unconscious. He takes no further
      * part in the game and is immediately removed from the battle)
      * @param Battle $battle
-     * @param FighterInterface $source
-     * @param FighterInterface $target
+     * @param Fighter $source
+     * @param Fighter $target
      * @param EquipmentInterface|null $weapon
      * @param bool $isCritical
      * @return bool
      */
-    public static function roll(Battle $battle, FighterInterface $source, FighterInterface $target, ?EquipmentInterface $weapon = null, bool $isCritical = false): bool
+    public static function roll(Battle $battle, Fighter $source, Fighter $target, ?EquipmentInterface $weapon = null, bool $isCritical = false): bool
     {
         // Critical: если woundRoll=6 и есть Critical, сразу OutOfAction
         if ($weapon && $isCritical) {

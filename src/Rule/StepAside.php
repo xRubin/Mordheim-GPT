@@ -2,12 +2,12 @@
 
 namespace Mordheim\Rule;
 
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
 use Mordheim\SpecialRule;
 
 class StepAside
 {
-    public static function roll(FighterInterface $target, bool &$parried): void
+    public static function roll(Fighter $target, bool &$parried): void
     {
         if ($target->hasSpecialRule(SpecialRule::STEP_ASIDE) && !$parried) {
             $stepAsideRoll = \Mordheim\Dice::roll(6);

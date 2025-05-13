@@ -3,7 +3,8 @@
 namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
+use Mordheim\Ruler;
 use Mordheim\Slot;
 use Mordheim\SpecialRule;
 
@@ -11,7 +12,7 @@ class CowardlyStrategy extends BaseBattleStrategy
 {
     public float $aggressiveness = 0.6;
 
-    protected function onMovePhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if ($battle->getActiveCombats()->isFighterInCombat($fighter))
             return;
@@ -19,7 +20,7 @@ class CowardlyStrategy extends BaseBattleStrategy
         // Ищем лидера в радиусе 6" (Ld bubble)
         $leader = null;
         foreach ($battle->getAlliesFor($fighter) as $ally) {
-            if ($ally->hasSpecialRule(SpecialRule::LEADER) && $this->getDistance($fighter, $ally) <= 6) {
+            if ($ally->hasSpecialRule(SpecialRule::LEADER) && Ruler::distance($fighter, $ally) <= 6) {
                 $leader = $ally;
                 break;
             }
@@ -29,8 +30,8 @@ class CowardlyStrategy extends BaseBattleStrategy
             $nearest = null;
             $minDist = PHP_INT_MAX;
             foreach ($battle->getAlliesFor($fighter) as $ally) {
-                if ($ally->hasSpecialRule(SpecialRule::LEADER) && $this->getDistance($fighter, $ally) <= 6) {
-                    $dist = $this->getDistance($fighter, $ally);
+                if ($ally->hasSpecialRule(SpecialRule::LEADER) && Ruler::distance($fighter, $ally) <= 6) {
+                    $dist = Ruler::distance($fighter, $ally);
                     if ($dist < $minDist) {
                         $minDist = $dist;
                         $nearest = $ally;
@@ -50,7 +51,7 @@ class CowardlyStrategy extends BaseBattleStrategy
             // Не прошёл тест — не действует
             return;
         }
-        if ($this->getDistance($fighter, $target) < 4) {
+        if (Ruler::distance($fighter, $target) < 4) {
             // Уходит от врага
             [$fx, $fy, $fz] = $fighter->getState()->getPosition(); // остальная логика ниже
             [$tx, $ty, $tz] = $target->getState()->getPosition();
@@ -65,7 +66,7 @@ class CowardlyStrategy extends BaseBattleStrategy
         } else {
             // Проверяем наличие стрелкового оружия и его дальность
             $ranged = $fighter->getEquipmentManager()->getMainWeapon(Slot::RANGED);
-            if ($ranged && $this->getDistance($fighter, $target) > $ranged->getRange()) {
+            if ($ranged && Ruler::distance($fighter, $target) > $ranged->getRange()) {
                 // Если не в радиусе, двигаемся к цели
                 \Mordheim\Rule\Move::common($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
                 return;
@@ -73,18 +74,18 @@ class CowardlyStrategy extends BaseBattleStrategy
         }
     }
 
-    protected function onShootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if (empty($enemies)) return;
         $ranged = $fighter->getEquipmentManager()->getMainWeapon(Slot::RANGED);
         if (!$ranged) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
-        if ($target && $this->getDistance($fighter, $target) <= $ranged->getRange()) {
+        if ($target && Ruler::distance($fighter, $target) <= $ranged->getRange()) {
             \Mordheim\Rule\Attack::ranged($battle, $fighter, $target, $this->spentMove);
         }
     }
 
-    protected function onMagicPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    protected function onMagicPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         // TODO: check active skills
         $spells = $fighter->getAdvancement()->getSpells();
@@ -98,12 +99,12 @@ class CowardlyStrategy extends BaseBattleStrategy
                 continue;
             }
             \Mordheim\BattleLogger::add("{$fighter->getName()} применяет заклинание {$spell->name}!");
-            if ($spell->onPhaseMagic($battle, $fighter))
+            if ($spell->getProcessor()?->onPhaseMagic($battle, $fighter))
                 return;
         }
     }
 
-    protected function onCloseCombatPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    protected function onCloseCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         // Обычно не атакует в рукопашную, если только не окружён
     }

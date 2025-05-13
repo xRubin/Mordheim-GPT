@@ -5,7 +5,7 @@ namespace Mordheim\Rule;
 use Mordheim\Battle;
 use Mordheim\CloseCombat;
 use Mordheim\Exceptions\ChargeFailedException;
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
 use Mordheim\Ruler;
 
 class Charge
@@ -14,14 +14,14 @@ class Charge
      * Выполнить попытку charge (атаки с разбега) по правилам Mordheim 1999
      * Возвращает объект CloseCombat при успехе
      * @param Battle $battle
-     * @param FighterInterface $attacker
-     * @param FighterInterface $defender
+     * @param Fighter $attacker
+     * @param Fighter $defender
      * @param float $aggressiveness
      * @param array $otherUnits
      * @return CloseCombat|null
      * @throws ChargeFailedException
      */
-    public static function attempt(Battle $battle, FighterInterface $attacker, FighterInterface $defender, float $aggressiveness, array $otherUnits = []): ?CloseCombat
+    public static function attempt(Battle $battle, Fighter $attacker, Fighter $defender, float $aggressiveness, array $otherUnits = []): ?CloseCombat
     {
         // Charge запрещён, если атакующий уже вовлечён в ближний бой
         if ($battle->getActiveCombats()->isFighterInCombat($attacker)) {
@@ -49,7 +49,7 @@ class Charge
         }
 
         // Проверка инициативы для скрытой цели
-        if (Ruler::distance($attacker->getState()->getPosition(), $defender->getState()->getPosition())
+        if (Ruler::distance($attacker, $defender)
             && $battle->hasObstacleBetween($attacker->getState()->getPosition(), $defender->getState()->getPosition())) {
             $roll = \Mordheim\Dice::roll(6);
             \Mordheim\BattleLogger::add("{$attacker->getName()} бросает Initiative для hidden цели: $roll против {$defender->getInitiative()}");
@@ -69,18 +69,18 @@ class Charge
     /**
      * TODO: obstacles
      * @param Battle $battle
-     * @param FighterInterface $attacker
-     * @param FighterInterface $defender
+     * @param Fighter $attacker
+     * @param Fighter $defender
      * @return array|null
      */
-    public static function getNearestChargePosition(Battle $battle, FighterInterface $attacker, FighterInterface $defender): ?array
+    public static function getNearestChargePosition(Battle $battle, Fighter $attacker, Fighter $defender): ?array
     {
         // Определить клетки adjacent к цели
         $adjacent = self::getAdjacentPositions($battle, $defender->getState()->getPosition());
         $minDist = INF;
         $targetPos = null;
         foreach ($adjacent as $pos) {
-            $dist = Ruler::distance($attacker->getState()->getPosition(), $pos);
+            $dist = Ruler::distance($attacker, $pos);
             if ($dist < $minDist) {
                 $minDist = $dist;
                 $targetPos = $pos;
@@ -97,7 +97,7 @@ class Charge
         $fightersPos = array_values(
             array_filter(
                 $battle->getFighters(),
-                fn(FighterInterface $fighter) => $fighter->getState()->getStatus()->isAlive() ? $fighter->getState()->getPosition() : null
+                fn(Fighter $fighter) => $fighter->getState()->getStatus()->isAlive() ? $fighter->getState()->getPosition() : null
             )
         );
 

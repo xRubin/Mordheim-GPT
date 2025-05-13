@@ -3,10 +3,10 @@
 namespace Mordheim\Rule;
 
 use Mordheim\Battle;
+use Mordheim\Fighter;
 use Mordheim\Ruler;
 use Mordheim\SpecialRule;
 use Mordheim\Warband;
-use Mordheim\FighterInterface;
 
 class RecoveryPhase
 {
@@ -33,9 +33,11 @@ class RecoveryPhase
      * Применяет психологические проверки к бойцу
      * @return bool true — если боец может действовать после всех проверок
      */
-    public static function applyPsychology(Battle $battle, FighterInterface $fighter, Warband $warband, array $warbands): bool
+    public static function applyPsychology(Battle $battle, Fighter $fighter, Warband $warband, array $warbands): bool
     {
         if (!$fighter->getState()->getStatus()->isAlive()) return false;
+        foreach ($fighter->getState()->getActiveSpells() as $spell)
+            $spell->getProcessor()?->onPhaseRecovery($battle, $fighter);
         // --- PANIC recovery ---
         if ($fighter->getState()->getStatus() === \Mordheim\Status::PANIC) {
             if (Psychology::leadershipTest($fighter, $warband->fighters)) {
@@ -45,17 +47,6 @@ class RecoveryPhase
             } else {
                 \Mordheim\BattleLogger::add("{$fighter->getName()} всё ещё в панике!");
                 return false;
-            }
-        }
-        // --- Lure of Chaos спасбросок ---
-        if ($fighter->getState()->hasActiveSpell(\Mordheim\Data\Spell::LURE_OD_CHAOS)) {
-            $roll = \Mordheim\Dice::roll(6) + \Mordheim\Dice::roll(6);
-            $success = $roll <= $fighter->getLeadership();
-            if ($success) {
-                $battle->removeActiveSpell($fighter, \Mordheim\Data\Spell::LURE_OD_CHAOS);
-                \Mordheim\BattleLogger::add("{$fighter->getName()} проходит тест Лидерства и освобождается от контроля Lure of Chaos (бросок $roll против {$fighter->getLeadership()}).");
-            } else {
-                \Mordheim\BattleLogger::add("{$fighter->getName()} не прошёл тест Лидерства и остаётся под контролем Lure of Chaos (бросок $roll против {$fighter->getLeadership()}).");
             }
         }
         // --- All Alone ---
@@ -69,9 +60,9 @@ class RecoveryPhase
                     }
                 }
             }
-            $closeEnemies = array_filter($enemies, fn($enemy) => Ruler::distance($fighter->getState()->getPosition(), $enemy->getState()->getPosition()) <= 1.99);
+            $closeEnemies = array_filter($enemies, fn($enemy) => Ruler::distance($fighter, $enemy) < 2);
             $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->getState()->getStatus()->canAct()
-                && Ruler::distance($fighter->getState()->getPosition(), $ally->getState()->getPosition()) <= 6);
+                && Ruler::distance($fighter, $ally) <= 6);
             if (count($closeEnemies) >= 2 && count($closeAllies) === 0) {
                 if (!Psychology::allAloneTest($fighter, $enemies, $allies)) {
                     $fighter->getState()->setStatus(\Mordheim\Status::PANIC);
@@ -99,7 +90,7 @@ class RecoveryPhase
             }
         }
         foreach ($enemies as $enemy) {
-            if ($enemy->hasSpecialRule(SpecialRule::CAUSE_FEAR) && Ruler::distance($fighter->getState()->getPosition(), $enemy->getState()->getPosition()) <= 8) {
+            if ($enemy->hasSpecialRule(SpecialRule::CAUSE_FEAR) && Ruler::distance($fighter, $enemy) <= 8) {
                 if (!Psychology::testFear($fighter, $enemy, $warband->fighters))
                     return false;
             }

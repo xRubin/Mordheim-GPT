@@ -5,21 +5,22 @@ namespace Mordheim\Strategy;
 use Mordheim\Battle;
 use Mordheim\Exceptions\ChargeFailedException;
 use Mordheim\Exceptions\MoveRunDeprecatedException;
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
 use Mordheim\Rule\Charge;
+use Mordheim\Ruler;
 use Mordheim\Slot;
 
 class AggressiveStrategy extends BaseBattleStrategy
 {
     public float $aggressiveness = 1.0;
 
-    protected function onMovePhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if (empty($enemies)) return;
 
         $target = $this->getNearestEnemy($fighter, $enemies);
 
-        if ($this->isAdjacent($fighter, $target))
+        if (Ruler::isAdjacent($fighter, $target))
             return;
 
         if (!$this->spentCharge) {
@@ -43,18 +44,18 @@ class AggressiveStrategy extends BaseBattleStrategy
         }
     }
 
-    protected function onShootPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if (empty($enemies)) return;
         $ranged = $fighter->getEquipmentManager()->getMainWeapon(Slot::RANGED);
         if (!$ranged) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
-        if ($target && $this->getDistance($fighter, $target) <= $ranged->getRange()) {
+        if ($target && Ruler::distance($fighter, $target) <= $ranged->getRange()) {
             \Mordheim\Rule\Attack::ranged($battle, $fighter, $target, $this->spentMove);
         }
     }
 
-    protected function onMagicPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    protected function onMagicPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         // TODO: check active skills
         $spells = $fighter->getAdvancement()->getSpells();
@@ -68,16 +69,16 @@ class AggressiveStrategy extends BaseBattleStrategy
                 continue;
             }
             \Mordheim\BattleLogger::add("{$fighter->getName()} применяет заклинание {$spell->name}!");
-            if ($spell->onPhaseMagic($battle, $fighter))
+            if ($spell->getProcessor()?->onPhaseMagic($battle, $fighter))
                 return;
         }
     }
 
-    protected function onCloseCombatPhase(Battle $battle, FighterInterface $fighter, array $enemies): void
+    protected function onCloseCombatPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if (empty($enemies)) return;
         $target = $this->getNearestEnemy($fighter, $enemies);
-        if ($target && $this->isAdjacent($fighter, $target)) {
+        if ($target && Ruler::isAdjacent($fighter, $target)) {
             $canAttack = $this->canActAgainst($battle, $fighter, $target);
             if ($canAttack) {
                 \Mordheim\Rule\Attack::melee($battle, $fighter, $target);

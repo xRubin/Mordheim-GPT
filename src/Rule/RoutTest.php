@@ -3,7 +3,7 @@
 namespace Mordheim\Rule;
 
 use Mordheim\Exceptions\RoutTestLeaderNotFoundException;
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
 use Mordheim\SpecialRule;
 use Mordheim\Warband;
 
@@ -47,9 +47,9 @@ class RoutTest
     /**
      * По правилам бросает лидер (первый живой)
      * @param Warband $warband
-     * @return FighterInterface
+     * @return Fighter
      */
-    private static function findLeader(Warband $warband): FighterInterface
+    private static function findLeader(Warband $warband): Fighter
     {
         foreach ($warband->fighters as $fighter) {
             if ($fighter->getState()->getStatus()->canAct() && $fighter->hasSpecialRule(SpecialRule::LEADER)) {

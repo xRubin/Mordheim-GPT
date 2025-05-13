@@ -6,7 +6,7 @@ use Mordheim\Battle;
 use Mordheim\CloseCombat;
 use Mordheim\Data\Equipment;
 use Mordheim\EquipmentInterface;
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
 use Mordheim\Ruler;
 use Mordheim\Slot;
 use Mordheim\SpecialRule;
@@ -17,15 +17,15 @@ class Attack
     /**
      * Выполнить ближний бой по Mordheim 1999 с поддержкой charge и CloseCombat
      * @param Battle $battle
-     * @param FighterInterface $source
-     * @param FighterInterface $target
+     * @param Fighter $source
+     * @param Fighter $target
      * @param CloseCombat|null $combat
      * @return bool true если нанесён урон, false если промах/парирование/сейв
      */
-    public static function melee(Battle $battle, FighterInterface $source, FighterInterface $target, ?\Mordheim\CloseCombat $combat = null): bool
+    public static function melee(Battle $battle, Fighter $source, Fighter $target, ?\Mordheim\CloseCombat $combat = null): bool
     {
         if (!self::canAttack($source, $target)) return false;
-        if (!Ruler::isAdjacent($source->getState()->getPosition(), $target->getState()->getPosition())) return false;
+        if (!Ruler::isAdjacent($source, $target)) return false;
         \Mordheim\BattleLogger::add("{$source->getName()} атакует melee {$target->getName()}!");
         \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: " . implode(',', array_map(fn($weapon) => $weapon->getName(), $source->getEquipmentManager()->getItemsBySlot(Slot::MELEE))));
 
@@ -54,7 +54,7 @@ class Attack
      * Стрельба по другому бойцу по правилам Mordheim
      * Учитывает Ballistic Skill, модификаторы (дальность, движение, укрытие, размер цели и т.д.)
      */
-    public static function ranged(Battle $battle, FighterInterface $source, FighterInterface $target, bool $moved = false): bool
+    public static function ranged(Battle $battle, Fighter $source, Fighter $target, bool $moved = false): bool
     {
         if (!self::canAttack($source, $target)) return false;
         $weapon = self::selectRangedWeapon($source, $target, $moved);
@@ -94,7 +94,7 @@ class Attack
      * Обработка атак по целям в особых состояниях (STUNNED, KNOCKED_DOWN)
      * Возвращает true/false если атака обработана, null если нужно продолжать обычный бой
      */
-    private static function handleSpecialStates(Battle $battle, FighterInterface $source, FighterInterface $target, $weapon): ?bool
+    private static function handleSpecialStates(Battle $battle, Fighter $source, Fighter $target, $weapon): ?bool
     {
         if ($target->getState()->getStatus() === Status::STUNNED) {
             \Mordheim\BattleLogger::add("Атака по оглушённому (STUNNED): попадание и ранение автоматически успешны, сейв невозможен.");
@@ -117,7 +117,7 @@ class Attack
      * Возвращает true если попадание успешно и не парировано
      * $hitRoll и $parried передаются по ссылке
      */
-    private static function rollToHit(FighterInterface $source, FighterInterface $target, $weapon, ?CloseCombat $combat, int $i, &$hitRoll, &$parried): bool
+    private static function rollToHit(Fighter $source, Fighter $target, $weapon, ?CloseCombat $combat, int $i, &$hitRoll, &$parried): bool
     {
         $attackerWS = $source->getWeaponSkill();
         $defenderWS = $target->getWeaponSkill();
@@ -164,7 +164,7 @@ class Attack
      * Бросок на ранение, обработка критов, сэйва, уменьшения ран
      * Возвращает true если нанесён урон
      */
-    private static function rollToWoundAndSave(Battle $battle, FighterInterface $source, FighterInterface $target, $weapon, &$success): bool
+    private static function rollToWoundAndSave(Battle $battle, Fighter $source, Fighter $target, $weapon, &$success): bool
     {
         $woundResult = RollToWound::roll($source, $target, $weapon);
         \Mordheim\BattleLogger::add("[DEBUG][Attack] woundResult: " . json_encode($woundResult));
@@ -208,7 +208,7 @@ class Attack
     /**
      * Попытка броска на сэйв. Возвращает true если сэйв удался
      */
-    private static function tryArmorSave(FighterInterface $source, FighterInterface $target, $weapon): bool
+    private static function tryArmorSave(Fighter $source, Fighter $target, $weapon): bool
     {
         $armorSave = $target->getArmorSave($weapon);
         if ($armorSave > 0) {
@@ -229,11 +229,11 @@ class Attack
         return false;
     }
 
-    public static function selectRangedWeapon(FighterInterface $source, FighterInterface $target, bool $moved): ?EquipmentInterface
+    public static function selectRangedWeapon(Fighter $source, Fighter $target, bool $moved): ?EquipmentInterface
     {
         $weapons = $source->getEquipmentManager()->getItemsBySlot(Slot::RANGED);
         if (!($weapon = reset($weapons))) return null;
-        if (Ruler::distance($source->getState()->getPosition(), $target->getState()->getPosition()) > $weapon->getRange()) return null;
+        if (Ruler::distance($source, $target) > $weapon->getRange()) return null;
         if ($moved && $weapon->hasSpecialRule(SpecialRule::MOVE_OR_FIRE)) {
             \Mordheim\BattleLogger::add("{$source->getName()} не может стрелять из {$weapon->getName()} после движения (Move or Fire).");
             return null;
@@ -241,7 +241,7 @@ class Attack
         return $weapon;
     }
 
-    public static function calculateRangedParams(Battle $battle, FighterInterface $source, FighterInterface $target, EquipmentInterface $weapon, bool $moved): array
+    public static function calculateRangedParams(Battle $battle, Fighter $source, Fighter $target, EquipmentInterface $weapon, bool $moved): array
     {
         $bs = $source->getBallisticSkill();
         $toHitBase = 7 - $bs;
@@ -249,7 +249,7 @@ class Attack
         if ($toHitBase > 6) $toHitBase = 6;
         $shots = ($source->hasSpecialRule(SpecialRule::QUICK_SHOT) && !$moved) ? 2 : 1;
         $mod = 0;
-        if (Ruler::distance($source->getState()->getPosition(), $target->getState()->getPosition()) > $weapon->getRange() / 2) $mod += 1;
+        if (Ruler::distance($source, $target) > $weapon->getRange() / 2) $mod += 1;
         if ($moved) $mod += 1;
         if ($battle->hasObstacleBetween($source->getState()->getPosition(), $target->getState()->getPosition())) $mod += 1;
         if ($target->hasSpecialRule(SpecialRule::LARGE_TARGET)) $mod -= 1;
@@ -260,7 +260,7 @@ class Attack
         return [$toHit, $shots];
     }
 
-    public static function tryArmorSaveRanged(FighterInterface $source, FighterInterface $target, $weapon): bool
+    public static function tryArmorSaveRanged(Fighter $source, Fighter $target, $weapon): bool
     {
         $armorSave = $target->getArmorSave($weapon);
         $saveRoll = $armorSave > 0 ? \Mordheim\Dice::roll(6) : 7;
@@ -270,7 +270,7 @@ class Attack
     /**
      * Проверка, может ли атакующий атаковать и может ли цель быть атакована
      */
-    private static function canAttack(FighterInterface $source, FighterInterface $target): bool
+    private static function canAttack(Fighter $source, Fighter $target): bool
     {
         if (!$source->getState()->getStatus()->canAct()) {
             \Mordheim\BattleLogger::add("{$source->getName()} не может атаковать из-за состояния: {$source->getState()->getStatus()->value}.");

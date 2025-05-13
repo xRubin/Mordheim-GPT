@@ -2,15 +2,15 @@
 
 namespace Mordheim;
 
-class Fighter implements FighterInterface
+class Fighter
 {
     private string $name = '';
 
     public function __construct(
         private readonly BlankInterface              $blank,
-        private readonly FighterAdvancementInterface $advancement,
+        private readonly FighterAdvancement $advancement,
         private readonly EquipmentManager            $equipmentManager,
-        private ?FighterStateInterface               $fighterState = null,
+        private ?FighterState               $fighterState = null,
     )
     {
         $this->name = $blank->name;
@@ -21,7 +21,7 @@ class Fighter implements FighterInterface
         return $this->name;
     }
 
-    public function setName(string $name): FighterInterface
+    public function setName(string $name): Fighter
     {
         $this->name = $name;
         return $this;
@@ -32,7 +32,7 @@ class Fighter implements FighterInterface
         return $this->blank;
     }
 
-    public function getAdvancement(): FighterAdvancementInterface
+    public function getAdvancement(): FighterAdvancement
     {
         return $this->advancement;
     }
@@ -42,7 +42,7 @@ class Fighter implements FighterInterface
         return $this->equipmentManager;
     }
 
-    public function getState(): FighterStateInterface
+    public function getState(): FighterState
     {
         return $this->fighterState;
     }
@@ -179,7 +179,7 @@ class Fighter implements FighterInterface
      */
     public function getRunRange(): int
     {
-        $moveMultiplier = 2;
+        $moveMultiplier = $this->hasSpecialRule(SpecialRule::MAY_NOT_RUN) ? 1 : 2;
         $penalty = $this->equipmentManager->getMovementPenalty();
         $movePoints = $this->getMovement() * $moveMultiplier;
         return max(1, $movePoints + $penalty); // движение не может быть меньше 1

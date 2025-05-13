@@ -2,7 +2,7 @@
 
 namespace Mordheim\Rule;
 
-use Mordheim\FighterInterface;
+use Mordheim\Fighter;
 use Mordheim\SpecialRule;
 use Mordheim\Status;
 
@@ -14,7 +14,7 @@ class StandUp
      * Без навыка — тратит всё движение, чтобы встать.
      * @return bool true если потратил движение
      */
-    public static function apply(FighterInterface $fighter): bool
+    public static function apply(Fighter $fighter): bool
     {
         if ($fighter->getState()->getStatus() !== Status::KNOCKED_DOWN) return false;
         if ($fighter->hasSpecialRule(SpecialRule::JUMP_UP)) {

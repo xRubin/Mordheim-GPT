@@ -4,17 +4,14 @@ namespace Mordheim\Rule;
 
 use Mordheim\BlankInterface;
 use Mordheim\Dice;
-use Mordheim\FighterAdvancementInterface;
+use Mordheim\FighterAdvancement;
 use Mordheim\SpecialRule;
 
 class Advancement
 {
     public static function getAvailableAdvancementsCount(BlankInterface $blank, int $exp): int
     {
-        if ($blank->hasSpecialRule(SpecialRule::ANIMAL))
-            return 0;
-
-        if ($blank->hasSpecialRule(SpecialRule::UNLIVING))
+        if ($blank->hasSpecialRule(SpecialRule::ANIMAL) || $blank->hasSpecialRule(SpecialRule::UNLIVING))
             return 0;
 
         if ($blank->isHero())
@@ -31,7 +28,7 @@ class Advancement
         return $cnt;
     }
 
-    public static function getCurrentAdvancementsCount(FighterAdvancementInterface $advancement): int
+    public static function getCurrentAdvancementsCount(FighterAdvancement $advancement): int
     {
         $points = $advancement->getCharacteristics()->getMovement()
             + $advancement->getCharacteristics()->getWeaponSkill()
@@ -48,7 +45,7 @@ class Advancement
         return $points + $specialRules;
     }
 
-    public static function validateAdvancement(BlankInterface $blank, FighterAdvancementInterface $advancement, array $data = []): bool
+    public static function validateAdvancement(BlankInterface $blank, FighterAdvancement $advancement, array $data = []): bool
     {
         switch ($data[0]) {
             case 'roll_spell':
@@ -86,7 +83,7 @@ class Advancement
         }
     }
 
-    public static function rollAdvancement(BlankInterface $blank, FighterAdvancementInterface $advancement, int $exp): array
+    public static function rollAdvancement(BlankInterface $blank, FighterAdvancement $advancement, int $exp): array
     {
         do {
             $suggests = array_filter(

@@ -4,6 +4,7 @@ use Mordheim\CloseCombat;
 use Mordheim\CloseCombatCollection;
 use Mordheim\Exceptions\CloseCombatCollectionOutOfBoundsException;
 use PHPUnit\Framework\TestCase;
+use Mordheim\Fighter;
 
 /**
  * Тесты для класса CloseCombatCollection
@@ -11,16 +12,16 @@ use PHPUnit\Framework\TestCase;
 class CloseCombatCollectionTest extends TestCase
 {
     private CloseCombatCollection $collection;
-    private \Mordheim\FighterInterface $fighter1;
-    private \Mordheim\FighterInterface $fighter2;
-    private \Mordheim\FighterInterface $fighter3;
+    private Fighter $fighter1;
+    private Fighter $fighter2;
+    private Fighter $fighter3;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->collection = new CloseCombatCollection();
 
-        $this->fighter1 = new \Mordheim\Fighter(
+        $this->fighter1 = (new Fighter(
             \Mordheim\Data\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
@@ -29,8 +30,9 @@ class CloseCombatCollectionTest extends TestCase
                 $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
-        );
-        $this->fighter2 = new \Mordheim\Fighter(
+        ))->setName('Fighter1');
+
+        $this->fighter2 = (new Fighter(
             \Mordheim\Data\Blank::MIDDENHEIM_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
@@ -39,8 +41,9 @@ class CloseCombatCollectionTest extends TestCase
                 $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
-        );
-        $this->fighter3 = new \Mordheim\Fighter(
+        ))->setName('Fighter2');
+
+        $this->fighter3 = (new Fighter(
             \Mordheim\Data\Blank::MARIENBURG_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
@@ -49,7 +52,7 @@ class CloseCombatCollectionTest extends TestCase
                 $this->createMock(Mordheim\BattleStrategyInterface::class),
                 1
             )
-        );
+        ))->setName('Fighter3');
     }
 
     public function testAddAndRemove(): void
