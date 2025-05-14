@@ -5,6 +5,8 @@ Status: Stupidity
 
 Status: Fear
 
+Remove close combats before magic move ?
+
 ## Strategy
 ### Conditions
 Full health

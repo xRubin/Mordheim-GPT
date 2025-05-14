@@ -16,6 +16,7 @@ abstract class MordheimTestCase extends TestCase
     protected function tearDown(): void
     {
         \Mordheim\Dice::setTestRolls([]);
-        \Mordheim\BattleLogger::print();
+        if (!$this->status()->isSuccess())
+            \Mordheim\BattleLogger::print();
     }
 }

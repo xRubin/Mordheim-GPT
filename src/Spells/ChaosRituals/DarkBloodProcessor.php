@@ -3,15 +3,19 @@
 namespace Mordheim\Spells\ChaosRituals;
 
 use Mordheim\Battle;
+use Mordheim\Data\Equipment;
 use Mordheim\Data\Spell;
 use Mordheim\Dice;
+use Mordheim\EquipmentInterface;
 use Mordheim\Fighter;
+use Mordheim\Rule\Attack;
 use Mordheim\Ruler;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class DarkBloodProcessor extends BaseSpellProcessor
 {
     public Spell $spell = Spell::DARK_BLOOD;
+    public EquipmentInterface $weapon = Equipment::DARK_BLOOD;
 
     public function __construct(
         public int $difficulty = 8
@@ -34,10 +38,7 @@ class DarkBloodProcessor extends BaseSpellProcessor
         $hits = Dice::roll(3); // D3
         \Mordheim\BattleLogger::add("{$target->getName()} получает {$hits} попаданий силой 5 от {$this->spell->name}.");
         for ($i = 0; $i < $hits; $i++) {
-            $target->getState()->modifyWounds(-5); // TODO armor save?
-        }
-        if ($target->getState()->getWounds() <= 0) {
-            $battle->killFighter($target);
+            Attack::magic($battle, $caster, $target, $this->weapon);
         }
         // Маг кидает на травму себе
         \Mordheim\Rule\Injuries::roll($battle, $caster, $caster); // TODO treat out of action as stunned

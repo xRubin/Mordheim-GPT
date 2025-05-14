@@ -3,23 +3,9 @@
 use Mordheim\Status;
 use Mordheim\Strategy\AggressiveStrategy;
 use Mordheim\Warband;
-use PHPUnit\Framework\TestCase;
 
-class RecoveryPhaseTest extends TestCase
+class RecoveryPhaseTest extends MordheimTestCase
 {
-    public function setUp(): void
-    {
-        \Mordheim\Dice::setTestRolls([]);
-        \Mordheim\BattleLogger::clear();
-        \Mordheim\BattleLogger::add("### Test: {$this->name()}");
-    }
-
-    public function tearDown(): void
-    {
-        \Mordheim\Dice::setTestRolls([]);
-        \Mordheim\BattleLogger::print();
-    }
-
     private function makeLeader($state = Status::STANDING)
     {
         return new class (
@@ -33,7 +19,7 @@ class RecoveryPhaseTest extends TestCase
                 $state
             )
         ) extends \Mordheim\Fighter {
-            public function getLeadership(): int
+            public function getLeadership(bool $withBonus = true): int
             {
                 return 2;
             }

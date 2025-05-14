@@ -1,10 +1,11 @@
 <?php
 
+namespace Spells;
+
 use Mordheim\Battle;
 use Mordheim\Characteristics;
 use Mordheim\Data\Blank;
 use Mordheim\Data\Spell;
-use Mordheim\Equipment;
 use Mordheim\EquipmentManager;
 use Mordheim\Fighter;
 use Mordheim\FighterAdvancement;
@@ -14,6 +15,7 @@ use Mordheim\Status;
 use Mordheim\Strategy\AggressiveStrategy;
 use Mordheim\Strategy\CarefulStrategy;
 use Mordheim\Warband;
+use MordheimTestCase;
 
 class NecromancyTest extends MordheimTestCase
 {

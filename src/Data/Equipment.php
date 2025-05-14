@@ -412,6 +412,27 @@ enum Equipment implements EquipmentInterface
     #[SlotMisc]
     case SUPERIOR_BLACKPOWDER;
 
+    #[MaximumRange(8)]
+    #[Strength(5)]
+    #[SlotRanged]
+    case DARK_BLOOD;
+    #[MaximumRange(18)]
+    #[Strength(4)]
+    #[SlotRanged]
+    case FIRE_OF_UZHUL;
+    #[MaximumRange(3)]
+    #[Strength(3)]
+    #[SlotRanged]
+    case WORD_OF_PAIN;
+    #[MaximumRange(24)]
+    #[Strength(3)]
+    #[SlotRanged]
+    case SILVER_ARROW_OF_ARHA;
+
+    #[StrengthBonus(+2)]
+    #[SlotMelee]
+    case SWORD_OF_REZHEBEL;
+
     public function getName(): string
     {
         return $this->name;
@@ -476,8 +497,8 @@ enum Equipment implements EquipmentInterface
         throw new InvalidAttributesException('Invalid attributes for: ' . $this->name);
     }
 
-    public function hasSpecialRule(SpecialRuleInterface $rule): bool
+    public function hasSpecialRule(SpecialRuleInterface $specialRule): bool
     {
-        return in_array($rule, $this->getSpecialRules());
+        return in_array($specialRule, $this->getSpecialRules());
     }
 }

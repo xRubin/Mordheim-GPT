@@ -69,23 +69,6 @@ class EquipmentManager
     }
 
     /**
-     * Оружие в зависимости от номера атаки
-     */
-    public function getWeaponByAttackIdx(Slot $slot, int $i): EquipmentInterface
-    {
-        $offset = 0;
-        foreach ($this->getItemsBySlot($slot) as $idx => $equipment) {
-            if ($equipment->hasSpecialRule(SpecialRule::TWO_HANDED)) {
-                $offset += 1;
-            }
-            if ($idx >= ($i - $offset))
-                return $equipment;
-        }
-
-        return Equipment::FIST;
-    }
-
-    /**
      * @param Slot $slot
      * @return EquipmentInterface[]
      */

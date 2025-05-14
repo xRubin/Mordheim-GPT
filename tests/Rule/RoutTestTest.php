@@ -3,24 +3,9 @@
 use Mordheim\Status;
 use Mordheim\Strategy\AggressiveStrategy;
 use Mordheim\Warband;
-use PHPUnit\Framework\TestCase;
 
-class RoutTestTest extends TestCase
+class RoutTestTest extends MordheimTestCase
 {
-
-    public function setUp(): void
-    {
-        \Mordheim\Dice::setTestRolls([]);
-        \Mordheim\BattleLogger::clear();
-        \Mordheim\BattleLogger::add("### Test: {$this->name()}");
-    }
-
-    public function tearDown(): void
-    {
-        \Mordheim\Dice::setTestRolls([]);
-        \Mordheim\BattleLogger::print();
-    }
-
     private function makeLeader($state = Status::STANDING)
     {
         return new class (
@@ -34,7 +19,7 @@ class RoutTestTest extends TestCase
                 $state
             )
         ) extends \Mordheim\Fighter {
-            public function getLeadership(): int
+            public function getLeadership(bool $withBonus = true): int
             {
                 return 2;
             }
@@ -54,7 +39,7 @@ class RoutTestTest extends TestCase
                 $state
             )
         ) extends \Mordheim\Fighter {
-            public function getLeadership(): int
+            public function getLeadership(bool $withBonus = true): int
             {
                 return 12;
             }

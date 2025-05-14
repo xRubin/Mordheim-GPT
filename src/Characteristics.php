@@ -62,4 +62,30 @@ class Characteristics
     {
         return $this->leadership;
     }
+
+    public function getByName(string $name): int
+    {
+        return $this->$name;
+    }
+
+    public function setByName(string $name, int $value): static
+    {
+        $this->$name = $value;
+        return $this;
+    }
+
+    public function add(Characteristics $characteristics): Characteristics
+    {
+        return new Characteristics(
+            movement: $this->movement + $characteristics->getMovement(),
+            weaponSkill: $this->weaponSkill + $characteristics->weaponSkill,
+            ballisticSkill: $this->ballisticSkill + $characteristics->ballisticSkill,
+            strength: $this->strength + $characteristics->strength,
+            toughness: $this->toughness + $characteristics->toughness,
+            wounds: $this->wounds + $characteristics->wounds,
+            initiative: $this->initiative + $characteristics->initiative,
+            attacks: $this->attacks + $characteristics->attacks,
+            leadership: $this->leadership + $characteristics->leadership
+        );
+    }
 }

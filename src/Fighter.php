@@ -2,14 +2,17 @@
 
 namespace Mordheim;
 
+use Mordheim\Data\Equipment;
+use Mordheim\Data\Spell;
+
 class Fighter
 {
     private string $name = '';
 
     public function __construct(
-        private readonly BlankInterface              $blank,
+        private readonly BlankInterface     $blank,
         private readonly FighterAdvancement $advancement,
-        private readonly EquipmentManager            $equipmentManager,
+        private readonly EquipmentManager   $equipmentManager,
         private ?FighterState               $fighterState = null,
     )
     {
@@ -42,58 +45,95 @@ class Fighter
         return $this->equipmentManager;
     }
 
-    public function getState(): FighterState
+    public function getState(): ?FighterState
     {
         return $this->fighterState;
     }
 
-    public function getMovement(): int
+    public function getMovement(bool $withBonus = true): int
     {
-        return $this->blank->getCharacteristics()->getMovement() + $this->advancement->getCharacteristics()->getMovement();
+        $base = $this->blank->getCharacteristics()->getMovement() + $this->advancement->getCharacteristics()->getMovement();
+        if (!$withBonus)
+            return $base;
+        $bonus = $this->getState()?->getCharacteristics()->getMovement() ?? 0;
+        return $base - $bonus;
     }
 
-    public function getStrength(): int
+    public function getStrength(bool $withBonus = true): int
     {
-        return $this->blank->getCharacteristics()->getStrength() + $this->advancement->getCharacteristics()->getStrength();
+        $base = $this->blank->getCharacteristics()->getStrength() + $this->advancement->getCharacteristics()->getStrength();
+        if (!$withBonus)
+            return $base;
+        $bonus = $this->getState()?->getCharacteristics()->getStrength() ?? 0;
+        return $base - $bonus;
     }
 
-    public function getWeaponSkill(): int
+    public function getWeaponSkill(bool $withBonus = true): int
     {
-        return $this->blank->getCharacteristics()->getWeaponSkill() + $this->advancement->getCharacteristics()->getWeaponSkill();
+        $base = $this->blank->getCharacteristics()->getWeaponSkill() + $this->advancement->getCharacteristics()->getWeaponSkill();
+        if (!$withBonus)
+            return $base;
+        $bonus = $this->getState()?->getCharacteristics()->getWeaponSkill()??0;
+        if ($this->getState()?->hasActiveSpell(Spell::SWORD_OF_REZHEBEL)) {
+            $bonus += 2;
+        }
+        return $base - $bonus;
     }
 
-    public function getBallisticSkill(): int
+    public function getBallisticSkill(bool $withBonus = true): int
     {
-        return $this->blank->getCharacteristics()->getBallisticSkill() + $this->advancement->getCharacteristics()->getBallisticSkill();
+        $base = $this->blank->getCharacteristics()->getBallisticSkill() + $this->advancement->getCharacteristics()->getBallisticSkill();
+        if (!$withBonus)
+            return $base;
+        $bonus = $this->getState()?->getCharacteristics()->getBallisticSkill() ?? 0;
+        return $base - $bonus;
     }
 
-    public function getToughness(): int
+    public function getToughness(bool $withBonus = true): int
     {
-        return $this->blank->getCharacteristics()->getToughness() + $this->advancement->getCharacteristics()->getToughness();
+        $base = $this->blank->getCharacteristics()->getToughness() + $this->advancement->getCharacteristics()->getToughness();
+        if (!$withBonus)
+            return $base;
+        $bonus = $this->getState()?->getCharacteristics()->getToughness()??0;
+        return $base - $bonus;
     }
 
-    public function getWounds(): int
+    public function getWounds(bool $withBonus = true): int
     {
-        return $this->blank->getCharacteristics()->getWounds() + $this->advancement->getCharacteristics()->getWounds();
+        $base = $this->blank->getCharacteristics()->getWounds() + $this->advancement->getCharacteristics()->getWounds();
+        if (!$withBonus)
+            return $base;
+        $bonus = $this->getState()?->getCharacteristics()->getWounds() ?? 0;
+        return $base - $bonus;
     }
 
-    public function getLeadership(): int
+    public function getLeadership(bool $withBonus = true): int
     {
-        return $this->blank->getCharacteristics()->getLeadership() + $this->advancement->getCharacteristics()->getLeadership();
+        $base = $this->blank->getCharacteristics()->getLeadership() + $this->advancement->getCharacteristics()->getLeadership();
+        if (!$withBonus)
+            return $base;
+        $bonus = $this->getState()?->getCharacteristics()->getLeadership() ?? 0;
+        return $base - $bonus;
     }
 
     /**
      * Итоговое количество атак с учётом экипировки (два одноручных оружия = +1 атака)
      */
-    public function getAttacks(): int
+    public function getAttacks(bool $withBonus = true): int
     {
         $base = $this->blank->getCharacteristics()->getAttacks() + $this->advancement->getCharacteristics()->getAttacks();
-        $bonus = 0;
+        if (!$withBonus)
+            return $base;
+        $bonus = $this->getState()?->getCharacteristics()->getAttacks() ?? 0;
         if ($this->getState()?->getStatus() === Status::FRENZY) {
             $base *= 2;
         }
+        if ($this->getState()?->hasActiveSpell(Spell::SWORD_OF_REZHEBEL)) {
+            $bonus += 1;
+            return $base + $bonus;
+        }
         if ($this->equipmentManager->countOneHandedMeleeWeapons() >= 2) {
-            $bonus = 1;
+            $bonus += 1;
         }
         return $base + $bonus;
     }
@@ -101,9 +141,13 @@ class Fighter
     /**
      * Получить итоговую инициативу с учетом навыков
      */
-    public function getInitiative(): int
+    public function getInitiative(bool $withBonus = true): int
     {
-        return $this->blank->getCharacteristics()->getInitiative() + $this->advancement->getCharacteristics()->getInitiative();
+        $base = $this->blank->getCharacteristics()->getInitiative() + $this->advancement->getCharacteristics()->getInitiative();
+        if (!$withBonus)
+            return $base;
+        $bonus = $this->getState()?->getCharacteristics()->getInitiative() ?? 0;
+        return $base - $bonus;
     }
 
     public function getClimbInitiative(): int
@@ -207,6 +251,26 @@ class Fighter
             || $this->getAdvancement()->hasSpecialRule($specialRule)
             || $this->getEquipmentManager()->hasSpecialRule($specialRule)
             || $this->getState()?->hasSpecialRule($specialRule);
+    }
+
+    /**
+     * Оружие в зависимости от номера атаки
+     */
+    public function getWeaponByAttackIdx(Slot $slot, int $i): EquipmentInterface
+    {
+        if ($this->getState()?->hasActiveSpell(Spell::SWORD_OF_REZHEBEL))
+            return Equipment::SWORD_OF_REZHEBEL;
+
+        $offset = 0;
+        foreach ($this->getEquipmentManager()->getItemsBySlot($slot) as $idx => $equipment) {
+            if ($equipment->hasSpecialRule(SpecialRule::TWO_HANDED)) {
+                $offset += 1;
+            }
+            if ($idx >= ($i - $offset))
+                return $equipment;
+        }
+
+        return Equipment::FIST;
     }
 }
 

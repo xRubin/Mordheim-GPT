@@ -40,13 +40,13 @@ class ChaosRitualsTest extends MordheimTestCase
         $battle = $this->createMock(Battle::class);
         $mage = $this->makeFighter('Mage', [0, 0, 0]);
         $ally = $this->makeFighter('Ally', [1, 0, 0]);
-        $oldCharacteristics = clone $ally->getAdvancement()->getCharacteristics();
+        $oldCharacteristics = clone $ally->getState()->getCharacteristics();
         $battle->method('getAlliesFor')->willReturn([$ally]);
         $battle->method('getEnemiesFor')->willReturn([]);
         \Mordheim\Dice::setTestRolls([6, 6, 3]);
         $result = Spell::EYE_OF_GOD->getProcessor()->onPhaseMagic($battle, $mage);
         $this->assertTrue($result);
-        $this->assertNotEquals($oldCharacteristics, $ally->getAdvancement()->getCharacteristics());
+        $this->assertNotEquals($oldCharacteristics, $ally->getState()->getCharacteristics());
     }
 
     public function testDarkBloodDamagesEnemy()
@@ -55,7 +55,7 @@ class ChaosRitualsTest extends MordheimTestCase
         $mage = $this->makeFighter('Mage', [0, 0, 0]);
         $enemy = $this->makeFighter('Enemy', [4, 0, 0], 5);
         $battle->method('getEnemiesFor')->willReturn([$enemy]);
-        \Mordheim\Dice::setTestRolls([6, 6]);
+        \Mordheim\Dice::setTestRolls([6, 6, 1, 6]);
         $result = Spell::DARK_BLOOD->getProcessor()->onPhaseMagic($battle, $mage);
         $this->assertTrue($result);
         $this->assertLessThan(5, $enemy->getState()->getWounds());
@@ -100,7 +100,7 @@ class ChaosRitualsTest extends MordheimTestCase
         $enemy1 = $this->makeFighter('Enemy1', [1, 0, 0], 5);
         $enemy2 = $this->makeFighter('Enemy2', [2, 0, 0], 5);
         $battle->method('getFighters')->willReturn([$mage, $enemy1, $enemy2]);
-        \Mordheim\Dice::setTestRolls([6, 6]);
+        \Mordheim\Dice::setTestRolls([6, 6, 6, 6]);
         $result = Spell::WORD_OF_PAIN->getProcessor()->onPhaseMagic($battle, $mage);
         $this->assertTrue($result);
         $this->assertLessThan(5, $enemy1->getState()->getWounds());

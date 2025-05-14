@@ -411,6 +411,16 @@ enum Blank implements BlankInterface
     #[SpecialRule('UNFEELING'), SpecialRule('NO_PAIN'), SpecialRUle('UNBLINKING_EYE'), SpecialRUle('METALLIC_BODY')]
     case VESKIT;
 
+    #[Warband('HIRED_SWORDS'), HiredSword, Rating(16)]
+    #[ExceptWarband('WITCH_HUNTERS'), ExceptWarband('SISTERS_OF_SIGMAR')]
+    #[HireFee(30), UpkeepFee(15)]
+    #[MaxCount(1)]
+    #[Characteristics(4,2,2,3,3,1,4,1,8), MaxCharacteristics(4, 3, 3, 4, 4, 2, 5, 2, 9)]
+    #[Equipment('STAFF')]
+    #[SpecialRule('WIZARD_LESSER_MAGIC')]
+    #[SkillGroup('ACADEMIC')]
+    case WARLOCK;
+
     public function getWarband(): ?WarbandInterface
     {
         $ref = new \ReflectionClassConstant(self::class, $this->name);

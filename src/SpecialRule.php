@@ -116,6 +116,7 @@ enum SpecialRule implements SpecialRuleInterface
     case IMMUNE_TO_SPELLS; // Shield of Faith
     case DOUBLE_DAMAGE; // The Hammer of Sigmar
     case PLUS_2_STRENGTH; // The Hammer of Sigmar
+    case REROLL_ANY_FAILED; // Luck of Shemtek
 
     case MUTATION_DAEMON_SOUL;
     case MUTATION_GREAT_CLAW;

@@ -2,6 +2,7 @@
 
 namespace Mordheim\Data;
 
+use Mordheim\Data\Attributes\Characteristics;
 use Mordheim\Data\Attributes\Difficulty;
 use Mordheim\Data\Attributes\SpellProcessor;
 use Mordheim\Data\Attributes\StateSpecialRule;
@@ -96,21 +97,28 @@ enum Spell implements SpellInterface
 
     #[WizardSpecialRule('WIZARD_LESSER_MAGIC')]
     #[Difficulty(7)]
+    #[SpellProcessor(Spells\LesserMagic\FiresOfUzhulProcessor::class)]
     case FIRES_OF_UZHUL;
     #[WizardSpecialRule('WIZARD_LESSER_MAGIC')]
     #[Difficulty(7)]
+    #[SpellProcessor(Spells\LesserMagic\FlightOfZimmeranProcessor::class)]
     case FLIGHT_OF_ZIMMERAN;
     #[WizardSpecialRule('WIZARD_LESSER_MAGIC')]
     #[Difficulty(7)]
+    #[SpellProcessor(Spells\LesserMagic\DreadOfAramarProcessor::class)]
     case DREAD_OF_ARAMAR;
     #[WizardSpecialRule('WIZARD_LESSER_MAGIC')]
     #[Difficulty(7)]
+    #[SpellProcessor(Spells\LesserMagic\SilverArrowsOfArhaProcessor::class)]
     case SILVER_ARROWS_OF_ARHA;
     #[WizardSpecialRule('WIZARD_LESSER_MAGIC')]
     #[Difficulty(6)]
+    #[StateSpecialRule('REROLL_ANY_FAILED')]
+    #[SpellProcessor(Spells\LesserMagic\LuckOfShemtekProcessor::class)]
     case LUCK_OF_SHEMTEK;
     #[WizardSpecialRule('WIZARD_LESSER_MAGIC')]
     #[Difficulty(7)]
+    #[SpellProcessor(Spells\LesserMagic\SwordOfRezhebelProcessor::class)]
     case SWORD_OF_REZHEBEL;
 
     #[WizardSpecialRule('WIZARD_MAGIC_OF_THE_HORNED_RAT')]

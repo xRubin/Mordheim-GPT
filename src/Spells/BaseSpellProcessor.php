@@ -6,7 +6,6 @@ use Mordheim\Battle;
 use Mordheim\Data\Spell;
 use Mordheim\Dice;
 use Mordheim\Fighter;
-use Mordheim\SpellInterface;
 
 abstract class BaseSpellProcessor implements SpellProcessorInterface
 {
@@ -17,6 +16,7 @@ abstract class BaseSpellProcessor implements SpellProcessorInterface
     {
 
     }
+
     public function onPhaseShoot(Battle $battle, Fighter $caster): void
     {
 

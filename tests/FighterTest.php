@@ -25,7 +25,7 @@ class FighterTest extends MordheimTestCase
         $fighter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager()
+            new \Mordheim\EquipmentManager(),
         );
         $this->assertEquals(4, $fighter->getMoveRange());
 

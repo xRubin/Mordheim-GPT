@@ -3,14 +3,18 @@
 namespace Mordheim\Spells\ChaosRituals;
 
 use Mordheim\Battle;
+use Mordheim\Data\Equipment;
 use Mordheim\Data\Spell;
+use Mordheim\EquipmentInterface;
 use Mordheim\Fighter;
+use Mordheim\Rule\Attack;
 use Mordheim\Ruler;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class WordOfPainProcessor extends BaseSpellProcessor
 {
-    public Spell $spell = Spell::DARK_BLOOD;
+    public Spell $spell = Spell::WORD_OF_PAIN;
+    public EquipmentInterface $weapon = Equipment::WORD_OF_PAIN;
 
     public function __construct(
         public int $difficulty = 7
@@ -30,11 +34,8 @@ class WordOfPainProcessor extends BaseSpellProcessor
             return false;
 
         foreach ($this->findTargets($battle, $caster) as $target) {
-            $target->getState()->modifyWounds(-3); // S3, но просто -3 ран
             \Mordheim\BattleLogger::add("{$target->getName()} получает урон от {$this->spell->name} (без сейва).");
-            if ($target->getState()->getWounds() <= 0) {
-                $battle->killFighter($target);
-            }
+            Attack::magic($battle, $caster, $target, $this->weapon, false);
         }
         return true;
     }

@@ -31,7 +31,7 @@ class Attack
 
         $success = false;
         for ($i = 0; $i < $source->getAttacks(); $i++) {
-            $weapon = $source->getEquipmentManager()->getWeaponByAttackIdx(Slot::MELEE, $i);
+            $weapon = $source->getWeaponByAttackIdx(Slot::MELEE, $i);
             \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->getState()->getWounds()}, state={$target->getState()->getStatus()->name}, weapon={$weapon->getName()}");
 
             if ($result = self::handleSpecialStates($battle, $source, $target, $weapon)) {
@@ -88,6 +88,45 @@ class Attack
             }
         }
         return $hit;
+    }
+
+    /**
+     * Расчет повреждения от магического снаряда с учетом силы и модификатора сейва цели
+     */
+    public static function magic(Battle $battle, Fighter $caster, Fighter $target, EquipmentInterface $weapon, $useSave = true): bool
+    {
+        if ($target->getState()->getWounds() <= 0)
+            return true;
+
+        $woundResult = \Mordheim\Rule\RollToWound::roll($caster, $target, $weapon);
+        if (!$woundResult['success']) {
+            \Mordheim\BattleLogger::add("{$target->getName()} не был ранен заклинанием {$weapon->name}.");
+            return true;
+        }
+
+        if ($useSave) {
+            // Сэйв с учетом модификатора цели
+            $armorSave = $target->getArmorSave($weapon);
+            $armorSaveMod = $target->getEquipmentManager()->getArmorSaveModifier($weapon);
+            $armorSave += $armorSaveMod;
+            if ($armorSave > 0) {
+                $saveRoll = \Mordheim\Dice::roll(6);
+                \Mordheim\BattleLogger::add("{$target->getName()} бросает на сэйв: $saveRoll (нужно $armorSave+)");
+                if ($saveRoll >= $armorSave) {
+                    \Mordheim\BattleLogger::add("Сэйв удался! Урон не нанесён.");
+                    return true;
+                } else {
+                    \Mordheim\BattleLogger::add("Сэйв не удался.");
+                }
+            }
+        }
+
+        $target->getState()->modifyWounds(-1);
+        \Mordheim\BattleLogger::add("{$target->getName()} получает 1 ранение от {$weapon->name}.");
+        if ($target->getState()->getWounds() <= 0) {
+            $battle->killFighter($target);
+        }
+        return true;
     }
 
     /**
@@ -260,10 +299,14 @@ class Attack
         return [$toHit, $shots];
     }
 
-    public static function tryArmorSaveRanged(Fighter $source, Fighter $target, $weapon): bool
+    public static function tryArmorSaveRanged(Fighter $source, Fighter $target, ?EquipmentInterface $weapon): bool
     {
         $armorSave = $target->getArmorSave($weapon);
-        $saveRoll = $armorSave > 0 ? \Mordheim\Dice::roll(6) : 7;
+        if ($armorSave <= 0) {
+            return false; // Нет сейва — урон проходит!
+        }
+        $saveRoll = \Mordheim\Dice::roll(6);
+        \Mordheim\BattleLogger::add("ArmorSave: {$armorSave}, SaveRoll: {$saveRoll}.");
         return $saveRoll >= $armorSave;
     }
 

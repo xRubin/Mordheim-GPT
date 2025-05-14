@@ -3,6 +3,7 @@
 namespace Mordheim\Spells\ChaosRituals;
 
 use Mordheim\Battle;
+use Mordheim\Characteristics;
 use Mordheim\Data\Spell;
 use Mordheim\Dice;
 use Mordheim\Fighter;
@@ -41,29 +42,27 @@ class EyeOfGodProcessor extends BaseSpellProcessor
         } elseif ($roll >= 2 && $roll <= 5) {
             // +1 к одной характеристике
             $characteristics = [
-                'movement' => $target->getMovement(),
-                'weaponSkill' => $target->getWeaponSkill(),
-                'ballisticSkill' => $target->getBallisticSkill(),
-                'strength' => $target->getStrength(),
-                'toughness' => $target->getToughness(),
-                'initiative' => $target->getInitiative(),
-                'attacks' => $target->getAttacks(),
-                'leadership' => $target->getLeadership(),
+                'movement' => $target->getMovement(false),
+                'weaponSkill' => $target->getWeaponSkill(false),
+                'ballisticSkill' => $target->getBallisticSkill(false),
+                'strength' => $target->getStrength(false),
+                'toughness' => $target->getToughness(false),
+                'initiative' => $target->getInitiative(false),
+                'attacks' => $target->getAttacks(false),
+                'leadership' => $target->getLeadership(false),
 
             ];
             arsort($characteristics);
-            $selected = array_key_first($characteristics);
-            $target->getAdvancement()->getCharacteristics()->$selected += 1;
-            \Mordheim\BattleLogger::add("{$target->getName()} получает +1 к {$selected} до конца боя ({$this->spell->name}).");
+            $char = array_key_first($characteristics);
+            $target->getState()->getCharacteristics()->setByName($char, $target->getState()->getCharacteristics()->getByName($char) + 1);
+            \Mordheim\BattleLogger::add("{$target->getName()} получает +1 к {$char} до конца боя ({$this->spell->name}).");
         } else {
             // +1 ко всем характеристикам
-            foreach ([
-                         'movement', 'weaponSkill', 'ballisticSkill', 'strength', 'toughness', 'wounds', 'initiative', 'attacks', 'leadership'
-                     ] as $char) {
-                if (property_exists($target->getAdvancement()->getCharacteristics(), $char)) {
-                    $target->getAdvancement()->getCharacteristics()->$char += 1;
-                }
-            }
+            $target->getState()->setCharacteristics(
+                $target->getState()->getCharacteristics()->add(
+                    new Characteristics(1,1,1,1,1,1,1,1,1)
+                )
+            );
             \Mordheim\BattleLogger::add("{$target->getName()} получает +1 ко всем характеристикам до конца боя ({$this->spell->name})!");
         }
 

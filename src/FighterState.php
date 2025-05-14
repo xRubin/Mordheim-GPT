@@ -2,6 +2,8 @@
 
 namespace Mordheim;
 
+use Mordheim\Data\Spell;
+
 class FighterState
 {
     /**
@@ -9,6 +11,7 @@ class FighterState
      * @var SpellInterface[]
      */
     private array $activeSpells = [];
+    private Characteristics $characteristics;
 
     public function __construct(
         private array                   $position,
@@ -17,7 +20,7 @@ class FighterState
         private Status                  $status = Status::STANDING,
     )
     {
-
+        $this->characteristics = new Characteristics();
     }
 
     public function getPosition(): array
@@ -139,5 +142,16 @@ class FighterState
                 return true;
         }
         return false;
+    }
+
+    public function getCharacteristics(): Characteristics
+    {
+        return $this->characteristics;
+    }
+
+    public function setCharacteristics(Characteristics $characteristics): FighterState
+    {
+        $this->characteristics = $characteristics;
+        return $this;
     }
 }
