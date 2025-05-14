@@ -53,7 +53,16 @@ class ChaosRitualsTest extends MordheimTestCase
     {
         $battle = $this->createMock(Battle::class);
         $mage = $this->makeFighter('Mage', [0, 0, 0]);
-        $enemy = $this->makeFighter('Enemy', [4, 0, 0], 5);
+        // Враг без сейва
+        $enemy = new class(
+            Blank::CULT_MAGISTER,
+            new FighterAdvancement(new Characteristics(wounds: 5)),
+            new EquipmentManager([]),
+            new FighterState([4, 0, 0], new AggressiveStrategy(), 5)
+        ) extends Fighter {
+            public function getArmorSave(?\Mordheim\EquipmentInterface $attackerWeapon): int { return 0; }
+        };
+        $enemy->setName('Enemy');
         $battle->method('getEnemiesFor')->willReturn([$enemy]);
         \Mordheim\Dice::setTestRolls([6, 6, 1, 6]);
         $result = Spell::DARK_BLOOD->getProcessor()->onPhaseMagic($battle, $mage);

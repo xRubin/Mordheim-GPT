@@ -33,16 +33,19 @@ class Move
      * @param Fighter $fighter
      * @param array $target
      * @param float $aggressiveness
+     * @param bool $checkNearEnemies
      * @return void
      * @throws PathfinderTargetUnreachableException
      * @throws MoveRunDeprecatedException
      */
-    public static function run(Battle $battle, Fighter $fighter, array $target, float $aggressiveness): void
+    public static function run(Battle $battle, Fighter $fighter, array $target, float $aggressiveness, bool $checkNearEnemies = true): void
     {
-        foreach ($battle->getEnemiesFor($fighter) as $enemy) {
-            if (Ruler::distance($fighter, $enemy) < 8) { // 8 клеток = 8"
-                \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать: враг слишком близко (меньше 8\")");
-                throw new MoveRunDeprecatedException();
+        if ($checkNearEnemies) {
+            foreach ($battle->getEnemiesFor($fighter) as $enemy) {
+                if (Ruler::distance($fighter, $enemy) < 8) { // 8 клеток = 8"
+                    \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать: враг слишком близко (меньше 8\")");
+                    throw new MoveRunDeprecatedException();
+                }
             }
         }
         $blockers = self::prepareBlockers($battle, $fighter);

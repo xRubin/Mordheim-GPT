@@ -26,7 +26,6 @@ enum SpecialRule implements SpecialRuleInterface
     case FIRE_TWICE;
     case SHOOT_IN_HAND_TO_HAND_COMBAT;
     case PREPARE_SHOT;
-    case SAVE_MODIFIER;
     case HAND_TO_HAND;
     case ACCURACY;
     case PICK_TARGET;
@@ -48,6 +47,8 @@ enum SpecialRule implements SpecialRuleInterface
     case VENOMOUS;
     case AVOID_STUN;
     case MOVEMENT;
+    case SHOT;
+    case FIRE_ONCE;
 
     case LEADER;
     case EXPERT_SWORDSMAN;

@@ -3,6 +3,8 @@
 namespace Mordheim;
 
 use Mordheim\Data\Spell;
+use Mordheim\Exceptions\MoveRunDeprecatedException;
+use Mordheim\Exceptions\PathfinderTargetUnreachableException;
 use Mordheim\Rule\RecoveryPhase;
 use SplObjectStorage;
 
@@ -85,19 +87,27 @@ class Battle
     {
         \Mordheim\BattleLogger::add("Ход #{$this->turn}");
         $actWarbands = $this->warbands;
+        $routed = [];
 
         foreach ($actWarbands as $warband) {
-            if (!RecoveryPhase::applyRoutTest($warband, $this->warbands)) {
-                $actWarbands = array_diff($actWarbands, [$warband]);
-                $this->phaseMove($warband);
-            } else {
-                foreach ($warband->fighters as $fighter) {
-                    if (!RecoveryPhase::applyPsychology($this, $fighter, $warband, $this->warbands)) {
-                        $fighter->getState()->getBattleStrategy()->spentAll();
-                    }
+            foreach ($warband->fighters as $fighter) {
+                if (!RecoveryPhase::applyPsychology($this, $fighter, $warband, $this->warbands)) {
+                    $fighter->getState()->getBattleStrategy()->spentAll();
                 }
             }
         }
+
+        foreach ($actWarbands as $warband) {
+            if (!RecoveryPhase::applyRoutTest($warband, $this->warbands)) {
+                $routed[] = $warband;
+                $this->phaseMove($warband);
+            }
+        }
+
+        $actWarbands = array_filter(
+            $actWarbands,
+            fn($wb) => !in_array($wb, $routed, true)
+        );
 
         foreach ($actWarbands as $warband)
             $this->phaseMove($warband);
@@ -122,6 +132,8 @@ class Battle
         foreach ($warband->fighters as $fighter) {
             $status = $fighter->getState()->getStatus();
             if ($status === Status::PANIC) {
+                foreach ($this->activeCombats->getByFighter($fighter) as $combat)
+                    $this->activeCombats->remove($combat);
                 // --- Паника: бежим к ближайшему краю ---
                 self::runAwayInPanic($fighter);
                 continue;
@@ -136,20 +148,44 @@ class Battle
     public function runAwayInPanic(Fighter $fighter): void
     {
         [$x, $y, $z] = $fighter->getState()->getPosition();
-        // Края: x=0, x=width-1, y=0, y=length-1
-        $dists = [
-            [0, $y, $z, abs($x - 0)],
-            [$this->getField()->getWidth() - 1, $y, $z, abs($x - ($this->getField()->getWidth() - 1))],
-            [$x, 0, $z, abs($y - 0)],
-            [$x, $this->getField()->getLength() - 1, $z, abs($y - ($this->getField()->getLength() - 1))],
+        $field = $this->getField();
+        $edges = [
+            [0, $y, $z],
+            [$field->getWidth() - 1, $y, $z],
+            [$x, 0, $z],
+            [$x, $field->getLength() - 1, $z],
         ];
-        usort($dists, fn($a, $b) => $a[3] <=> $b[3]);
-        // Берём ближайший край
-        $target = [$dists[0][0], $dists[0][1], $dists[0][2]];
+
+        // Сортируем по расстоянию до текущей позиции
+        usort($edges, fn($a, $b) => (abs($x - $a[0]) + abs($y - $a[1])) <=> (abs($x - $b[0]) + abs($y - $b[1])));
+
+        // Ищем ближайшую незанятую клетку на краю
+        $target = null;
+        foreach ($edges as $edge) {
+            $occupied = false;
+            foreach ($this->getFighters() as $f) {
+                if ($f !== $fighter && $f->getState()->getPosition() === $edge && $f->getState()->getStatus()->isAlive()) {
+                    $occupied = true;
+                    break;
+                }
+            }
+            if (!$occupied && !$field->getCell($edge[0], $edge[1], $edge[2])->obstacle) {
+                $target = $edge;
+                break;
+            }
+        }
+
+        if ($target === null) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может убежать в панике: все края заняты.");
+            return;
+        }
+
         try {
-            \Mordheim\Rule\Move::run($this, $fighter, $target, 0.4); // минимальная агрессивность
-        } catch (\Throwable $e) {
+            \Mordheim\Rule\Move::run($this, $fighter, $target, 0.4, false); // минимальная агрессивность
+        } catch (MoveRunDeprecatedException $e) {
             \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать в панике: " . $e->getMessage());
+        } catch (PathfinderTargetUnreachableException $e) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может убежать в панике: путь до края недоступен. (" . implode(", ", $target) . ")");
         }
     }
 
@@ -334,7 +370,8 @@ class Battle
         $error2 = $dx - $dz;
 
         for ($i = 0; $i < $n; $i++) {
-            if ($this->getField()->getCell($x, $y, $z)->obstacle) {
+            $cell = $this->getField()->getCell($x, $y, $z);
+            if (null === $cell || $cell->obstacle) {
                 return true;
             }
 

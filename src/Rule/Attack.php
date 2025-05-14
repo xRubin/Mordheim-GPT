@@ -66,14 +66,13 @@ class Attack
 
         $hit = false;
         for ($i = 0; $i < $shots; $i++) {
+            if (!$target->getState()->getStatus()->isAlive()) break;
             \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->getState()->getWounds()}, state={$target->getState()->getStatus()->name}, weapon={$weapon->getName()}");
             $roll = \Mordheim\Dice::roll(6);
             if ($roll === 6) {
                 // Critical
                 $target->getState()->modifyWounds(-1);
-                if ($target->getState()->getWounds() <= 0) {
-                    $battle->killFighter($target);
-                }
+                Injuries::rollIfNoWounds($battle, $source, $target, $weapon, true);
                 $hit = true;
                 continue;
             }
@@ -81,9 +80,7 @@ class Attack
             if (Dodge::roll($target)) continue;
             if (!self::tryArmorSaveRanged($source, $target, $weapon)) {
                 $target->getState()->modifyWounds(-1);
-                if ($target->getState()->getWounds() <= 0) {
-                    $battle->killFighter($target);
-                }
+                Injuries::rollIfNoWounds($battle, $source, $target, $weapon);
                 $hit = true;
             }
         }
@@ -105,10 +102,17 @@ class Attack
         }
 
         if ($useSave) {
-            // Сэйв с учетом модификатора цели
             $armorSave = $target->getArmorSave($weapon);
+            if ($armorSave <= 0) {
+                $target->getState()->modifyWounds(-1);
+                \Mordheim\BattleLogger::add("{$target->getName()} получает 1 ранение от {$weapon->name}.");
+                Injuries::rollIfNoWounds($battle, $caster, $target, $weapon);
+                return true;
+            }
+            $attackerStrength = $weapon->getStrength($caster->getStrength());
+            $strengthMod = self::getStrengthArmorSaveModifier($attackerStrength);
             $armorSaveMod = $target->getEquipmentManager()->getArmorSaveModifier($weapon);
-            $armorSave += $armorSaveMod;
+            $armorSave = $armorSave - $strengthMod + $armorSaveMod;
             if ($armorSave > 0) {
                 $saveRoll = \Mordheim\Dice::roll(6);
                 \Mordheim\BattleLogger::add("{$target->getName()} бросает на сэйв: $saveRoll (нужно $armorSave+)");
@@ -123,9 +127,7 @@ class Attack
 
         $target->getState()->modifyWounds(-1);
         \Mordheim\BattleLogger::add("{$target->getName()} получает 1 ранение от {$weapon->name}.");
-        if ($target->getState()->getWounds() <= 0) {
-            $battle->killFighter($target);
-        }
+        Injuries::rollIfNoWounds($battle, $caster, $target, $weapon);
         return true;
     }
 
@@ -209,9 +211,21 @@ class Attack
         \Mordheim\BattleLogger::add("[DEBUG][Attack] woundResult: " . json_encode($woundResult));
         if (!$woundResult['success']) return false;
         $armorSave = $target->getArmorSave($weapon);
+        if ($armorSave <= 0) {
+            // Нет брони — урон проходит автоматически
+            $target->getState()->modifyWounds(
+                $source->hasSpecialRule(SpecialRule::DOUBLE_DAMAGE) ? -2 : -1
+            );
+            \Mordheim\BattleLogger::add("У {$target->getName()} осталось {$target->getState()->getWounds()} ран(а/ий)");
+            Injuries::rollIfNoWounds($battle, $source, $target, $weapon);
+            $success = true;
+            return true;
+        }
+        $attackerStrength = $weapon->getStrength($source->getStrength());
+        $strengthMod = self::getStrengthArmorSaveModifier($attackerStrength);
         $armorSaveMod = $source->getEquipmentManager()->getArmorSaveModifier($weapon);
-        $armorSave += $armorSaveMod;
-        \Mordheim\BattleLogger::add("Сэйв защищающегося: $armorSave (модификатор: $armorSaveMod)");
+        $armorSave = $armorSave - $strengthMod + $armorSaveMod;
+        \Mordheim\BattleLogger::add("Сэйв защищающегося: $armorSave (модификатор по силе: $strengthMod, спецправила: $armorSaveMod)");
         if ($woundResult['isCritical']) {
             \Mordheim\BattleLogger::add("[DEBUG][Attack] Критическое ранение! Перед InjuryRoll");
             $success = Injuries::roll($battle, $source, $target, $weapon, true);
@@ -236,6 +250,7 @@ class Attack
                     $source->hasSpecialRule(SpecialRule::DOUBLE_DAMAGE) ? -2 : -1
                 );
                 \Mordheim\BattleLogger::add("У {$target->getName()} осталось {$target->getState()->getWounds()} ран(а/ий)");
+                Injuries::rollIfNoWounds($battle, $source, $target, $weapon);
                 $success = true;
             }
             \Mordheim\BattleLogger::add("[DEBUG][Attack] После InjuryRoll: статус цели=" . $target->getState()->getStatus()->name);
@@ -305,6 +320,13 @@ class Attack
         if ($armorSave <= 0) {
             return false; // Нет сейва — урон проходит!
         }
+        $attackerStrength = $weapon ? $weapon->getStrength($source->getStrength()) : $source->getStrength();
+        $strengthMod = self::getStrengthArmorSaveModifier($attackerStrength);
+        $armorSaveMod = $source->getEquipmentManager()->getArmorSaveModifier($weapon);
+        $armorSave = $armorSave - $strengthMod + $armorSaveMod;
+        if ($armorSave <= 0) {
+            return false; // Нет сейва — урон проходит!
+        }
         $saveRoll = \Mordheim\Dice::roll(6);
         \Mordheim\BattleLogger::add("ArmorSave: {$armorSave}, SaveRoll: {$saveRoll}.");
         return $saveRoll >= $armorSave;
@@ -313,16 +335,30 @@ class Attack
     /**
      * Проверка, может ли атакующий атаковать и может ли цель быть атакована
      */
-    private static function canAttack(Fighter $source, Fighter $target): bool
+    public static function canAttack(Fighter $source, Fighter $target): bool
     {
         if (!$source->getState()->getStatus()->canAct()) {
-            \Mordheim\BattleLogger::add("{$source->getName()} не может атаковать из-за состояния: {$source->getState()->getStatus()->value}.");
+            \Mordheim\BattleLogger::add("{$source->getName()} не может атаковать из-за состояния: {$source->getState()->getStatus()->name}.");
             return false;
         }
         if (!$target->getState()->getStatus()->isAlive()) {
-            \Mordheim\BattleLogger::add("{$target->getName()} не может быть атакован: состояние {$target->getState()->getStatus()->value}.");
+            \Mordheim\BattleLogger::add("{$target->getName()} не может быть атакован: состояние {$target->getState()->getStatus()->name}.");
             return false;
         }
         return true;
+    }
+
+    /**
+     * Модификатор сейва по силе удара (таблица Mordheim)
+     */
+    public static function getStrengthArmorSaveModifier(int $strength): int
+    {
+        if ($strength <= 3) return 0;
+        if ($strength == 4) return -1;
+        if ($strength == 5) return -2;
+        if ($strength == 6) return -3;
+        if ($strength == 7) return -4;
+        if ($strength == 8) return -5;
+        return -6;
     }
 }

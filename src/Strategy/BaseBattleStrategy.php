@@ -4,6 +4,7 @@ namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
 use Mordheim\BattleStrategyInterface;
+use Mordheim\Data\Equipment;
 use Mordheim\Fighter;
 use Mordheim\Ruler;
 use Mordheim\Slot;
@@ -114,6 +115,12 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
             \Mordheim\BattleLogger::add("{$fighter->getName()} не может действовать из-за состояния {$fighter->getState()->getStatus()->value}.");
             return;
         }
+
+        if (count($fighter->getEquipmentManager()->getItemsBySlot(Slot::ARMOR)))
+            return;
+
+        if ($fighter->getEquipmentManager()->hasItem(Equipment::SHIELD) || $fighter->getEquipmentManager()->hasItem(Equipment::BUCKLER))
+            return;
 
         if (!$this->spentMagic)
             $this->onMagicPhase($battle, $fighter, $enemies);

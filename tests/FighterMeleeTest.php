@@ -145,10 +145,14 @@ class FighterMeleeTest extends MordheimTestCase
     {
         \Mordheim\Dice::setTestRolls([4, 1, 4, 1, 1]); // hit, parry, wound, injury=1 (выбывает)
         $attacker = $this->makeFighter([], [Equipment::CLUB], 2, [0, 0, 0]);
-        $defender = $this->makeFighter([], [Equipment::SWORD], 2, [1, 0, 0]);
+        $defender = $this->makeFighter([], [Equipment::SWORD], 1, [1, 0, 0]); // 1 рана!
         $battle = $this->makeClearBattle([$attacker], [$defender]);
         \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
-        $this->assertFalse($defender->getState()->getStatus()->isAlive(), 'Club/Mace/Hammer should put out of action on 1');
+        $this->assertEquals(
+            \Mordheim\Status::OUT_OF_ACTION,
+            $defender->getState()->getStatus(),
+            'Club/Mace/Hammer should put out of action on injury roll 1'
+        );
     }
 
     public function testDoubleHandedAndArmorPiercingAffectSave()
@@ -216,9 +220,13 @@ class FighterMeleeTest extends MordheimTestCase
     {
         \Mordheim\Dice::setTestRolls([4, 1, 6, 7]); // hit, parry, wound=6 (крит), save
         $attacker = $this->makeFighter([], [Equipment::SWORD], 2, [0, 0, 0]);
-        $defender = self::makeTestFighter([], [Equipment::SWORD], 2, [1, 0, 0]);
+        $defender = self::makeTestFighter([], [Equipment::SWORD], 1, [1, 0, 0]); // 1 рана!
         $battle = $this->makeClearBattle([$attacker], [$defender]);
         \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
-        $this->assertEquals(\Mordheim\Status::OUT_OF_ACTION, $defender->getState()->getStatus(), 'Critical should put out of action on 6 to wound');
+        $this->assertEquals(
+            \Mordheim\Status::OUT_OF_ACTION,
+            $defender->getState()->getStatus(),
+            'Critical should put out of action'
+        );
     }
 }

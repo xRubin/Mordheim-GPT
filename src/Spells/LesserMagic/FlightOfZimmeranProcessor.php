@@ -7,6 +7,7 @@ use Mordheim\CloseCombat;
 use Mordheim\Data\Spell;
 use Mordheim\Fighter;
 use Mordheim\Rule\Charge;
+use Mordheim\Rule\Injuries;
 use Mordheim\Ruler;
 use Mordheim\Spells\BaseSpellProcessor;
 use Mordheim\Status;
@@ -45,9 +46,7 @@ class FlightOfZimmeranProcessor extends BaseSpellProcessor
         if ($target->getState()->getStatus() === Status::PANIC) {
             \Mordheim\BattleLogger::add("{$caster->getName()} наносит автоматический удар по бегущему {$target->getName()} ({$this->spell->name}).");
             $target->getState()->modifyWounds(-1); // Пример: 1 урон
-            if ($target->getState()->getWounds() <= 0) {
-                $battle->killFighter($target);
-            }
+            Injuries::rollIfNoWounds($battle, $caster, $target);
         } else {
             $battle->getActiveCombats()->add(new CloseCombat($caster, $target));
         }

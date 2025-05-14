@@ -7,6 +7,7 @@ use Mordheim\Data\Blank;
 use Mordheim\Data\Spell;
 use Mordheim\Data\Warband;
 use Mordheim\Fighter;
+use Mordheim\Rule\Injuries;
 use Mordheim\Ruler;
 use Mordheim\Spells\BaseSpellProcessor;
 
@@ -35,9 +36,7 @@ class LifestealerProcessor extends BaseSpellProcessor
         $target->getState()->modifyWounds(-1);
         $caster->getState()->modifyWounds(+1);
         \Mordheim\BattleLogger::add("{$caster->getName()} высасывает жизнь у {$target->getName()} ({$this->spell->name}).");
-        if ($target->getState()->getWounds() <= 0) {
-            $battle->killFighter($target);
-        }
+        Injuries::rollIfNoWounds($battle, $caster, $target);
         return true;
     }
 

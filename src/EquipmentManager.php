@@ -46,17 +46,9 @@ class EquipmentManager
         return $this;
     }
 
-    /**
-     * Проверяет, есть ли у бойца шлем с защитой от стана (Avoid stun)
-     */
-    public function hasHelmetProtection(): bool
+    public function hasItem(EquipmentInterface $item): bool
     {
-        foreach ($this->items as $eq) {
-            if ($eq->hasSpecialRule(SpecialRule::AVOID_STUN)) {
-                return true;
-            }
-        }
-        return false;
+        return in_array($item, $this->items);
     }
 
     /**

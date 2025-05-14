@@ -83,6 +83,8 @@ enum Equipment implements EquipmentInterface
     #[SlotMelee]
     case DOUBLE_HANDED_HAMMER;
     #[StrengthBonus(+2)]
+    #[SpecialRule('TWO_HANDED')]
+    #[SpecialRule('CUTTING_EDGE')]
     #[SlotMelee]
     case DOUBLE_HANDED_AXE;
 
@@ -135,7 +137,7 @@ enum Equipment implements EquipmentInterface
     #[MaximumRange(6)]
     #[Strength(4)]
     #[SpecialRule('PREPARE_SHOT')]
-    #[SpecialRule('SAVE_MODIFIER')]
+    #[SpecialRule('MINUS_1_SAVE_MODIFIER')]
     #[SpecialRule('HAND_TO_HAND')]
     #[SlotRanged]
     case PISTOL;
@@ -143,7 +145,7 @@ enum Equipment implements EquipmentInterface
     #[Strength(4)]
     #[SpecialRule('ACCURACY')]
     #[SpecialRule('PREPARE_SHOT')]
-    #[SpecialRule('SAVE_MODIFIER')]
+    #[SpecialRule('MINUS_1_SAVE_MODIFIER')]
     #[SpecialRule('HAND_TO_HAND')]
     #[SlotRanged]
     case DUELLING_PISTOL;
@@ -157,7 +159,7 @@ enum Equipment implements EquipmentInterface
     #[Strength(4)]
     #[SpecialRule('PREPARE_SHOT')]
     #[SpecialRule('MOVE_OR_FIRE')]
-    #[SpecialRule('SAVE_MODIFIER')]
+    #[SpecialRule('MINUS_1_SAVE_MODIFIER')]
     #[SlotRanged]
     case HANDGUN;
     #[MaximumRange(48)]
@@ -165,7 +167,7 @@ enum Equipment implements EquipmentInterface
     #[SpecialRule('MOVE_OR_FIRE')]
     #[SpecialRule('PREPARE_SHOT')]
     #[SpecialRule('PICK_TARGET')]
-    #[SpecialRule('SAVE_MODIFIER')]
+    #[SpecialRule('MINUS_1_SAVE_MODIFIER')]
     #[SlotRanged]
     case HOCHLAND_LONG_RIFFLE;
 
@@ -416,6 +418,14 @@ enum Equipment implements EquipmentInterface
     #[Strength(5)]
     #[SlotRanged]
     case DARK_BLOOD;
+    #[MaximumRange(4)]
+    #[Strength(3)]
+    #[SlotRanged]
+    case SOULFIRE_3;
+    #[MaximumRange(4)]
+    #[Strength(5)]
+    #[SlotRanged]
+    case SOULFIRE_5;
     #[MaximumRange(18)]
     #[Strength(4)]
     #[SlotRanged]

@@ -3,6 +3,7 @@
 namespace Mordheim\Rule;
 
 use Mordheim\Fighter;
+use Mordheim\SpecialRule;
 
 class AvoidStun
 {
@@ -12,7 +13,7 @@ class AvoidStun
      */
     public static function roll(Fighter $fighter): bool
     {
-        if ($fighter->getEquipmentManager()->hasHelmetProtection()) {
+        if ($fighter->getEquipmentManager()->hasSpecialRule(SpecialRule::AVOID_STUN)) {
             $roll = \Mordheim\Dice::roll(6);
             if ($roll >= 4) {
                 \Mordheim\BattleLogger::add("{$fighter->getName()} спасся от стана шлемом (бросок $roll)");

@@ -5,6 +5,7 @@ namespace Mordheim\Spells\LesserMagic;
 use Mordheim\Battle;
 use Mordheim\Data\Spell;
 use Mordheim\Data\Warband;
+use Mordheim\Exceptions\MoveRunDeprecatedException;
 use Mordheim\Fighter;
 use Mordheim\Ruler;
 use Mordheim\SpecialRule;
@@ -54,9 +55,9 @@ class DreadOfAramarProcessor extends BaseSpellProcessor
             $newZ = (int)round($from[2] + $distance * ($dz / $len));
             $targetPos = [$newX, $newY, $newZ];
             try {
-                \Mordheim\Rule\Move::common($battle, $target, $targetPos, 0.4);
+                \Mordheim\Rule\Move::run($battle, $target, $targetPos, 0.4, false);
                 \Mordheim\BattleLogger::add("{$target->getName()} не прошёл тест Лидерства и убегает на {$distance}\" от {$caster->getName()} ({$this->spell->name}).");
-            } catch (\Throwable $e) {
+            } catch (MoveRunDeprecatedException $e) {
                 \Mordheim\BattleLogger::add("{$target->getName()} не может убежать: " . $e->getMessage());
             }
         } else {

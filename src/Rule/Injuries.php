@@ -85,4 +85,12 @@ class Injuries
         }
         return true;
     }
+
+    public static function rollIfNoWounds(Battle $battle, Fighter $source, Fighter $target, ?EquipmentInterface $weapon = null, bool $isCritical = false):bool
+    {
+        if ($target->getState()->getWounds() <= 0) {
+            return self::roll($battle, $source, $target, $weapon, $isCritical);
+        }
+        return false;
+    }
 }

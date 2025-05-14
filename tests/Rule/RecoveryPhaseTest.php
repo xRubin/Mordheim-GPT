@@ -50,6 +50,7 @@ class RecoveryPhaseTest extends MordheimTestCase
             $this->makeFighter(Status::OUT_OF_ACTION),
         ];
         $warband = new Warband('Test', $fighters);
+        \Mordheim\Dice::setTestRolls([2]);
         $result = \Mordheim\Rule\RecoveryPhase::applyRoutTest($warband, [$warband]);
         $this->assertFalse($result);
         $this->assertEquals(Status::PANIC, $fighters[0]->getState()->getStatus());

@@ -9,6 +9,7 @@ use Mordheim\Dice;
 use Mordheim\Fighter;
 use Mordheim\Rule\Attack;
 use Mordheim\Rule\Dodge;
+use Mordheim\Rule\Injuries;
 use Mordheim\Ruler;
 use Mordheim\Spells\BaseSpellProcessor;
 
@@ -47,9 +48,7 @@ class SilverArrowsOfArhaProcessor extends BaseSpellProcessor
             if (!Attack::tryArmorSaveRanged($caster, $target, $this->weapon)) {
                 $target->getState()->modifyWounds(-1);
                 \Mordheim\BattleLogger::add("{$target->getName()} получает 1 ранение от {$this->weapon->name}.");
-                if ($target->getState()->getWounds() <= 0) {
-                    $battle->killFighter($target);
-                }
+                Injuries::rollIfNoWounds($battle, $caster, $target, $this->weapon);
             }
         }
         return true;
