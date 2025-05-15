@@ -6,7 +6,7 @@ enum Slot
 {
     case MELEE;
     case RANGED;
-    case ARMOR;
+    case ARMOUR;
     case HELMET;
     case MISC;
 }

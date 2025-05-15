@@ -60,7 +60,7 @@ class ChaosRitualsTest extends MordheimTestCase
             new EquipmentManager([]),
             new FighterState([4, 0, 0], new AggressiveStrategy(), 5)
         ) extends Fighter {
-            public function getArmorSave(?\Mordheim\EquipmentInterface $attackerWeapon): int { return 0; }
+            public function getArmourSave(?\Mordheim\EquipmentInterface $attackerWeapon): int { return 0; }
         };
         $enemy->setName('Enemy');
         $battle->method('getEnemiesFor')->willReturn([$enemy]);

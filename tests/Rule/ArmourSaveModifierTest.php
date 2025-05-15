@@ -3,21 +3,21 @@
 use Mordheim\Data\Equipment;
 use Mordheim\EquipmentManager;
 
-class ArmorSaveModifierTest extends MordheimTestCase
+class ArmourSaveModifierTest extends MordheimTestCase
 {
     /**
      * @dataProvider equipmentStrengthModifierProvider
      */
-    public function testEquipmentTotalArmorSaveModifier(Equipment $equipment, int $fighterStrength, int $expectedModifier)
+    public function testEquipmentTotalArmourSaveModifier(Equipment $equipment, int $fighterStrength, int $expectedModifier)
     {
         $actualStrength = $equipment->getStrength($fighterStrength);
 
         // Модификатор по таблице Mordheim
-        $tableModifier = \Mordheim\Rule\Attack::getStrengthArmorSaveModifier($actualStrength);
+        $tableModifier = \Mordheim\Rule\Attack::getStrengthArmourSaveModifier($actualStrength);
 
         // Модификатор от спецправил оружия
         $equipmentManager = new EquipmentManager([$equipment]);
-        $specialModifier = $equipmentManager->getArmorSaveModifier($equipment);
+        $specialModifier = $equipmentManager->getArmourSaveModifier($equipment);
 
         // Итоговый модификатор: по правилам Mordheim модификаторы складываются (оба отрицательные)
         $totalModifier = $tableModifier - $specialModifier;

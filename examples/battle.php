@@ -20,7 +20,7 @@ $battle = new Battle($field, [
         new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_MERCENARY_CAPTAIN,
             \Mordheim\FighterAdvancement::empty(),
-            new EquipmentManager([Equipment::SWORD, Equipment::LIGHT_ARMOR]),
+            new EquipmentManager([Equipment::SWORD, Equipment::LIGHT_ARMOUR]),
             new \Mordheim\FighterState(
                 [0, 0, 0],
                 new AggressiveStrategy(),
@@ -28,12 +28,12 @@ $battle = new Battle($field, [
             )
         ),
         new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_YOUNGBLOOD,
-            \Mordheim\FighterAdvancement::empty(),
-            new EquipmentManager([Equipment::AXE, Equipment::HEAVY_ARMOR]),
+            \Mordheim\Data\Blank::WARLOCK,
+            \Mordheim\FighterAdvancement::empty()->addSpell(\Mordheim\WizardSpell::create(\Mordheim\Data\Spell::FIRES_OF_UZHUL)),
+            new EquipmentManager([Equipment::STAFF]),
             new \Mordheim\FighterState(
                 [0, 2, 0],
-                new AggressiveStrategy(),
+                new \Mordheim\Strategy\CarefulStrategy(),
                 \Mordheim\Data\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->getWounds()
             )
         ),
@@ -43,8 +43,18 @@ $battle = new Battle($field, [
             new EquipmentManager([Equipment::BOW]),
             new \Mordheim\FighterState(
                 [0, 4, 0],
-                new AggressiveStrategy(),
+                new \Mordheim\Strategy\CowardlyStrategy(),
                 \Mordheim\Data\Blank::MARIENBURG_MARKSMAN->getCharacteristics()->getWounds()
+            )
+        ),
+        new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::MARIENBURG_YOUNGBLOOD,
+            \Mordheim\FighterAdvancement::empty(),
+            new EquipmentManager([Equipment::AXE, Equipment::HEAVY_ARMOUR]),
+            new \Mordheim\FighterState(
+                [0, 6, 0],
+                new AggressiveStrategy(),
+                \Mordheim\Data\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->getWounds()
             )
         ),
     ]),
@@ -62,7 +72,7 @@ $battle = new Battle($field, [
         new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MIDDENHEIM_YOUNGBLOOD,
             \Mordheim\FighterAdvancement::empty(),
-            new EquipmentManager([Equipment::AXE, Equipment::HEAVY_ARMOR]),
+            new EquipmentManager([Equipment::AXE, Equipment::HEAVY_ARMOUR]),
             new \Mordheim\FighterState(
                 [7, 2, 0],
                 new AggressiveStrategy(),
@@ -70,11 +80,21 @@ $battle = new Battle($field, [
             )
         ),
         new \Mordheim\Fighter(
+            \Mordheim\Data\Blank::WARLOCK,
+            \Mordheim\FighterAdvancement::empty()->addSpell(\Mordheim\WizardSpell::create(\Mordheim\Data\Spell::SWORD_OF_REZHEBEL)),
+            new EquipmentManager([Equipment::STAFF]),
+            new \Mordheim\FighterState(
+                [7, 4, 0],
+                new AggressiveStrategy(),
+                \Mordheim\Data\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->getWounds()
+            )
+        ),
+        new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MIDDENHEIM_WARRIOR,
             \Mordheim\FighterAdvancement::empty(),
             new EquipmentManager([Equipment::CLUB]),
             new \Mordheim\FighterState(
-                [7, 4, 0],
+                [7, 6, 0],
                 new AggressiveStrategy(),
                 \Mordheim\Data\Blank::MIDDENHEIM_WARRIOR->getCharacteristics()->getWounds()
             )

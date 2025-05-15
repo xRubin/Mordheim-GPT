@@ -27,7 +27,7 @@ class PrayersOfSigmarTest extends MordheimTestCase
     {
         $fighter = $this->makeFighterWithSpell(Spell::ARMOUR_OF_RIGHTEOUSNESS);
         $fighter->getState()->addActiveSpell(Spell::ARMOUR_OF_RIGHTEOUSNESS);
-        $this->assertEquals(2, $fighter->getArmorSave(null));
+        $this->assertEquals(2, $fighter->getArmourSave(null));
         $this->assertTrue($fighter->getState()->hasActiveSpell(Spell::ARMOUR_OF_RIGHTEOUSNESS));
         $this->assertTrue($fighter->hasSpecialRule(SpecialRule::FEARSOME));
     }

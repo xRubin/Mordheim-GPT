@@ -22,6 +22,7 @@ class CloseCombatCollection
     public function add(CloseCombat $combat): static
     {
         $this->combats[] = $combat;
+        \Mordheim\BattleLogger::add("[DEBUG][CloseCombat] добавление боя (" . implode(', ', array_map(fn ($fighter)=> $fighter->getName(), $combat->fighters)). ")");
         return $this;
     }
 
@@ -35,6 +36,7 @@ class CloseCombatCollection
         $index = array_search($combat, $this->combats);
         if (false === $index)
             throw new CloseCombatCollectionOutOfBoundsException();
+        \Mordheim\BattleLogger::add("[DEBUG][CloseCombat] удаление боя (" . implode(', ', array_map(fn ($fighter)=> $fighter->getName(), $combat->fighters)). ")");
         unset($this->combats[$index]);
         $this->combats = array_values($this->combats);
         return $this;

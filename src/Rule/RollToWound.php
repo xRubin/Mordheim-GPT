@@ -20,6 +20,8 @@ class RollToWound
         $attackerS = $weapon->getStrength($source->getStrength());
         if ($source->hasSpecialRule(SpecialRule::PLUS_2_STRENGTH))
             $attackerS += 2;
+        if ($source->hasSpecialRule(SpecialRule::PLUS_1_STRENGTH))
+            $attackerS += 1;
         $resilientMod = (int)$source->getEquipmentManager()->hasSpecialRule(SpecialRule::RESILIENT);
         $defenderT = $target->getToughness() + $resilientMod;
         $toWound = 4;

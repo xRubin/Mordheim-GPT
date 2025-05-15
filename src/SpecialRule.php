@@ -8,7 +8,7 @@ enum SpecialRule implements SpecialRuleInterface
 {
     use EnumTryFromNameTrait;
 
-    case PLUS_1_ENEMY_ARMOR_SAVE;
+    case PLUS_1_ENEMY_ARMOUR_SAVE;
     case CONCUSSION;
     case CUTTING_EDGE;
     case PARRY;
@@ -116,6 +116,7 @@ enum SpecialRule implements SpecialRuleInterface
     case FEARSOME;
     case IMMUNE_TO_SPELLS; // Shield of Faith
     case DOUBLE_DAMAGE; // The Hammer of Sigmar
+    case PLUS_1_STRENGTH; // Black Fury
     case PLUS_2_STRENGTH; // The Hammer of Sigmar
     case REROLL_ANY_FAILED; // Luck of Shemtek
 

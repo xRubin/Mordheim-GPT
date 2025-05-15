@@ -5,6 +5,7 @@ namespace Mordheim\Rule;
 use Mordheim\Battle;
 use Mordheim\CloseCombat;
 use Mordheim\Data\Equipment;
+use Mordheim\Data\Spell;
 use Mordheim\EquipmentInterface;
 use Mordheim\Fighter;
 use Mordheim\Ruler;
@@ -60,7 +61,7 @@ class Attack
         $weapon = self::selectRangedWeapon($source, $target, $moved);
         if (!$weapon) return false;
         \Mordheim\BattleLogger::add("{$source->getName()} атакует ranged {$target->getName()}!");
-        \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: " . implode(',', array_map(fn($weapon) => $weapon->getName(), $source->getEquipmentManager()->getItemsBySlot(Slot::MELEE))));
+        \Mordheim\BattleLogger::add("[DEBUG] Оружия у атакующего: " . implode(',', array_map(fn($weapon) => $weapon->getName(), $source->getEquipmentManager()->getItemsBySlot(Slot::RANGED))));
 
         [$toHit, $shots] = self::calculateRangedParams($battle, $source, $target, $weapon, $moved);
 
@@ -69,16 +70,29 @@ class Attack
             if (!$target->getState()->getStatus()->isAlive()) break;
             \Mordheim\BattleLogger::add("[DEBUG] Атака #" . ($i + 1) . ": до атаки wounds={$target->getState()->getWounds()}, state={$target->getState()->getStatus()->name}, weapon={$weapon->getName()}");
             $roll = \Mordheim\Dice::roll(6);
+            \Mordheim\BattleLogger::add("[DEBUG] ToHit: {$toHit} Roll: {$roll}");
+            if ($roll >= $toHit && $source->getState()->hasActiveSpell(Spell::SORCERERS_CURSE)) {
+                // re-roll any successful to hit rolls
+                $roll = \Mordheim\Dice::roll(6);
+                \Mordheim\BattleLogger::add("[REROLL] ToHit: {$toHit} Roll: {$roll}");
+            }
             if ($roll === 6) {
-                // Critical
+                \Mordheim\BattleLogger::add("[DEBUG] Critical!");
                 $target->getState()->modifyWounds(-1);
                 Injuries::rollIfNoWounds($battle, $source, $target, $weapon, true);
                 $hit = true;
                 continue;
             }
-            if ($roll < $toHit) continue;
-            if (Dodge::roll($target)) continue;
-            if (!self::tryArmorSaveRanged($source, $target, $weapon)) {
+            if ($roll < $toHit) {
+                \Mordheim\BattleLogger::add("[DEBUG] Промах");
+                continue;
+            }
+            if (Dodge::roll($target)) {
+                \Mordheim\BattleLogger::add("[DEBUG] Dodge");
+                continue;
+            }
+            if (!self::tryArmourSaveRanged($source, $target, $weapon)) {
+                \Mordheim\BattleLogger::add("[DEBUG] Попадание");
                 $target->getState()->modifyWounds(-1);
                 Injuries::rollIfNoWounds($battle, $source, $target, $weapon);
                 $hit = true;
@@ -92,31 +106,31 @@ class Attack
      */
     public static function magic(Battle $battle, Fighter $caster, Fighter $target, EquipmentInterface $weapon, $useSave = true): bool
     {
-        if ($target->getState()->getWounds() <= 0)
-            return true;
+        if (!$target->getState()->getStatus()->isAlive())
+            return false;
 
-        $woundResult = \Mordheim\Rule\RollToWound::roll($caster, $target, $weapon);
+        $woundResult = RollToWound::roll($caster, $target, $weapon);
         if (!$woundResult['success']) {
             \Mordheim\BattleLogger::add("{$target->getName()} не был ранен заклинанием {$weapon->name}.");
             return true;
         }
 
         if ($useSave) {
-            $armorSave = $target->getArmorSave($weapon);
-            if ($armorSave <= 0) {
+            $armourSave = $target->getArmourSave($weapon);
+            if ($armourSave <= 0) {
                 $target->getState()->modifyWounds(-1);
                 \Mordheim\BattleLogger::add("{$target->getName()} получает 1 ранение от {$weapon->name}.");
                 Injuries::rollIfNoWounds($battle, $caster, $target, $weapon);
                 return true;
             }
             $attackerStrength = $weapon->getStrength($caster->getStrength());
-            $strengthMod = self::getStrengthArmorSaveModifier($attackerStrength);
-            $armorSaveMod = $target->getEquipmentManager()->getArmorSaveModifier($weapon);
-            $armorSave = $armorSave - $strengthMod + $armorSaveMod;
-            if ($armorSave > 0) {
+            $strengthMod = self::getStrengthArmourSaveModifier($attackerStrength);
+            $armourSaveMod = $target->getEquipmentManager()->getArmourSaveModifier($weapon);
+            $armourSave = $armourSave - $strengthMod + $armourSaveMod;
+            if ($armourSave > 0) {
                 $saveRoll = \Mordheim\Dice::roll(6);
-                \Mordheim\BattleLogger::add("{$target->getName()} бросает на сэйв: $saveRoll (нужно $armorSave+)");
-                if ($saveRoll >= $armorSave) {
+                \Mordheim\BattleLogger::add("{$target->getName()} бросает на сэйв: $saveRoll (нужно $armourSave+)");
+                if ($saveRoll >= $armourSave) {
                     \Mordheim\BattleLogger::add("Сэйв удался! Урон не нанесён.");
                     return true;
                 } else {
@@ -147,7 +161,7 @@ class Attack
             StepAside::roll($target, $parried);
             $woundResult = RollToWound::roll($source, $target, $weapon);
             if (!$woundResult['success']) return false;
-            if (self::tryArmorSave($source, $target, $weapon)) return false;
+            if (self::tryArmourSave($target, $weapon)) return false;
             return Injuries::roll($battle, $source, $target, $weapon, $woundResult['isCritical']);
         }
         return null;
@@ -174,6 +188,11 @@ class Attack
         \Mordheim\BattleLogger::add("[DEBUG][Attack] Перед броском на попадание: оружие={$weapon->getName()}, атакующий={$source->getName()}, защищающийся={$target->getName()}");
         $hitRoll = \Mordheim\Dice::roll(6);
         \Mordheim\BattleLogger::add("[DEBUG][Attack] Бросок на попадание: $hitRoll");
+        if ($hitRoll >= 4 && $source->getState()->hasActiveSpell(Spell::SORCERERS_CURSE)) {
+            // re-roll any successful to hit rolls
+            $hitRoll = \Mordheim\Dice::roll(6);
+            \Mordheim\BattleLogger::add("[REROLL] {$target->getName()} Бросок на попадание: $hitRoll");
+        }
         $parried = false;
         $defenderWeapon = $target->getEquipmentManager()->getMainWeapon(Slot::MELEE, Equipment::FIST);
         $canBeParried = $source->getEquipmentManager()->canBeParried($weapon, $defenderWeapon, $hitRoll);
@@ -205,13 +224,13 @@ class Attack
      * Бросок на ранение, обработка критов, сэйва, уменьшения ран
      * Возвращает true если нанесён урон
      */
-    private static function rollToWoundAndSave(Battle $battle, Fighter $source, Fighter $target, $weapon, &$success): bool
+    public static function rollToWoundAndSave(Battle $battle, Fighter $source, Fighter $target, $weapon, &$success): bool
     {
         $woundResult = RollToWound::roll($source, $target, $weapon);
         \Mordheim\BattleLogger::add("[DEBUG][Attack] woundResult: " . json_encode($woundResult));
         if (!$woundResult['success']) return false;
-        $armorSave = $target->getArmorSave($weapon);
-        if ($armorSave <= 0) {
+        $armourSave = $target->getArmourSave($weapon);
+        if ($armourSave <= 0) {
             // Нет брони — урон проходит автоматически
             $target->getState()->modifyWounds(
                 $source->hasSpecialRule(SpecialRule::DOUBLE_DAMAGE) ? -2 : -1
@@ -222,20 +241,25 @@ class Attack
             return true;
         }
         $attackerStrength = $weapon->getStrength($source->getStrength());
-        $strengthMod = self::getStrengthArmorSaveModifier($attackerStrength);
-        $armorSaveMod = $source->getEquipmentManager()->getArmorSaveModifier($weapon);
-        $armorSave = $armorSave - $strengthMod + $armorSaveMod;
-        \Mordheim\BattleLogger::add("Сэйв защищающегося: $armorSave (модификатор по силе: $strengthMod, спецправила: $armorSaveMod)");
+        $strengthMod = self::getStrengthArmourSaveModifier($attackerStrength);
+        $armourSaveMod = $target->getEquipmentManager()->getArmourSaveModifier($weapon); // ???
+        $armourSave = $armourSave - $strengthMod + $armourSaveMod;
+        \Mordheim\BattleLogger::add("Сэйв защищающегося: $armourSave (модификатор по силе: $strengthMod, спецправила: $armourSaveMod)");
         if ($woundResult['isCritical']) {
             \Mordheim\BattleLogger::add("[DEBUG][Attack] Критическое ранение! Перед InjuryRoll");
             $success = Injuries::roll($battle, $source, $target, $weapon, true);
             \Mordheim\BattleLogger::add("[DEBUG][Attack] После InjuryRoll: статус цели=" . $target->getState()->getStatus()->name);
             return true;
         } else {
-            if ($armorSave > 0) {
+            if ($armourSave > 0) {
                 $saveRoll = \Mordheim\Dice::roll(6);
-                \Mordheim\BattleLogger::add("{$target->getName()} бросает на сэйв: $saveRoll (нужно $armorSave+)");
-                if ($saveRoll >= $armorSave) {
+                \Mordheim\BattleLogger::add("{$target->getName()} бросает на сэйв: $saveRoll (нужно $armourSave+)");
+                if ($saveRoll >= $armourSave && $target->getState()->hasActiveSpell(Spell::SORCERERS_CURSE)) {
+                    // re-roll any successful armour saves
+                    $saveRoll = \Mordheim\Dice::roll(6);
+                    \Mordheim\BattleLogger::add("[REROLL] {$target->getName()} бросает на сэйв: $saveRoll (нужно $armourSave+)");
+                }
+                if ($saveRoll >= $armourSave) {
                     \Mordheim\BattleLogger::add("Сэйв удался! Урон не нанесён.");
                     return false;
                 } else {
@@ -262,19 +286,24 @@ class Attack
     /**
      * Попытка броска на сэйв. Возвращает true если сэйв удался
      */
-    private static function tryArmorSave(Fighter $source, Fighter $target, $weapon): bool
+    private static function tryArmourSave(Fighter $target, $weapon): bool
     {
-        $armorSave = $target->getArmorSave($weapon);
-        if ($armorSave > 0) {
-            $armorSaveMod = $source->getEquipmentManager()->getArmorSaveModifier($weapon);
-            $armorSave += $armorSaveMod;
-            \Mordheim\BattleLogger::add("Сэйв защищающегося: $armorSave (модификатор: $armorSaveMod)");
+        $armourSave = $target->getArmourSave($weapon);
+        if ($armourSave > 0) {
+            $armourSaveMod = $target->getEquipmentManager()->getArmourSaveModifier($weapon);
+            $armourSave += $armourSaveMod;
+            \Mordheim\BattleLogger::add("Сэйв защищающегося: $armourSave (модификатор: $armourSaveMod)");
             $saveRoll = \Mordheim\Dice::roll(6);
-            \Mordheim\BattleLogger::add("{$target->getName()} бросает на сэйв: $saveRoll (нужно $armorSave+)");
-            \Mordheim\BattleLogger::add("[DEBUG] armorSave={$armorSave}, saveRoll={$saveRoll}");
-            if ($saveRoll >= $armorSave) {
+            \Mordheim\BattleLogger::add("{$target->getName()} бросает на сэйв: $saveRoll (нужно $armourSave+)");
+            \Mordheim\BattleLogger::add("[DEBUG] armourSave={$armourSave}, saveRoll={$saveRoll}");
+            if ($saveRoll >= $armourSave && $target->getState()->hasActiveSpell(Spell::SORCERERS_CURSE)) {
+                // re-roll any successful armour saves
+                $saveRoll = \Mordheim\Dice::roll(6);
+                \Mordheim\BattleLogger::add("[REROLL] {$target->getName()} бросает на сэйв: $saveRoll (нужно $armourSave+)");
+            }
+            if ($saveRoll >= $armourSave) {
                 \Mordheim\BattleLogger::add("Сэйв удался! Урон не нанесён.");
-                \Mordheim\BattleLogger::add("[DEBUG] result=false (saveRoll >= armorSave)");
+                \Mordheim\BattleLogger::add("[DEBUG] result=false (saveRoll >= armourSave)");
                 return true;
             } else {
                 \Mordheim\BattleLogger::add("Сэйв не удался.");
@@ -314,22 +343,27 @@ class Attack
         return [$toHit, $shots];
     }
 
-    public static function tryArmorSaveRanged(Fighter $source, Fighter $target, ?EquipmentInterface $weapon): bool
+    public static function tryArmourSaveRanged(Fighter $source, Fighter $target, ?EquipmentInterface $weapon): bool
     {
-        $armorSave = $target->getArmorSave($weapon);
-        if ($armorSave <= 0) {
+        $armourSave = $target->getArmourSave($weapon);
+        if ($armourSave <= 0) {
             return false; // Нет сейва — урон проходит!
         }
         $attackerStrength = $weapon ? $weapon->getStrength($source->getStrength()) : $source->getStrength();
-        $strengthMod = self::getStrengthArmorSaveModifier($attackerStrength);
-        $armorSaveMod = $source->getEquipmentManager()->getArmorSaveModifier($weapon);
-        $armorSave = $armorSave - $strengthMod + $armorSaveMod;
-        if ($armorSave <= 0) {
+        $strengthMod = self::getStrengthArmourSaveModifier($attackerStrength);
+        $armourSaveMod = $source->getEquipmentManager()->getArmourSaveModifier($weapon);
+        $armourSave = $armourSave - $strengthMod + $armourSaveMod;
+        if ($armourSave <= 0) {
             return false; // Нет сейва — урон проходит!
         }
         $saveRoll = \Mordheim\Dice::roll(6);
-        \Mordheim\BattleLogger::add("ArmorSave: {$armorSave}, SaveRoll: {$saveRoll}.");
-        return $saveRoll >= $armorSave;
+        if ($saveRoll >= $armourSave && $target->getState()?->hasActiveSpell(Spell::SORCERERS_CURSE)) {
+            // re-roll any successful armour saves
+            $saveRoll = \Mordheim\Dice::roll(6);
+            \Mordheim\BattleLogger::add("[REROLL] {$target->getName()} бросает на сэйв: $saveRoll (нужно $armourSave+)");
+        }
+        \Mordheim\BattleLogger::add("ArmourSave: {$armourSave}, SaveRoll: {$saveRoll}.");
+        return $saveRoll >= $armourSave;
     }
 
     /**
@@ -351,7 +385,7 @@ class Attack
     /**
      * Модификатор сейва по силе удара (таблица Mordheim)
      */
-    public static function getStrengthArmorSaveModifier(int $strength): int
+    public static function getStrengthArmourSaveModifier(int $strength): int
     {
         if ($strength <= 3) return 0;
         if ($strength == 4) return -1;

@@ -132,6 +132,10 @@ class Fighter
             $bonus += 1;
             return $base + $bonus;
         }
+        if ($this->getState()?->hasActiveSpell(Spell::BLACK_FURY)) {
+            $bonus += 2;
+            return $base + $bonus;
+        }
         if ($this->equipmentManager->countOneHandedMeleeWeapons() >= 2) {
             $bonus += 1;
         }
@@ -177,22 +181,28 @@ class Fighter
     /**
      * Расчёт сейва с учётом всей экипировки и состояний
      */
-    public function getArmorSave(?EquipmentInterface $attackerWeapon): int
+    public function getArmourSave(?EquipmentInterface $attackerWeapon): int
     {
+        $save = 0;
         if ($this->hasSpecialRule(SpecialRule::SAVE_2))
-            return 2;
-        if ($this->hasSpecialRule(SpecialRule::SAVE_3))
-            return 2;
-        if ($this->hasSpecialRule(SpecialRule::METALLIC_BODY))
-            return 3;
-        if ($this->hasSpecialRule(SpecialRule::SAVE_4))
-            return 4;
-        if ($this->hasSpecialRule(SpecialRule::SAVE_5))
-            return 5;
-        if ($this->hasSpecialRule(SpecialRule::SAVE_6))
-            return 6;
+            $save = 2;
+        elseif ($this->hasSpecialRule(SpecialRule::SAVE_3))
+            $save = 2;
+        elseif ($this->hasSpecialRule(SpecialRule::METALLIC_BODY))
+            $save = 3;
+        elseif ($this->hasSpecialRule(SpecialRule::SAVE_4))
+            $save = 4;
+        elseif ($this->hasSpecialRule(SpecialRule::SAVE_5))
+            $save = 5;
+        elseif ($this->hasSpecialRule(SpecialRule::SAVE_6))
+            $save = 6;
 
-        return 0;
+        // Учет спецправила PLUS_1_ENEMY_ARMOUR_SAVE от оружия атакующего
+        if ($save && $attackerWeapon?->hasSpecialRule(SpecialRule::PLUS_1_ENEMY_ARMOUR_SAVE)) {
+            $save -= 1;
+        }
+
+        return $save;
     }
 
     public function getHitModifier(?EquipmentInterface $attackerWeapon): int

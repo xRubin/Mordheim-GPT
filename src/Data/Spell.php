@@ -123,21 +123,28 @@ enum Spell implements SpellInterface
 
     #[WizardSpecialRule('WIZARD_MAGIC_OF_THE_HORNED_RAT')]
     #[Difficulty(8)]
+    #[SpellProcessor(Spells\MagicOfTheHornedRat\WarpfireProcessor::class)]
     case WARPFIRE;
     #[WizardSpecialRule('WIZARD_MAGIC_OF_THE_HORNED_RAT')]
     #[Difficulty(0)]
+    #[SpellProcessor(Spells\MagicOfTheHornedRat\ChildrenOfTheHornedRatProcessor::class)]
     case CHILDREN_OF_THE_HORNED_RAT;
     #[WizardSpecialRule('WIZARD_MAGIC_OF_THE_HORNED_RAT')]
     #[Difficulty(8)]
+    #[SpellProcessor(Spells\MagicOfTheHornedRat\GnawdoomProcessor::class)]
     case GNAWDOOM;
     #[WizardSpecialRule('WIZARD_MAGIC_OF_THE_HORNED_RAT')]
     #[Difficulty(4)]
+    #[StateSpecialRule('PLUS_1_STRENGTH')]
+    #[SpellProcessor(Spells\MagicOfTheHornedRat\BlackFuryProcessor::class)]
     case BLACK_FURY;
     #[WizardSpecialRule('WIZARD_MAGIC_OF_THE_HORNED_RAT')]
     #[Difficulty(8)]
+    #[SpellProcessor(Spells\MagicOfTheHornedRat\EyeOfTheWarpProcessor::class)]
     case EYE_OF_THE_WARP;
     #[WizardSpecialRule('WIZARD_MAGIC_OF_THE_HORNED_RAT')]
     #[Difficulty(6)]
+    #[SpellProcessor(Spells\MagicOfTheHornedRat\SorcerersCurseProcessor::class)]
     case SORCERERS_CURSE;
 
     public function getOwnerSpecialRule(): SpecialRuleInterface

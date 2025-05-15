@@ -5,6 +5,7 @@ namespace Mordheim\Spells;
 use Mordheim\Battle;
 use Mordheim\Data\Spell;
 use Mordheim\Dice;
+use Mordheim\Exceptions\MoveRunDeprecatedException;
 use Mordheim\Fighter;
 
 abstract class BaseSpellProcessor implements SpellProcessorInterface
@@ -50,6 +51,11 @@ abstract class BaseSpellProcessor implements SpellProcessorInterface
      */
     public function rollSpellApplied(Battle $battle, Fighter $caster): bool
     {
+        if ($this->difficulty <= 1 ) {
+            \Mordheim\BattleLogger::add("{$caster->getName()} автоматически применяет заклинание {$this->spell->name}!");
+            return true;
+        }
+
         $roll = Dice::roll(6) + Dice::roll(6);
 
         \Mordheim\BattleLogger::add("{$caster->getName()} бросает 2d6=$roll для заклинания {$this->spell->name} (сложность {$this->difficulty})");
@@ -59,5 +65,43 @@ abstract class BaseSpellProcessor implements SpellProcessorInterface
         }
         \Mordheim\BattleLogger::add("{$caster->getName()} применяет заклинание {$this->spell->name}!");
         return true;
+    }
+
+    public function runFromCaster(Battle $battle, Fighter $caster, Fighter $target): void
+    {
+        $allies = $battle->getAlliesFor($target);
+        if (!\Mordheim\Rule\Psychology::leadershipTest($target, $allies)) {
+            foreach ($battle->getActiveCombats()->getByFighter($target) as $combat)
+                $battle->getActiveCombats()->remove($combat);
+
+            // Провал — цель убегает на 2D6" от заклинателя
+            $distance = \Mordheim\Dice::roll(6) + \Mordheim\Dice::roll(6);
+            $from = $target->getState()->getPosition();
+            $to = $caster->getState()->getPosition();
+            // Вычисляем направление от заклинателя к цели
+            $dx = $from[0] - $to[0];
+            $dy = $from[1] - $to[1];
+            $dz = $from[2] - $to[2];
+            $len = sqrt($dx * $dx + $dy * $dy + $dz * $dz);
+            if ($len == 0) $len = 1; // чтобы не делить на 0
+            // Новая точка на расстоянии distance в том же направлении
+            $newX = (int)round($from[0] + $distance * ($dx / $len));
+            $newY = (int)round($from[1] + $distance * ($dy / $len));
+            $newZ = (int)round($from[2] + $distance * ($dz / $len));
+            $newX = max(0, min($battle->getField()->getWidth() - 1, $newX));
+            $newY = max(0, min($battle->getField()->getLength() - 1, $newY));
+            $newZ = max(0, min($battle->getField()->getHeight() - 1, $newZ));
+            $targetPos = [$newX, $newY, $newZ];
+            // Логирование координат
+            \Mordheim\BattleLogger::add("runFromCaster: from=" . implode(',', $from) . " to=" . implode(',', $to) . " targetPos=" . implode(',', $targetPos));
+            try {
+                \Mordheim\Rule\Move::run($battle, $target, $targetPos, 0.4, false);
+                \Mordheim\BattleLogger::add("{$target->getName()} не прошёл тест Лидерства и убегает на {$distance}\" от {$caster->getName()} ({$this->spell->name}).");
+            } catch (MoveRunDeprecatedException $e) {
+                \Mordheim\BattleLogger::add("{$target->getName()} не может убежать: " . $e->getMessage());
+            }
+        } else {
+            \Mordheim\BattleLogger::add("{$target->getName()} прошёл тест Лидерства и не поддался страху ({$this->spell->name}).");
+        }
     }
 }

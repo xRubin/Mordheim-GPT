@@ -5,6 +5,7 @@ namespace Mordheim\Strategy;
 use Mordheim\Battle;
 use Mordheim\BattleStrategyInterface;
 use Mordheim\Data\Equipment;
+use Mordheim\Exceptions\PathfinderTargetUnreachableException;
 use Mordheim\Fighter;
 use Mordheim\Ruler;
 use Mordheim\Slot;
@@ -84,8 +85,12 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
         if ($battle->getActiveCombats()->isFighterInCombat($fighter))
             return;
 
-        if (!$this->spentMove)
-            $this->onMovePhase($battle, $fighter, $enemies);
+        try {
+            if (!$this->spentMove)
+                $this->onMovePhase($battle, $fighter, $enemies);
+        } catch (PathfinderTargetUnreachableException $e) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} PathfinderTargetUnreachableException (" . implode(', ', $e->getPosition()) . ") -> (" . implode(', ', $e->getTarget()) . ")");
+        }
 
         $this->spentMove = true;
     }
@@ -93,38 +98,51 @@ abstract class BaseBattleStrategy implements BattleStrategyInterface
     public function shootPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if (!$fighter->getState()->getStatus()->canAct()) {
-            \Mordheim\BattleLogger::add("{$fighter->getName()} не может действовать из-за состояния {$fighter->getState()->getStatus()->value}.");
+            \Mordheim\BattleLogger::add("[Debug][PhaseShoot]{$fighter->getName()} не может стрелять из-за состояния {$fighter->getState()->getStatus()->value}.");
             return;
         }
 
-        if (!count($fighter->getEquipmentManager()->getItemsBySlot(SLOT::RANGED)))
+        if (!count($fighter->getEquipmentManager()->getItemsBySlot(SLOT::RANGED))) {
+            \Mordheim\BattleLogger::add("[Debug][PhaseShoot]{$fighter->getName()} не может стрелять так как нет Ranged оружия.");
             return;
+        }
 
-        if ($battle->getActiveCombats()->isFighterInCombat($fighter))
+        if ($battle->getActiveCombats()->isFighterInCombat($fighter)) {
+            \Mordheim\BattleLogger::add("[Debug][PhaseShoot]{$fighter->getName()} не может стрелять так как в Close Combat.");
             return;
+        }
 
-        if (!$this->spentShoot)
-            $this->onShootPhase($battle, $fighter, $enemies);
+        if ($this->spentShoot) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может стрелять из-за потраченной фазы.");
+        }
 
+        $this->onShootPhase($battle, $fighter, $enemies);
         $this->spentShoot = true;
     }
 
     public function magicPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
         if (!$fighter->getState()->getStatus()->canAct()) {
-            \Mordheim\BattleLogger::add("{$fighter->getName()} не может действовать из-за состояния {$fighter->getState()->getStatus()->value}.");
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может колдовать из-за состояния {$fighter->getState()->getStatus()->value}.");
             return;
         }
 
-        if (count($fighter->getEquipmentManager()->getItemsBySlot(Slot::ARMOR)))
+        if (count($fighter->getEquipmentManager()->getItemsBySlot(Slot::ARMOUR))) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может колдовать из-за надетой брони.");
+            return;
+        }
+
+        if ($fighter->getEquipmentManager()->hasItem(Equipment::SHIELD) || $fighter->getEquipmentManager()->hasItem(Equipment::BUCKLER)) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может колдовать из-за надетого щита.");
+            return;
+        }
+
+        if ($this->spentMagic) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может колдовать из-за потраченной фазы.");
             return;
 
-        if ($fighter->getEquipmentManager()->hasItem(Equipment::SHIELD) || $fighter->getEquipmentManager()->hasItem(Equipment::BUCKLER))
-            return;
-
-        if (!$this->spentMagic)
-            $this->onMagicPhase($battle, $fighter, $enemies);
-
+        }
+        $this->onMagicPhase($battle, $fighter, $enemies);
         $this->spentMagic = true;
     }
 

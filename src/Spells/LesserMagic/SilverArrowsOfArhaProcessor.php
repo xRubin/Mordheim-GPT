@@ -36,16 +36,17 @@ class SilverArrowsOfArhaProcessor extends BaseSpellProcessor
         if (!parent::rollSpellApplied($battle, $caster))
             return false;
 
-        $hits = Dice::roll(6) + 2; // D6 + 2\
+        $hits = Dice::roll(6) + 2; // D6 + 2
         [$toHit, $_] = Attack::calculateRangedParams($battle, $caster, $target, $this->weapon, false);
         \Mordheim\BattleLogger::add("{$target->getName()} получает {$hits} попаданий силой 3 от {$this->spell->name}.");
         for ($i = 0; $i < $hits; $i++) {
-            if ($target->getState()->getWounds() <= 0)
+            if (!
+            $target->getState()->getStatus()->isAlive())
                 break;
             $roll = Dice::roll(6);
             if ($roll < $toHit) continue;
             if (Dodge::roll($target)) continue;
-            if (!Attack::tryArmorSaveRanged($caster, $target, $this->weapon)) {
+            if (!Attack::tryArmourSaveRanged($caster, $target, $this->weapon)) {
                 $target->getState()->modifyWounds(-1);
                 \Mordheim\BattleLogger::add("{$target->getName()} получает 1 ранение от {$this->weapon->name}.");
                 Injuries::rollIfNoWounds($battle, $caster, $target, $this->weapon);

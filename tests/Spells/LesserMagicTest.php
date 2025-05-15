@@ -58,7 +58,7 @@ class LesserMagicTest extends MordheimTestCase
             \Mordheim\Data\Blank::REIKLAND_YOUNGBLOOD,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([]),
-            new \Mordheim\FighterState([5, 0, 0], new \Mordheim\Strategy\AggressiveStrategy(), 2)
+            new \Mordheim\FighterState([3, 3, 0], new \Mordheim\Strategy\AggressiveStrategy(), 2)
         );
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
             new \Mordheim\Warband('Wizards', [$caster]),
@@ -67,7 +67,7 @@ class LesserMagicTest extends MordheimTestCase
         \Mordheim\Dice::setTestRolls([6, 6, 6, 6]); // Провал лидерства
         $result = \Mordheim\Data\Spell::DREAD_OF_ARAMAR->getProcessor()->onPhaseMagic($battle, $caster);
         $this->assertTrue($result);
-        $this->assertNotEquals([5, 0, 0], $enemy->getState()->getPosition());
+        $this->assertNotEquals([3, 3, 0], $enemy->getState()->getPosition());
     }
 
     public function testSilverArrowsOfArha()

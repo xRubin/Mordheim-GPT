@@ -59,4 +59,10 @@ class FighterAdvancement
     {
         return $this->spells;
     }
+
+    public function addSpell(WizardSpellInterface $spell): static
+    {
+        $this->spells = array_unique(array_merge($this->spells, [$spell]));
+        return $this;
+    }
 }

@@ -386,7 +386,7 @@ enum Blank implements BlankInterface
     #[HireFee(150)]
     #[MaxCount(1)]
     #[Characteristics(5, 8, 4, 4, 3, 2, 7, 3, 8), MaxCharacteristics(5, 8, 7, 4, 4, 3, 9, 4, 10)]
-    #[Equipment('ITHILMAR_ARMOR'), Equipment('ELVEN_CLOAK'), Equipment('SWORD_IENH_KHAIN')]
+    #[Equipment('ITHILMAR_ARMOUR'), Equipment('ELVEN_CLOAK'), Equipment('SWORD_IENH_KHAIN')]
     #[SpecialRule('STRIKE_TO_INJURE'), SpecialRule('EXPERT_SWORDSMAN'), SpecialRule('STEP_ASIDE')]
     #[SpecialRule('SPRINT'), SpecialRule('LIGHTNING_REFLEXES'), SpecialRule('DODGE'), SpecialRUle('MIGHTY_BLOW')]
     #[SpecialRule('INVINCIBLE_SWORDSMAN'), SpecialRule('WANDERER')]

@@ -1,18 +1,20 @@
 <?php
 
-namespace Mordheim\Spells\LesserMagic;
+namespace Mordheim\Spells\MagicOfTheHornedRat;
 
 use Mordheim\Battle;
+use Mordheim\Data\Equipment;
 use Mordheim\Data\Spell;
-use Mordheim\Data\Warband;
+use Mordheim\Dice;
 use Mordheim\Fighter;
+use Mordheim\Rule\Attack;
 use Mordheim\Ruler;
-use Mordheim\SpecialRule;
 use Mordheim\Spells\BaseSpellProcessor;
 
-class DreadOfAramarProcessor extends BaseSpellProcessor
+class GnawdoomProcessor extends BaseSpellProcessor
 {
-    public Spell $spell = Spell::DREAD_OF_ARAMAR;
+    public Spell $spell = Spell::GNAWDOOM;
+    public Equipment $weapon = Equipment::GNAWDOOM;
 
     public function __construct(
         public int $difficulty = 7
@@ -32,19 +34,18 @@ class DreadOfAramarProcessor extends BaseSpellProcessor
         if (!parent::rollSpellApplied($battle, $caster))
             return false;
 
-        $this->runFromCaster($battle, $caster, $target);
-
+        $hits = Dice::roll(6) + Dice::roll(6); // 2D6
+        \Mordheim\BattleLogger::add("{$target->getName()} получает {$hits} попаданий силой 1 от {$this->spell->name}.");
+        for ($i = 0; $i < $hits; $i++) {
+            Attack::magic($battle, $caster, $target, $this->weapon);
+        }
         return true;
     }
 
     private function findEnemy(Battle $battle, Fighter $caster): ?Fighter
     {
         foreach ($battle->getEnemiesFor($caster) as $enemy) {
-            if (Ruler::distance($caster, $enemy) > 12)
-                continue;
-            if ($enemy->getBlank()->getWarband() == Warband::UNDEAD)
-                continue;
-            if ($enemy->hasSpecialRule(SpecialRule::FEARSOME))
+            if (Ruler::distance($caster, $enemy) > 8)
                 continue;
             return $enemy;
         }

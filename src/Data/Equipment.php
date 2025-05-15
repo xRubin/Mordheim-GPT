@@ -4,7 +4,7 @@ namespace Mordheim\Data;
 
 use Mordheim\Data\Attributes\Cost;
 use Mordheim\Data\Attributes\MaximumRange;
-use Mordheim\Data\Attributes\SlotArmor;
+use Mordheim\Data\Attributes\SlotArmour;
 use Mordheim\Data\Attributes\SlotHelmet;
 use Mordheim\Data\Attributes\SlotMelee;
 use Mordheim\Data\Attributes\SlotMisc;
@@ -25,10 +25,10 @@ enum Equipment implements EquipmentInterface
     use EnumTryFromNameTrait;
 
     #[StrengthBonus(-1)]
-    #[SpecialRule('PLUS_1_ENEMY_ARMOR_SAVE')]
+    #[SpecialRule('PLUS_1_ENEMY_ARMOUR_SAVE')]
     #[SlotMelee]
     case FIST;
-    #[SpecialRule('PLUS_1_ENEMY_ARMOR_SAVE')]
+    #[SpecialRule('PLUS_1_ENEMY_ARMOUR_SAVE')]
     #[SlotMelee]
     case DAGGER;
     #[SpecialRule('CONCUSSION')]
@@ -172,12 +172,12 @@ enum Equipment implements EquipmentInterface
     case HOCHLAND_LONG_RIFFLE;
 
     #[SpecialRule('SAVE_6')]
-    #[SlotArmor]
-    case LIGHT_ARMOR;
+    #[SlotArmour]
+    case LIGHT_ARMOUR;
     #[SpecialRule('SAVE_5')]
     #[SpecialRule('MOVEMENT')]
-    #[SlotArmor]
-    case HEAVY_ARMOR;
+    #[SlotArmour]
+    case HEAVY_ARMOUR;
     #[SpecialRule('SAVE_6')]
     #[SlotMelee]
     case SHIELD;
@@ -187,14 +187,14 @@ enum Equipment implements EquipmentInterface
     #[SpecialRule('AVOID_STUN')]
     case HELMET;
     #[SpecialRule('SAVE_5')]
-    #[SlotArmor]
-    case ITHILMAR_ARMOR;
+    #[SlotArmour]
+    case ITHILMAR_ARMOUR;
     #[SpecialRule('SAVE_4')]
-    #[SlotArmor]
-    case GROMRIL_ARMOR;
+    #[SlotArmour]
+    case GROMRIL_ARMOUR;
 
     #[SpecialRule('ITHILMAR')]
-    #[SpecialRule('PLUS_1_ENEMY_ARMOR_SAVE')]
+    #[SpecialRule('PLUS_1_ENEMY_ARMOUR_SAVE')]
     #[SlotMelee]
     case ITHILMAR_DAGGER;
     #[SpecialRule('ITHILMAR')]
@@ -265,7 +265,7 @@ enum Equipment implements EquipmentInterface
     case ITHILMAR_DOUBLE_HANDED_AXE;
 
     #[SpecialRule('GROMRIL')]
-    #[SpecialRule('PLUS_1_ENEMY_ARMOR_SAVE')]
+    #[SpecialRule('PLUS_1_ENEMY_ARMOUR_SAVE')]
     #[SlotMelee]
     case GROMRIL_DAGGER;
     #[SpecialRule('GROMRIL')]
@@ -438,10 +438,21 @@ enum Equipment implements EquipmentInterface
     #[Strength(3)]
     #[SlotRanged]
     case SILVER_ARROW_OF_ARHA;
-
     #[StrengthBonus(+2)]
     #[SlotMelee]
     case SWORD_OF_REZHEBEL;
+    #[MaximumRange(8)]
+    #[Strength(4)]
+    #[SlotRanged]
+    case WARPFIRE_DIRECT;
+    #[MaximumRange(2)]
+    #[Strength(3)]
+    #[SlotRanged]
+    case WARPFIRE_AOE;
+    #[MaximumRange(8)]
+    #[Strength(1)]
+    #[SlotRanged]
+    case GNAWDOOM;
 
     public function getName(): string
     {
@@ -495,7 +506,7 @@ enum Equipment implements EquipmentInterface
         foreach ([
                      SlotMelee::class,
                      SlotRanged::class,
-                     SlotArmor::class,
+                     SlotArmour::class,
                      SlotHelmet::class,
                      SlotMisc::class,
                  ] as $class) {

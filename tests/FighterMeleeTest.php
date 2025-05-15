@@ -23,7 +23,7 @@ class FighterMeleeTest extends MordheimTestCase
                 $wounds
             )
         ) extends \Mordheim\Fighter {
-            public function getArmorSave(?\Mordheim\EquipmentInterface $attackerWeapon): int
+            public function getArmourSave(?\Mordheim\EquipmentInterface $attackerWeapon): int
             {
                 return 0;
             }
@@ -155,15 +155,15 @@ class FighterMeleeTest extends MordheimTestCase
         );
     }
 
-    public function testDoubleHandedAndArmorPiercingAffectSave()
+    public function testDoubleHandedAndArmourPiercingAffectSave()
     {
         \Mordheim\Dice::setTestRolls([4, 1, 4, 5]); // hit, parry, wound, save=5 (обычно спасся бы при save=5, но с модификаторами не спасётся)
         // Используем "Ogre Club" как пример двуручного оружия с Club и DoubleHanded
         $attacker = $this->makeFighter([], [Equipment::DOUBLE_HANDED_AXE], 2, [0, 0, 0]);
-        $defender = $this->makeFighter([], [Equipment::SWORD, Equipment::LIGHT_ARMOR], 2, [1, 0, 0]);
+        $defender = $this->makeFighter([], [Equipment::SWORD, Equipment::LIGHT_ARMOUR], 2, [1, 0, 0]);
         $battle = $this->makeClearBattle([$attacker], [$defender]);
         $result = \Mordheim\Rule\Attack::melee($battle, $attacker, $defender);
-        $this->assertTrue($result, 'DoubleHanded and ArmorPiercing should worsen save');
+        $this->assertTrue($result, 'DoubleHanded and ArmourPiercing should worsen save');
     }
 
     /**

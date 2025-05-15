@@ -21,7 +21,7 @@ class EquipmentManager
     {
         $slotMelee = 2;
         $slotRanged = 1;
-        $slotArmor = 1;
+        $slotArmour = 1;
         $slotHelmet = 1;
         foreach (array_merge($this->items, [$item]) as $equipment) {
             if ($equipment->getSlot() === Slot::RANGED) {
@@ -32,13 +32,13 @@ class EquipmentManager
                 } else {
                     $slotMelee -= 1;
                 }
-            } elseif ($equipment->getSlot() === Slot::ARMOR) {
-                $slotArmor -= 1;
+            } elseif ($equipment->getSlot() === Slot::ARMOUR) {
+                $slotArmour -= 1;
             } elseif ($equipment->getSlot() === Slot::HELMET) {
                 $slotHelmet -= 1;
             }
         }
-        if ($slotRanged < 0 || $slotMelee < 0 || $slotArmor < 0 || $slotHelmet < 0)
+        if ($slotRanged < 0 || $slotMelee < 0 || $slotArmour < 0 || $slotHelmet < 0)
             throw new EquipmentManagerAddItemException();
         $this->items[] = $item;
         $names = array_map(fn($equipment) => $equipment->getName(), $this->items);
@@ -89,8 +89,8 @@ class EquipmentManager
 
     public function getMovementPenalty(): int
     {
-        // Heavy Armor и Shield вместе дают -1 к движению, иначе штрафа нет
-        return (in_array(Equipment::HEAVY_ARMOR, $this->items) && in_array(Equipment::SHIELD, $this->items)) ? -1 : 0;
+        // Heavy Armour и Shield вместе дают -1 к движению, иначе штрафа нет
+        return (in_array(Equipment::HEAVY_ARMOUR, $this->items) && in_array(Equipment::SHIELD, $this->items)) ? -1 : 0;
     }
 
     public function canBeParried(EquipmentInterface $attackerWeapon, EquipmentInterface $defenderWeapon, int $hitRoll): bool
@@ -98,7 +98,7 @@ class EquipmentManager
         return $defenderWeapon->hasSpecialRule(SpecialRule::PARRY) && $hitRoll >= 4 && !$attackerWeapon->hasSpecialRule(SpecialRule::CANNOT_BE_PARRIED);
     }
 
-    public function getArmorSaveModifier(?EquipmentInterface $weapon = null): int
+    public function getArmourSaveModifier(?EquipmentInterface $weapon = null): int
     {
         $mod = 0;
         if ($weapon && $weapon->hasSpecialRule(SpecialRule::TWO_HANDED)) {

@@ -1,26 +1,32 @@
 <?php
 
-namespace Mordheim\Spells\LesserMagic;
+namespace Mordheim\Spells\MagicOfTheHornedRat;
 
 use Mordheim\Battle;
 use Mordheim\CloseCombat;
+use Mordheim\Data\Equipment;
 use Mordheim\Data\Spell;
+use Mordheim\Dice;
 use Mordheim\Fighter;
+use Mordheim\Rule\Attack;
 use Mordheim\Rule\Charge;
-use Mordheim\Rule\Injuries;
 use Mordheim\Ruler;
 use Mordheim\Spells\BaseSpellProcessor;
-use Mordheim\Status;
 
-class FlightOfZimmeranProcessor extends BaseSpellProcessor
+class BlackFuryProcessor extends BaseSpellProcessor
 {
-    public Spell $spell = Spell::FLIGHT_OF_ZIMMERAN;
+    public Spell $spell = Spell::BLACK_FURY;
 
     public function __construct(
         public int $difficulty = 7
     )
     {
 
+    }
+
+    public function onPhaseRecovery(Battle $battle, Fighter $owner): void
+    {
+        $battle->removeActiveSpell($owner, $this->spell);
     }
 
     public function onPhaseMagic(Battle $battle, Fighter $caster): ?bool
@@ -42,26 +48,19 @@ class FlightOfZimmeranProcessor extends BaseSpellProcessor
 
         $caster->getState()->setPosition($adj);
         \Mordheim\BattleLogger::add("{$caster->getName()} перемещается к {$target->getName()} с помощью {$this->spell->name}.");
-        // Charge/Close Combat
-        if ($target->getState()->getStatus() === Status::PANIC) {
-            \Mordheim\BattleLogger::add("{$caster->getName()} наносит автоматический удар по бегущему {$target->getName()} ({$this->spell->name}).");
-            $target->getState()->modifyWounds(-1); // Пример: 1 урон
-            Injuries::rollIfNoWounds($battle, $caster, $target);
-        } else {
-            $battle->getActiveCombats()->add(new CloseCombat($caster, $target));
-        }
+
+        $battle->getActiveCombats()->add(new CloseCombat($caster, $target));
+        $caster->getState()->addActiveSpell($this->spell);
         return true;
     }
 
     private function findEnemy(Battle $battle, Fighter $caster): ?Fighter
     {
-        $enemies = $battle->getEnemiesFor($caster);
-        if (empty($enemies))
-            return null;
-        usort($enemies, fn($a, $b) => Ruler::distance($caster, $a) <=> Ruler::distance($caster, $b));
-        $closest = $enemies[0];
-        if (Ruler::distance($caster, $closest) > 12)
-            return null;
-        return $closest;
+        foreach ($battle->getEnemiesFor($caster) as $enemy) {
+            if (Ruler::distance($caster, $enemy) > 12)
+                continue;
+            return $enemy;
+        }
+        return null;
     }
 }

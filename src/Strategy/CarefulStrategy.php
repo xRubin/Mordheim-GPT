@@ -22,10 +22,10 @@ class CarefulStrategy extends BaseBattleStrategy
         if (!$target) return;
         $canAct = $this->canActAgainst($battle, $fighter, $target);
         if (!$canAct) return;
-        if (!Ruler::isAdjacent($fighter, $target)) {
-            // Держит дистанцию
-            \Mordheim\Rule\Move::common($battle, $fighter, [$fighter->getState()->getPosition()[0] + 1, $fighter->getState()->getPosition()[1] + 1, $fighter->getState()->getPosition()[2]], $this->aggressiveness);
-        }
+        if (Ruler::isAdjacent($fighter, $target))
+            return; // Держит дистанцию
+
+        \Mordheim\Rule\Move::common($battle, $fighter, [$fighter->getState()->getPosition()[0] + 1, $fighter->getState()->getPosition()[1] + 1, $fighter->getState()->getPosition()[2]], $this->aggressiveness);
     }
 
     protected function onShootPhase(Battle $battle, Fighter $fighter, array $enemies): void
@@ -41,19 +41,9 @@ class CarefulStrategy extends BaseBattleStrategy
 
     protected function onMagicPhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
-        // TODO: check active skills
-        $spells = $fighter->getAdvancement()->getSpells();
-        foreach ($spells as $wizardSpell) {
-            $difficulty = $wizardSpell->getDifficulty();
-            $spell = $wizardSpell->getSpell();
-            $roll = \Mordheim\Dice::roll(6) + \Mordheim\Dice::roll(6);
-            \Mordheim\BattleLogger::add("{$fighter->getName()} бросает 2d6=$roll для заклинания {$spell->name} (сложность {$difficulty})");
-            if ($roll < $difficulty) {
-                \Mordheim\BattleLogger::add("{$fighter->getName()} не смог применить заклинание {$spell->name}.");
-                continue;
-            }
-            \Mordheim\BattleLogger::add("{$fighter->getName()} применяет заклинание {$spell->name}!");
-            if ($spell->getProcessor()?->onPhaseMagic($battle, $fighter))
+        foreach ($fighter->getAdvancement()->getSpells() as $wizardSpell) {
+            \Mordheim\BattleLogger::add("{$fighter->getName()} применяет заклинание {$wizardSpell->getSpell()->name}!");
+            if ($wizardSpell->getSpell()->getProcessor()?->onPhaseMagic($battle, $fighter))
                 return;
         }
     }

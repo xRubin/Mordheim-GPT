@@ -53,7 +53,7 @@ class SpellOfAwakeningProcessor extends BaseSpellProcessor
                     SpecialRule::NO_BRAIN
                 ]
             ),
-            new EquipmentManager([Equipment::SWORD, Equipment::HEAVY_ARMOR]),
+            new EquipmentManager([Equipment::SWORD, Equipment::HEAVY_ARMOUR]),
             new FighterState($cell, new AggressiveStrategy(), 2)
         );
         $battle->addFighter($zombieHero);

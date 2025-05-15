@@ -87,6 +87,7 @@ class Battle
     {
         \Mordheim\BattleLogger::add("Ход #{$this->turn}");
         $actWarbands = $this->warbands;
+        \Mordheim\BattleLogger::add("[DEBUG][Battle] in battle: " . implode(', ', array_map(fn(Warband $warband) => $warband->name . "\n[" . implode(', ', array_map(fn(Fighter $fighter) => $fighter->getName() . " ({$fighter->getState()->getStatus()->name})", $warband->fighters)) . "]", $actWarbands)));
         $routed = [];
 
         foreach ($actWarbands as $warband) {
@@ -185,7 +186,7 @@ class Battle
         } catch (MoveRunDeprecatedException $e) {
             \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать в панике: " . $e->getMessage());
         } catch (PathfinderTargetUnreachableException $e) {
-            \Mordheim\BattleLogger::add("{$fighter->getName()} не может убежать в панике: путь до края недоступен. (" . implode(", ", $target) . ")");
+            \Mordheim\BattleLogger::add("{$fighter->getName()} не может убежать в панике: путь до края недоступен (" . implode(', ', $fighter->getState()->getPosition()) . ") -> (" . implode(', ', $target) . ")");
         }
     }
 
@@ -228,6 +229,7 @@ class Battle
     {
         \Mordheim\BattleLogger::add("Фаза рукопашного боя");
         foreach ($this->getActiveCombats()->getAll() as $combat) {
+            \Mordheim\BattleLogger::add("[DEBUG][CloseCombat] бой (" . implode(', ', array_map(fn($fighter) => $fighter->getName(), $combat->fighters)) . ")");
             $fighters = $combat->fighters;
             usort($fighters, function (Fighter $a, Fighter $b) use ($combat) {
                 if ($combat->getBonus($a, CloseCombat::BONUS_CHARGED))

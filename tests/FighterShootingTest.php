@@ -280,21 +280,19 @@ class FighterShootingTest extends TestCase
         $this->assertEquals(1, $shots);
     }
 
-    public function testTryArmorSaveRangedReturnsTrueIfSaveRollSufficient()
+    public function testTryArmourSaveRangedReturnsTrueIfSaveRollSufficient()
     {
         $source = $this->createMock(Fighter::class);
         $target = $this->createMock(Fighter::class);
         $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
-        // Мокаем getArmorSave чтобы вернуть 4, и Dice::roll чтобы вернуть 5 (>=4)
-        $target->method('getArmorSave')->willReturn(4);
+        // Мокаем getArmoUrSave чтобы вернуть 4, и Dice::roll чтобы вернуть 5 (>=4)
+        $target->method('getArmourSave')->willReturn(4);
         \Mordheim\Dice::setTestRolls([5]);
-        // Здесь имитируем saveRoll >= armorSave
-        $this->assertTrue(Attack::tryArmorSaveRanged($source, $target, $weapon, function () {
-            return 5;
-        }));
+        // Здесь имитируем saveRoll >= armourSave
+        $this->assertTrue(Attack::tryArmourSaveRanged($source, $target, $weapon));
     }
 
-    public function testTryArmorSaveRangedReturnsFalseIfSaveRollInsufficient()
+    public function testTryArmourSaveRangedReturnsFalseIfSaveRollInsufficient()
     {
         $source = $this->createMock(Fighter::class);
         $target = $this->createMock(Fighter::class);
@@ -304,9 +302,9 @@ class FighterShootingTest extends TestCase
         $targetState->method('getStatus')->willReturn(\Mordheim\Status::STANDING);
         $target->method('getState')->willReturn($targetState);
 
-        $target->method('getArmorSave')->willReturn(5);
+        $target->method('getArmourSave')->willReturn(5);
         \Mordheim\Dice::setTestRolls([3]);
-        $this->assertFalse(Attack::tryArmorSaveRanged($source, $target, $weapon));
+        $this->assertFalse(Attack::tryArmourSaveRanged($source, $target, $weapon));
     }
 
     public function testSelectRangedWeaponReturnsNullIfNoWeapon()

@@ -18,6 +18,7 @@ class Move
      * @param array $target
      * @param float $aggressiveness
      * @return void
+     * @throws PathfinderTargetUnreachableException
      */
     public static function common(Battle $battle, Fighter $fighter, array $target, float $aggressiveness): void
     {
@@ -83,12 +84,17 @@ class Move
 
     /**
      * Поиск пути и определение индекса достижимой точки
+     * @throws PathfinderTargetUnreachableException
      */
     protected static function findPathAndReachableIndex(Battle $battle, Fighter $fighter, array $target, float $aggressiveness, array $blockers, int $movePoints): array
     {
         $path = \Mordheim\PathFinder::findPath($battle->getField(), $fighter->getState()->getPosition(), $target, $fighter->getMovementWeights(), $aggressiveness, $blockers);
-        if (!$path || count($path) < 2)
-            throw new PathfinderTargetUnreachableException();
+        if (!$path || count($path) < 2) {
+            $error = new PathfinderTargetUnreachableException();
+            $error->setPosition($fighter->getState()->getPosition());
+            $error->setTarget($target);
+            throw $error;
+        }
         $lastReachableIdx = 0;
         for ($i = 1; $i < count($path); $i++) {
             if ($path[$i]['cost'] > $movePoints + 1e-6) break;

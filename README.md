@@ -5,7 +5,15 @@ Status: Stupidity
 
 Status: Fear
 
-Remove close combats before magic move ?
+выбрать написание Armor/Armour
+
+Magic of the Horned rat
+
+## Вопросы:
+Remove close combats before magic move ? flee ? punch ?
+
+Что происходит если паникер добежал до края стола?
+
 
 ## Strategy
 ### Conditions

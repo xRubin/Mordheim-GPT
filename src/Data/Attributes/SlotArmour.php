@@ -6,13 +6,13 @@ use Attribute;
 use Mordheim\Slot;
 
 #[Attribute(Attribute::TARGET_CLASS_CONSTANT)]
-readonly class SlotArmor
+readonly class SlotArmour
 {
     public function __construct() {
     }
 
     public function getValue(): Slot
     {
-        return Slot::ARMOR;
+        return Slot::ARMOUR;
     }
 }

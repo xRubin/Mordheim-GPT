@@ -19,7 +19,7 @@ class FighterTest extends MordheimTestCase
         $this->assertTrue(true, 'Leap skill placeholder test');
     }
 
-    public function testMovementPenaltyForHeavyArmorAndShield()
+    public function testMovementPenaltyForHeavyArmourAndShield()
     {
         // Без брони
         $fighter = new \Mordheim\Fighter(
@@ -29,11 +29,11 @@ class FighterTest extends MordheimTestCase
         );
         $this->assertEquals(4, $fighter->getMoveRange());
 
-        // Только Heavy Armor с MOVEMENT
+        // Только Heavy Armour с MOVEMENT
         $fighter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([Equipment::HEAVY_ARMOR])
+            new \Mordheim\EquipmentManager([Equipment::HEAVY_ARMOUR])
         );
         $this->assertEquals(4, $fighter->getMoveRange());
 
@@ -44,11 +44,11 @@ class FighterTest extends MordheimTestCase
         );
         $this->assertEquals(4, $fighter->getMoveRange());
 
-        // Heavy Armor с MOVEMENT и Shield
+        // Heavy Armour с MOVEMENT и Shield
         $fighter = new \Mordheim\Fighter(
             \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
-            new \Mordheim\EquipmentManager([Equipment::HEAVY_ARMOR, Equipment::SHIELD])
+            new \Mordheim\EquipmentManager([Equipment::HEAVY_ARMOUR, Equipment::SHIELD])
         );
         $this->assertEquals(3, $fighter->getMoveRange());
     }
