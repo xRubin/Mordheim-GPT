@@ -2,7 +2,7 @@
 
 use Mordheim\Battle;
 use Mordheim\Characteristics;
-use Mordheim\Data\Equipment;
+use Mordheim\Equipment;
 use Mordheim\Fighter;
 use Mordheim\GameField;
 use Mordheim\Rule\Attack;
@@ -27,7 +27,7 @@ class FighterShootingTest extends TestCase
     public function testBasicHitAndMiss()
     {
         $shooter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            Mordheim\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::BOW]),
             new \Mordheim\FighterState(
@@ -38,7 +38,7 @@ class FighterShootingTest extends TestCase
         );
 
         $target = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -64,7 +64,7 @@ class FighterShootingTest extends TestCase
     public function testDodgeSkill()
     {
         $shooter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            Mordheim\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::BOW]),
             new \Mordheim\FighterState(
@@ -75,7 +75,7 @@ class FighterShootingTest extends TestCase
         );
 
         $target = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             new \Mordheim\FighterAdvancement(new Characteristics(), [SpecialRule::DODGE]),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -93,7 +93,7 @@ class FighterShootingTest extends TestCase
     public function testQuickShotSkill()
     {
         $shooter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            Mordheim\Blank::REIKLAND_MARKSMAN,
             new \Mordheim\FighterAdvancement(new Characteristics(), [SpecialRule::QUICK_SHOT]),
             new \Mordheim\EquipmentManager([Equipment::SLING]),
             new \Mordheim\FighterState(
@@ -104,7 +104,7 @@ class FighterShootingTest extends TestCase
         );
 
         $target = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -122,7 +122,7 @@ class FighterShootingTest extends TestCase
     public function testWeaponSpecialRules()
     {
         $shooter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            Mordheim\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::CROSSBOW]),
             new \Mordheim\FighterState(
@@ -133,7 +133,7 @@ class FighterShootingTest extends TestCase
         );
 
         $target = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -151,7 +151,7 @@ class FighterShootingTest extends TestCase
     public function testMoveOrFireBlocksShootingAfterMove()
     {
         $shooter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            Mordheim\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::CROSSBOW]),
             new \Mordheim\FighterState(
@@ -162,7 +162,7 @@ class FighterShootingTest extends TestCase
         );
 
         $target = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -180,7 +180,7 @@ class FighterShootingTest extends TestCase
     public function testMoveOrFireAllowsShootingWithoutMove()
     {
         $shooter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            Mordheim\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::CROSSBOW]),
             new \Mordheim\FighterState(
@@ -191,7 +191,7 @@ class FighterShootingTest extends TestCase
         );
 
         $target = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -209,7 +209,7 @@ class FighterShootingTest extends TestCase
     public function testNormalRangedWeaponCanShootAfterMove()
     {
         $shooter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_MARKSMAN,
+            Mordheim\Blank::REIKLAND_MARKSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::BOW]),
             new \Mordheim\FighterState(
@@ -220,7 +220,7 @@ class FighterShootingTest extends TestCase
         );
 
         $target = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -237,14 +237,17 @@ class FighterShootingTest extends TestCase
 
     public function testSelectRangedWeaponReturnsNullIfMoveOrFireAndMoved()
     {
-        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
-        $weapon->method('getRange')->willReturn(24);
-        $weapon->method('hasSpecialRule')->willReturnCallback(function ($rule) {
-            return $rule === SpecialRule::MOVE_OR_FIRE;
-        });
         $source = $this->createMock(Fighter::class);
-        $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager());
+        $sourceState = $this->createMock(\Mordheim\FighterState::class);
+        $sourceState->method('getPosition')->willReturn([0, 0, 0]);
+        $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager([Equipment::CROSSBOW]));
+        $source->method('getState')->willReturn($sourceState);
+
         $target = $this->createMock(Fighter::class);
+        $targetState = $this->createMock(\Mordheim\FighterState::class);
+        $targetState->method('getPosition')->willReturn([10, 0, 0]);
+        $target->method('getState')->willReturn($targetState);
+
         $this->assertNull(Attack::selectRangedWeapon($source, $target, true));
     }
 
@@ -253,8 +256,7 @@ class FighterShootingTest extends TestCase
         $battle = $this->createMock(Battle::class);
         $battle->method('hasObstacleBetween')->willReturn(true);
 
-        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
-        $weapon->method('getRange')->willReturn(20);
+        $weapon = Equipment::BOW;
 
         $sourceState = $this->createMock(\Mordheim\FighterState::class);
         $sourceState->method('getPosition')->willReturn([0, 0, 0]);
@@ -284,7 +286,7 @@ class FighterShootingTest extends TestCase
     {
         $source = $this->createMock(Fighter::class);
         $target = $this->createMock(Fighter::class);
-        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
+        $weapon = Equipment::BOW;
         // Мокаем getArmoUrSave чтобы вернуть 4, и Dice::roll чтобы вернуть 5 (>=4)
         $target->method('getArmourSave')->willReturn(4);
         \Mordheim\Dice::setTestRolls([5]);
@@ -296,7 +298,7 @@ class FighterShootingTest extends TestCase
     {
         $source = $this->createMock(Fighter::class);
         $target = $this->createMock(Fighter::class);
-        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
+        $weapon = Equipment::BOW;
 
         $targetState = $this->createMock(\Mordheim\FighterState::class);
         $targetState->method('getStatus')->willReturn(\Mordheim\Status::STANDING);
@@ -317,30 +319,32 @@ class FighterShootingTest extends TestCase
 
     public function testSelectRangedWeaponReturnsWeaponIfInRange()
     {
-        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
-        $weapon->method('getRange')->willReturn(24);
-        $weapon->method('hasSpecialRule')->willReturn(false);
-        $weapon->method('getSlot')->willReturn(\Mordheim\Slot::RANGED);
+        $weapon = Equipment::BOW;
         $source = $this->createMock(Fighter::class);
         $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager([$weapon]));
         $source->method('getState')->willReturn(
-            new \Mordheim\FighterState([0,0,0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1)
+            new \Mordheim\FighterState([0, 0, 0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1)
         );
         $target = $this->createMock(Fighter::class);
         $target->method('getState')->willReturn(
-            new \Mordheim\FighterState([3,0,0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1)
+            new \Mordheim\FighterState([3, 0, 0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1)
         );
         $this->assertSame($weapon, Attack::selectRangedWeapon($source, $target, false));
     }
 
     public function testSelectRangedWeaponReturnsNullIfOutOfRange()
     {
-        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
-        $weapon->method('getRange')->willReturn(12);
-        $weapon->method('hasSpecialRule')->willReturn(false);
         $source = $this->createMock(Fighter::class);
-        $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager());
+        $sourceState = $this->createMock(\Mordheim\FighterState::class);
+        $sourceState->method('getPosition')->willReturn([0, 0, 0]);
+        $source->method('getEquipmentManager')->willReturn(new \Mordheim\EquipmentManager([Equipment::PISTOL]));
+        $source->method('getState')->willReturn($sourceState);
+
         $target = $this->createMock(Fighter::class);
+        $targetState = $this->createMock(\Mordheim\FighterState::class);
+        $targetState->method('getPosition')->willReturn([10, 0, 0]);
+        $target->method('getState')->willReturn($targetState);
+
         $this->assertNull(Attack::selectRangedWeapon($source, $target, false));
     }
 
@@ -348,9 +352,7 @@ class FighterShootingTest extends TestCase
     {
         $battle = $this->createMock(Battle::class);
         $battle->method('hasObstacleBetween')->willReturn(false);
-        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
-        $weapon->method('getRange')->willReturn(24);
-        $weapon->method('getSlot')->willReturn(\Mordheim\Slot::RANGED);
+        $weapon = Equipment::BOW;
         $source = $this->createMock(Fighter::class);
         $source->method('getBallisticSkill')->willReturn(4); // 4+ to hit
         $source->method('hasSpecialRule')->willReturn(false);
@@ -372,9 +374,7 @@ class FighterShootingTest extends TestCase
     {
         $battle = $this->createMock(Battle::class);
         $battle->method('hasObstacleBetween')->willReturn(false);
-        $weapon = $this->createMock(\Mordheim\EquipmentInterface::class);
-        $weapon->method('getRange')->willReturn(24);
-        $weapon->method('getSlot')->willReturn(\Mordheim\Slot::RANGED);
+        $weapon = Equipment::BOW;
         $source = $this->createMock(Fighter::class);
         $source->method('getBallisticSkill')->willReturn(4);
         $source->method('hasSpecialRule')->willReturnCallback(function ($rule) {

@@ -2,9 +2,7 @@
 
 namespace Mordheim;
 
-use Mordheim\Traits\EnumTryFromNameTrait;
-
-enum SpecialRule implements SpecialRuleInterface
+enum SpecialRule
 {
     use EnumTryFromNameTrait;
 
@@ -114,6 +112,17 @@ enum SpecialRule implements SpecialRuleInterface
     case METALLIC_BODY;
     case WIZARD_LESSER_MAGIC;
     case FEARSOME;
+    case COOK;
+    case SEEKER;
+    case EXCELLENT_SIGHT;
+    case FEY;
+    case LUCK;
+    case DEATHWISH;
+    case HARD_TO_KILL;
+    case HARD_HEAD;
+    case FEROCIOUS_CHARGE;
+    case MONSTER_SLAYER;
+    case BERSERKER;
     case IMMUNE_TO_SPELLS; // Shield of Faith
     case DOUBLE_DAMAGE; // The Hammer of Sigmar
     case PLUS_1_STRENGTH; // Black Fury

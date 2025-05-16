@@ -128,7 +128,7 @@ class MoveTest extends MordheimTestCase
     {
         $fighter = $this->makeFighterMock([0, 0, 0], 3);
         $battle = $this->makeClearBattle([$fighter], []);
-        \Mordheim\Rule\Move::run($battle, $fighter, [6, 0, 0], 1.0);
+        \Mordheim\Rule\Move::runIfNoEnemies($battle, $fighter, [6, 0, 0], 1.0);
         $this->assertEquals([6, 0, 0], $fighter->getState()->getPosition(), 'Боец должен пробежать на 6 клеток (двойное движение)');
     }
 
@@ -138,7 +138,7 @@ class MoveTest extends MordheimTestCase
         $enemy = $this->makeFighterMock([5, 0, 0], 3);
         $battle = $this->makeClearBattle([$fighter], [$enemy]);
         $this->expectException(\Mordheim\Exceptions\MoveRunDeprecatedException::class);
-        \Mordheim\Rule\Move::run($battle, $fighter, [6, 0, 0], 1.0);
+        \Mordheim\Rule\Move::runIfNoEnemies($battle, $fighter, [6, 0, 0], 1.0);
     }
 
     public function testRun_StopOnWater()
@@ -148,7 +148,7 @@ class MoveTest extends MordheimTestCase
         $waterCell = new \Mordheim\FieldCell();
         $waterCell->water = true;
         $battle->getField()->setCell(3, 0, 0, $waterCell);
-        \Mordheim\Rule\Move::run($battle, $fighter, [8, 0, 0], 1.0);
+        \Mordheim\Rule\Move::runIfNoEnemies($battle, $fighter, [8, 0, 0], 1.0);
         $this->assertEquals([2, 0, 0], $fighter->getState()->getPosition(), 'Боец должен остановиться перед водой');
         $logs = \Mordheim\BattleLogger::getAll();
         $this->assertStringContainsString('не может бежать: на пути есть вода', implode("\n", $logs));
@@ -158,7 +158,7 @@ class MoveTest extends MordheimTestCase
     {
         $fighter = $this->makeFighterMock([0, 0, 0], 5);
         $battle = $this->makeClearBattle([$fighter], []);
-        \Mordheim\Rule\Move::run($battle, $fighter, [20, 0, 0], 1.0);
+        \Mordheim\Rule\Move::runIfNoEnemies($battle, $fighter, [20, 0, 0], 1.0);
         $this->assertEquals([10, 0, 0], $fighter->getState()->getPosition(), 'Боец должен пробежать ровно на 10 клеток (двойное движение)');
     }
 }

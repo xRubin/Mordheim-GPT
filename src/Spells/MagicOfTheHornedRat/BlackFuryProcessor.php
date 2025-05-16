@@ -4,13 +4,10 @@ namespace Mordheim\Spells\MagicOfTheHornedRat;
 
 use Mordheim\Battle;
 use Mordheim\CloseCombat;
-use Mordheim\Data\Equipment;
-use Mordheim\Data\Spell;
-use Mordheim\Dice;
 use Mordheim\Fighter;
-use Mordheim\Rule\Attack;
 use Mordheim\Rule\Charge;
 use Mordheim\Ruler;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class BlackFuryProcessor extends BaseSpellProcessor

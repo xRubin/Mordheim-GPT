@@ -2,7 +2,8 @@
 
 namespace Mordheim\Data;
 
-use Mordheim\Traits\EnumTryFromNameTrait;
+use Mordheim\Blank;
+use Mordheim\EnumTryFromNameTrait;
 use Mordheim\WarbandInterface;
 
 enum Warband implements WarbandInterface

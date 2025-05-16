@@ -6,8 +6,8 @@ class FighterAdvancement
 {
     public function __construct(
         private Characteristics $characteristics,
-        private array $specialRules = [],
-        private array $spells = [], // WizardSpellInterface[]
+        private array           $specialRules = [],
+        private array           $spells = [], // WizardSpell[]
     )
     {
 
@@ -53,14 +53,14 @@ class FighterAdvancement
     }
 
     /**
-     * @return WizardSpellInterface[]
+     * @return WizardSpell[]
      */
     public function getSpells(): array
     {
         return $this->spells;
     }
 
-    public function addSpell(WizardSpellInterface $spell): static
+    public function addSpell(WizardSpell $spell): static
     {
         $this->spells = array_unique(array_merge($this->spells, [$spell]));
         return $this;

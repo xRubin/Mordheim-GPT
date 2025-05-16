@@ -1,13 +1,13 @@
 <?php
 
 use Mordheim\Battle;
+use Mordheim\Blank;
 use Mordheim\Characteristics;
-use Mordheim\Data\Blank;
-use Mordheim\Data\Spell;
 use Mordheim\EquipmentManager;
 use Mordheim\Fighter;
 use Mordheim\FighterAdvancement;
 use Mordheim\FighterState;
+use Mordheim\Spell;
 use Mordheim\Status;
 use Mordheim\Strategy\AggressiveStrategy;
 
@@ -60,7 +60,7 @@ class ChaosRitualsTest extends MordheimTestCase
             new EquipmentManager([]),
             new FighterState([4, 0, 0], new AggressiveStrategy(), 5)
         ) extends Fighter {
-            public function getArmourSave(?\Mordheim\EquipmentInterface $attackerWeapon): int { return 0; }
+            public function getArmourSave(?\Mordheim\Equipment $attackerWeapon): int { return 0; }
         };
         $enemy->setName('Enemy');
         $battle->method('getEnemiesFor')->willReturn([$enemy]);

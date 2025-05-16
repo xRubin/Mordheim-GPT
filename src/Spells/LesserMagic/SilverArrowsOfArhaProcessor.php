@@ -3,14 +3,14 @@
 namespace Mordheim\Spells\LesserMagic;
 
 use Mordheim\Battle;
-use Mordheim\Data\Equipment;
-use Mordheim\Data\Spell;
 use Mordheim\Dice;
+use Mordheim\Equipment;
 use Mordheim\Fighter;
 use Mordheim\Rule\Attack;
 use Mordheim\Rule\Dodge;
 use Mordheim\Rule\Injuries;
 use Mordheim\Ruler;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class SilverArrowsOfArhaProcessor extends BaseSpellProcessor

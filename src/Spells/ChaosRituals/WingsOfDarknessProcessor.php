@@ -4,11 +4,11 @@ namespace Mordheim\Spells\ChaosRituals;
 
 use Mordheim\Battle;
 use Mordheim\CloseCombat;
-use Mordheim\Data\Spell;
 use Mordheim\Fighter;
 use Mordheim\Rule\Charge;
 use Mordheim\Rule\Injuries;
 use Mordheim\Ruler;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 use Mordheim\Status;
 

@@ -3,18 +3,17 @@
 namespace Mordheim\Spells\ChaosRituals;
 
 use Mordheim\Battle;
-use Mordheim\Data\Equipment;
-use Mordheim\Data\Spell;
-use Mordheim\EquipmentInterface;
+use Mordheim\Equipment;
 use Mordheim\Fighter;
 use Mordheim\Rule\Attack;
 use Mordheim\Ruler;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class WordOfPainProcessor extends BaseSpellProcessor
 {
     public Spell $spell = Spell::WORD_OF_PAIN;
-    public EquipmentInterface $weapon = Equipment::WORD_OF_PAIN;
+    public Equipment $weapon = Equipment::WORD_OF_PAIN;
 
     public function __construct(
         public int $difficulty = 7

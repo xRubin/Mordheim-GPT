@@ -3,8 +3,8 @@
 namespace Mordheim\Spells\LesserMagic;
 
 use Mordheim\Battle;
-use Mordheim\Data\Spell;
 use Mordheim\Fighter;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class LuckOfShemtekProcessor extends BaseSpellProcessor

@@ -3,18 +3,17 @@
 namespace Mordheim\Spells\LesserMagic;
 
 use Mordheim\Battle;
-use Mordheim\Data\Equipment;
-use Mordheim\Data\Spell;
-use Mordheim\EquipmentInterface;
+use Mordheim\Equipment;
 use Mordheim\Fighter;
 use Mordheim\Rule\Attack;
 use Mordheim\Ruler;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class FiresOfUzhulProcessor extends BaseSpellProcessor
 {
     public Spell $spell = Spell::FIRES_OF_UZHUL;
-    public EquipmentInterface $weapon = Equipment::FIRE_OF_UZHUL;
+    public Equipment $weapon = Equipment::FIRE_OF_UZHUL;
 
     public function __construct(
         public int $difficulty = 7

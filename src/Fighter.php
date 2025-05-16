@@ -2,15 +2,12 @@
 
 namespace Mordheim;
 
-use Mordheim\Data\Equipment;
-use Mordheim\Data\Spell;
-
 class Fighter
 {
     private string $name = '';
 
     public function __construct(
-        private readonly BlankInterface     $blank,
+        private readonly Blank              $blank,
         private readonly FighterAdvancement $advancement,
         private readonly EquipmentManager   $equipmentManager,
         private ?FighterState               $fighterState = null,
@@ -30,7 +27,7 @@ class Fighter
         return $this;
     }
 
-    public function getBlank(): BlankInterface
+    public function getBlank(): Blank
     {
         return $this->blank;
     }
@@ -73,7 +70,7 @@ class Fighter
         $base = $this->blank->getCharacteristics()->getWeaponSkill() + $this->advancement->getCharacteristics()->getWeaponSkill();
         if (!$withBonus)
             return $base;
-        $bonus = $this->getState()?->getCharacteristics()->getWeaponSkill()??0;
+        $bonus = $this->getState()?->getCharacteristics()->getWeaponSkill() ?? 0;
         if ($this->getState()?->hasActiveSpell(Spell::SWORD_OF_REZHEBEL)) {
             $bonus += 2;
         }
@@ -94,7 +91,7 @@ class Fighter
         $base = $this->blank->getCharacteristics()->getToughness() + $this->advancement->getCharacteristics()->getToughness();
         if (!$withBonus)
             return $base;
-        $bonus = $this->getState()?->getCharacteristics()->getToughness()??0;
+        $bonus = $this->getState()?->getCharacteristics()->getToughness() ?? 0;
         return $base - $bonus;
     }
 
@@ -181,7 +178,7 @@ class Fighter
     /**
      * Расчёт сейва с учётом всей экипировки и состояний
      */
-    public function getArmourSave(?EquipmentInterface $attackerWeapon): int
+    public function getArmourSave(?Equipment $attackerWeapon): int
     {
         $save = 0;
         if ($this->hasSpecialRule(SpecialRule::SAVE_2))
@@ -205,7 +202,7 @@ class Fighter
         return $save;
     }
 
-    public function getHitModifier(?EquipmentInterface $attackerWeapon): int
+    public function getHitModifier(?Equipment $attackerWeapon): int
     {
         if (!$attackerWeapon)
             return 0;
@@ -266,13 +263,15 @@ class Fighter
     /**
      * Оружие в зависимости от номера атаки
      */
-    public function getWeaponByAttackIdx(Slot $slot, int $i): EquipmentInterface
+    public function getWeaponByAttackIdx(Slot $slot, int $i): Equipment
     {
         if ($this->getState()?->hasActiveSpell(Spell::SWORD_OF_REZHEBEL))
             return Equipment::SWORD_OF_REZHEBEL;
 
         $offset = 0;
         foreach ($this->getEquipmentManager()->getItemsBySlot($slot) as $idx => $equipment) {
+            if (in_array($equipment, [Equipment::BUCKLER, Equipment::SHIELD]))
+                continue;
             if ($equipment->hasSpecialRule(SpecialRule::TWO_HANDED)) {
                 $offset += 1;
             }

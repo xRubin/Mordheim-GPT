@@ -58,6 +58,8 @@ class Psychology
     {
         if ($defender->hasSpecialRule(SpecialRule::FEARSOME))
             return true;
+        if ($defender->hasSpecialRule(SpecialRule::DEATHWISH))
+            return true;
         if ($attacker->getWeaponSkill() < $defender->getWeaponSkill()) {
             $res = self::leadershipTest($attacker, $allies);
             \Mordheim\BattleLogger::add("{$attacker->getName()} проходит тест страха против {$defender->getName()}: " . ($res ? 'успех' : 'провал'));
@@ -75,6 +77,8 @@ class Psychology
     public static function testRout(Fighter $fighter, array $allies = []): bool
     {
         if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
+            return true;
+        if ($fighter->hasSpecialRule(SpecialRule::DEATHWISH))
             return true;
         $res = self::leadershipTest($fighter, $allies);
         \Mordheim\BattleLogger::add("{$fighter->getName()} проходит тест паники/бегства: " . ($res ? 'успех' : 'провал'));
@@ -116,6 +120,8 @@ class Psychology
     {
         if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
             return true;
+        if ($fighter->hasSpecialRule(SpecialRule::DEATHWISH))
+            return true;
         $closeEnemies = array_filter($enemies, fn($enemy) => Ruler::distance($fighter, $enemy) <= 1.99);
         if (count($closeEnemies) < 2) return true;
         $closeAllies = array_filter($allies, fn($ally) => $ally !== $fighter && $ally->getState()->getStatus()->canAct()
@@ -136,6 +142,8 @@ class Psychology
     public static function fearTest(Fighter $fighter): bool
     {
         if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
+            return true;
+        if ($fighter->hasSpecialRule(SpecialRule::DEATHWISH))
             return true;
         $roll = \Mordheim\Dice::roll(6) + \Mordheim\Dice::roll(6);
         $success = $roll <= $fighter->getLeadership();
@@ -181,6 +189,8 @@ class Psychology
     public static function stupidityTest(Fighter $fighter): bool
     {
         if ($fighter->hasSpecialRule(SpecialRule::UNFEELING))
+            return true;
+        if ($fighter->hasSpecialRule(SpecialRule::DEATHWISH))
             return true;
         $roll = \Mordheim\Dice::roll(6) + \Mordheim\Dice::roll(6);
         $success = $roll <= $fighter->getLeadership();

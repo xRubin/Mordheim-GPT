@@ -1,6 +1,6 @@
 <?php
 
-use Mordheim\Data\Equipment;
+use Mordheim\Equipment;
 use Mordheim\Rule\AvoidStun;
 
 class FighterTest extends MordheimTestCase
@@ -23,7 +23,7 @@ class FighterTest extends MordheimTestCase
     {
         // Без брони
         $fighter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
         );
@@ -31,14 +31,14 @@ class FighterTest extends MordheimTestCase
 
         // Только Heavy Armour с MOVEMENT
         $fighter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::HEAVY_ARMOUR])
         );
         $this->assertEquals(4, $fighter->getMoveRange());
 
         $fighter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::SHIELD])
         );
@@ -46,7 +46,7 @@ class FighterTest extends MordheimTestCase
 
         // Heavy Armour с MOVEMENT и Shield
         $fighter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::HEAVY_ARMOUR, Equipment::SHIELD])
         );
@@ -56,7 +56,7 @@ class FighterTest extends MordheimTestCase
     public function testTryAvoidStunWithHelmet()
     {
         $fighter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager([Equipment::HELMET])
         );

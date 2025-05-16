@@ -37,7 +37,7 @@ class AggressiveStrategy extends BaseBattleStrategy
         }
 
         try {
-            \Mordheim\Rule\Move::run($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
+            \Mordheim\Rule\Move::runIfNoEnemies($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
             $this->spentShoot = true;
         } catch (MoveRunDeprecatedException $e) {
             \Mordheim\Rule\Move::common($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);

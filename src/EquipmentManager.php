@@ -2,12 +2,11 @@
 
 namespace Mordheim;
 
-use Mordheim\Data\Equipment;
 use Mordheim\Exceptions\EquipmentManagerAddItemException;
 
 class EquipmentManager
 {
-    /** @var EquipmentInterface[] */
+    /** @var Equipment[] */
     private array $items = [];
 
     public function __construct(array $items = [])
@@ -17,7 +16,7 @@ class EquipmentManager
         }
     }
 
-    public function addItem(EquipmentInterface $item): static
+    public function addItem(Equipment $item): static
     {
         $slotMelee = 2;
         $slotRanged = 1;
@@ -46,7 +45,7 @@ class EquipmentManager
         return $this;
     }
 
-    public function hasItem(EquipmentInterface $item): bool
+    public function hasItem(Equipment $item): bool
     {
         return in_array($item, $this->items);
     }
@@ -54,7 +53,7 @@ class EquipmentManager
     /**
      * Итоговые параметры оружия для атаки (главное оружие)
      */
-    public function getMainWeapon(Slot $slot, $default = null): ?EquipmentInterface
+    public function getMainWeapon(Slot $slot, $default = null): ?Equipment
     {
         $items = $this->getItemsBySlot($slot);
         return reset($items) ?: $default;
@@ -62,12 +61,12 @@ class EquipmentManager
 
     /**
      * @param Slot $slot
-     * @return EquipmentInterface[]
+     * @return Equipment[]
      */
     public function getItemsBySlot(Slot $slot): array
     {
         return array_values(
-            array_filter($this->items, fn(EquipmentInterface $item) => $item->getSlot() === $slot)
+            array_filter($this->items, fn(Equipment $item) => $item->getSlot() === $slot)
         );
     }
 
@@ -78,11 +77,13 @@ class EquipmentManager
     {
         $count = 0;
         foreach ($this->getItemsBySlot(Slot::MELEE) as $weapon) {
-            if (
-                !$weapon->hasSpecialRule(SpecialRule::TWO_HANDED) && !$weapon->hasSpecialRule(SpecialRule::PAIR)
-            ) {
-                $count++;
-            }
+            if ($weapon->hasSpecialRule(SpecialRule::TWO_HANDED))
+                continue;
+            if ($weapon->hasSpecialRule(SpecialRule::PAIR))
+                continue;
+            if (in_array($weapon, [Equipment::BUCKLER, Equipment::SHIELD]))
+                continue;
+            $count++;
         }
         return $count;
     }
@@ -90,15 +91,15 @@ class EquipmentManager
     public function getMovementPenalty(): int
     {
         // Heavy Armour и Shield вместе дают -1 к движению, иначе штрафа нет
-        return (in_array(Equipment::HEAVY_ARMOUR, $this->items) && in_array(Equipment::SHIELD, $this->items)) ? -1 : 0;
+        return $this->hasItem(Equipment::HEAVY_ARMOUR) && $this->hasItem(Equipment::SHIELD) ? -1 : 0;
     }
 
-    public function canBeParried(EquipmentInterface $attackerWeapon, EquipmentInterface $defenderWeapon, int $hitRoll): bool
+    public function canBeParried(Equipment $attackerWeapon, Equipment $defenderWeapon, int $hitRoll): bool
     {
         return $defenderWeapon->hasSpecialRule(SpecialRule::PARRY) && $hitRoll >= 4 && !$attackerWeapon->hasSpecialRule(SpecialRule::CANNOT_BE_PARRIED);
     }
 
-    public function getArmourSaveModifier(?EquipmentInterface $weapon = null): int
+    public function getArmourSaveModifier(?Equipment $weapon = null): int
     {
         $mod = 0;
         if ($weapon && $weapon->hasSpecialRule(SpecialRule::TWO_HANDED)) {

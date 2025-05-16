@@ -3,15 +3,16 @@
 namespace Mordheim\Spells\Necromancy;
 
 use Mordheim\Battle;
+use Mordheim\Blank;
 use Mordheim\Characteristics;
-use Mordheim\Data\Blank;
-use Mordheim\Data\Equipment;
-use Mordheim\Data\Spell;
+use Mordheim\Equipment;
 use Mordheim\EquipmentManager;
 use Mordheim\Fighter;
 use Mordheim\FighterAdvancement;
 use Mordheim\FighterState;
+use Mordheim\Rule\Random;
 use Mordheim\SpecialRule;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 use Mordheim\Strategy\AggressiveStrategy;
 
@@ -41,7 +42,12 @@ class SpellOfAwakeningProcessor extends BaseSpellProcessor
             return false;
 
         $zombieHero = new Fighter(
-            Blank::REIKLAND_CHAMPION, // TODO other heroes rand?
+            Random::fromArray([
+                Blank::REIKLAND_CHAMPION,
+                Blank::MARIENBURG_CHAMPION,
+                Blank::MIDDENHEIM_CHAMPION,
+                Blank::WITCH_HUNTER
+            ]),
             new FighterAdvancement(
                 new Characteristics(),
                 [

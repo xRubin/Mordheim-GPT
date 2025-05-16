@@ -3,13 +3,13 @@
 namespace Mordheim\Spells\MagicOfTheHornedRat;
 
 use Mordheim\Battle;
-use Mordheim\Data\Blank;
-use Mordheim\Data\Spell;
+use Mordheim\Blank;
 use Mordheim\Dice;
 use Mordheim\EquipmentManager;
 use Mordheim\Fighter;
 use Mordheim\FighterAdvancement;
 use Mordheim\FighterState;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 use Mordheim\Strategy\AggressiveStrategy;
 

@@ -3,19 +3,18 @@
 namespace Mordheim\Spells\ChaosRituals;
 
 use Mordheim\Battle;
-use Mordheim\Data\Equipment;
-use Mordheim\Data\Spell;
 use Mordheim\Dice;
-use Mordheim\EquipmentInterface;
+use Mordheim\Equipment;
 use Mordheim\Fighter;
 use Mordheim\Rule\Attack;
 use Mordheim\Ruler;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class DarkBloodProcessor extends BaseSpellProcessor
 {
     public Spell $spell = Spell::DARK_BLOOD;
-    public EquipmentInterface $weapon = Equipment::DARK_BLOOD;
+    public Equipment $weapon = Equipment::DARK_BLOOD;
 
     public function __construct(
         public int $difficulty = 8

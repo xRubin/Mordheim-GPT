@@ -3,9 +3,10 @@
 namespace Mordheim\Data\Attributes;
 
 use Attribute;
+use Mordheim\SpecialRule;
 
 #[Attribute(Attribute::TARGET_CLASS_CONSTANT)]
-readonly class EquipmentList
+readonly class WizardRule
 {
     public function __construct(
         private string $value,
@@ -13,8 +14,8 @@ readonly class EquipmentList
     {
     }
 
-    public function getValue(): \Mordheim\EquipmentList
+    public function getValue(): SpecialRule
     {
-        return \Mordheim\EquipmentList::tryFromName($this->value);
+        return SpecialRule::tryFromName($this->value);
     }
 }

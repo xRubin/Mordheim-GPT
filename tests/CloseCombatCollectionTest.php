@@ -3,8 +3,8 @@
 use Mordheim\CloseCombat;
 use Mordheim\CloseCombatCollection;
 use Mordheim\Exceptions\CloseCombatCollectionOutOfBoundsException;
-use PHPUnit\Framework\TestCase;
 use Mordheim\Fighter;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Тесты для класса CloseCombatCollection
@@ -22,7 +22,7 @@ class CloseCombatCollectionTest extends TestCase
         $this->collection = new CloseCombatCollection();
 
         $this->fighter1 = (new Fighter(
-            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -33,7 +33,7 @@ class CloseCombatCollectionTest extends TestCase
         ))->setName('Fighter1');
 
         $this->fighter2 = (new Fighter(
-            \Mordheim\Data\Blank::MIDDENHEIM_CHAMPION,
+            Mordheim\Blank::MIDDENHEIM_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -44,7 +44,7 @@ class CloseCombatCollectionTest extends TestCase
         ))->setName('Fighter2');
 
         $this->fighter3 = (new Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_CHAMPION,
+            Mordheim\Blank::MARIENBURG_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(

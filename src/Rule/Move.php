@@ -29,26 +29,39 @@ class Move
     }
 
     /**
+     * нельзя бежать если в начале хода есть враг в 8" (20.32 см),
+     * @param Battle $battle
+     * @param Fighter $fighter
+     * @param array $target
+     * @param float $aggressiveness
+     * @return void
+     * @throws MoveRunDeprecatedException
+     * @throws PathfinderTargetUnreachableException
+     */
+    public static function runIfNoEnemies(Battle $battle, Fighter $fighter, array $target, float $aggressiveness) : void
+    {
+        foreach ($battle->getEnemiesFor($fighter) as $enemy) {
+            if (!$enemy->getState()->getStatus()->canAct())
+                continue;
+            if (Ruler::distance($fighter, $enemy) < 8) { // 8 клеток = 8"
+                \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать: враг слишком близко (меньше 8\")");
+                throw new MoveRunDeprecatedException();
+            }
+        }
+        self::run($battle, $fighter, $target, $aggressiveness);
+    }
+
+    /**
      * Бег по правилам Mordheim 1999: удвоенное движение, нельзя бежать если в начале хода есть враг в 8" (20.32 см), нельзя бежать по воде
      * @param Battle $battle
      * @param Fighter $fighter
      * @param array $target
      * @param float $aggressiveness
-     * @param bool $checkNearEnemies
      * @return void
      * @throws PathfinderTargetUnreachableException
-     * @throws MoveRunDeprecatedException
      */
-    public static function run(Battle $battle, Fighter $fighter, array $target, float $aggressiveness, bool $checkNearEnemies = true): void
+    public static function run(Battle $battle, Fighter $fighter, array $target, float $aggressiveness): void
     {
-        if ($checkNearEnemies) {
-            foreach ($battle->getEnemiesFor($fighter) as $enemy) {
-                if (Ruler::distance($fighter, $enemy) < 8) { // 8 клеток = 8"
-                    \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать: враг слишком близко (меньше 8\")");
-                    throw new MoveRunDeprecatedException();
-                }
-            }
-        }
         $blockers = self::prepareBlockers($battle, $fighter);
         $movePoints = $fighter->getRunRange();
         \Mordheim\BattleLogger::add("{$fighter->getName()}: runPoints = $movePoints (run range)");

@@ -3,7 +3,6 @@
 namespace Mordheim\Data\Attributes;
 
 use Attribute;
-use Mordheim\EquipmentInterface;
 
 #[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_CLASS_CONSTANT)]
 readonly class Equipment
@@ -14,8 +13,8 @@ readonly class Equipment
     {
     }
 
-    public function getValue(): EquipmentInterface
+    public function getValue(): \Mordheim\Equipment
     {
-        return \Mordheim\Data\Equipment::tryFromName($this->value);
+        return \Mordheim\Equipment::tryFromName($this->value);
     }
 }

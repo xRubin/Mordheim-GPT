@@ -3,18 +3,19 @@
 namespace Mordheim\Data\Attributes;
 
 use Attribute;
-use Mordheim\SpecialRuleInterface;
+use Mordheim\SpecialRule;
 
 #[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_CLASS_CONSTANT)]
-readonly class StateSpecialRule
+readonly class StateRule
 {
     public function __construct(
         private string $value,
-    ) {
+    )
+    {
     }
 
-    public function getValue(): SpecialRuleInterface
+    public function getValue(): SpecialRule
     {
-        return \Mordheim\SpecialRule::tryFromName($this->value);
+        return SpecialRule::tryFromName($this->value);
     }
 }

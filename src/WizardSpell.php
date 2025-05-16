@@ -2,13 +2,11 @@
 
 namespace Mordheim;
 
-use Mordheim\Data\Spell;
-
-class WizardSpell implements WizardSpellInterface
+class WizardSpell
 {
     public function __construct(
-        private readonly SpellInterface $spell,
-        private readonly int            $difficulty
+        private readonly Spell $spell,
+        private readonly int   $difficulty
     )
     {
 
@@ -19,7 +17,7 @@ class WizardSpell implements WizardSpellInterface
         return new static($spell, $spell->getBlankDifficulty());
     }
 
-    public function getSpell(): SpellInterface
+    public function getSpell(): Spell
     {
         return $this->spell;
     }

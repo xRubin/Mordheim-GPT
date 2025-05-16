@@ -2,7 +2,7 @@
 
 namespace Mordheim\Rule;
 
-use Mordheim\EquipmentInterface;
+use Mordheim\Equipment;
 use Mordheim\Fighter;
 use Mordheim\SpecialRule;
 
@@ -12,10 +12,10 @@ class RollToWound
      * Обычный бросок на ранение и сейв
      * @param Fighter $source
      * @param Fighter $target
-     * @param EquipmentInterface $weapon
+     * @param Equipment $weapon
      * @return array
      */
-    public static function roll(Fighter $source, Fighter $target, EquipmentInterface $weapon): array
+    public static function roll(Fighter $source, Fighter $target, Equipment $weapon): array
     {
         $attackerS = $weapon->getStrength($source->getStrength());
         if ($source->hasSpecialRule(SpecialRule::PLUS_2_STRENGTH))

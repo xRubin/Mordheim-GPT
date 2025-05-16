@@ -1,12 +1,12 @@
 <?php
 
+use Mordheim\Blank;
 use Mordheim\Characteristics;
-use Mordheim\Data\Blank;
-use Mordheim\Data\Spell;
 use Mordheim\EquipmentManager;
 use Mordheim\Fighter;
 use Mordheim\FighterAdvancement;
 use Mordheim\SpecialRule;
+use Mordheim\Spell;
 use Mordheim\Status;
 use Mordheim\Strategy\AggressiveStrategy;
 

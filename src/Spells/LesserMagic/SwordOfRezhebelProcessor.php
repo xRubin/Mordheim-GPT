@@ -3,9 +3,9 @@
 namespace Mordheim\Spells\LesserMagic;
 
 use Mordheim\Battle;
-use Mordheim\Data\Spell;
 use Mordheim\Dice;
 use Mordheim\Fighter;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class SwordOfRezhebelProcessor extends BaseSpellProcessor

@@ -2,8 +2,6 @@
 
 namespace Mordheim;
 
-use Mordheim\Data\Spell;
-use Mordheim\Exceptions\MoveRunDeprecatedException;
 use Mordheim\Exceptions\PathfinderTargetUnreachableException;
 use Mordheim\Rule\RecoveryPhase;
 use SplObjectStorage;
@@ -27,7 +25,7 @@ class Battle
     protected int $activeWarbandIndex = 0;
     /**
      * Активные заклинания на поле боя
-     * @var SplObjectStorage<Fighter, SpellInterface[]>
+     * @var SplObjectStorage<Fighter, Spell[]>
      */
     protected SplObjectStorage $activeSpells;
 
@@ -182,9 +180,7 @@ class Battle
         }
 
         try {
-            \Mordheim\Rule\Move::run($this, $fighter, $target, 0.4, false); // минимальная агрессивность
-        } catch (MoveRunDeprecatedException $e) {
-            \Mordheim\BattleLogger::add("{$fighter->getName()} не может бежать в панике: " . $e->getMessage());
+            \Mordheim\Rule\Move::run($this, $fighter, $target, 0.4); // минимальная агрессивность
         } catch (PathfinderTargetUnreachableException $e) {
             \Mordheim\BattleLogger::add("{$fighter->getName()} не может убежать в панике: путь до края недоступен (" . implode(', ', $fighter->getState()->getPosition()) . ") -> (" . implode(', ', $target) . ")");
         }
@@ -404,7 +400,7 @@ class Battle
     /**
      * Получить активные заклинания для бойца
      * @param Fighter $fighter
-     * @return SpellInterface[]
+     * @return Spell[]
      */
     public function getActiveSpellsFor(Fighter $fighter): array
     {
@@ -414,9 +410,9 @@ class Battle
     /**
      * Добавить активное заклинание для бойца
      * @param Fighter $fighter
-     * @param SpellInterface $spell
+     * @param Spell $spell
      */
-    public function addActiveSpell(Fighter $fighter, SpellInterface $spell): void
+    public function addActiveSpell(Fighter $fighter, Spell $spell): void
     {
         $spells = $this->activeSpells->contains($fighter) ? $this->activeSpells[$fighter] : [];
         $spells[] = $spell;
@@ -427,9 +423,9 @@ class Battle
     /**
      * Удалить активное заклинание для бойца
      * @param Fighter $fighter
-     * @param SpellInterface $spell
+     * @param Spell $spell
      */
-    public function removeActiveSpell(Fighter $fighter, SpellInterface $spell): void
+    public function removeActiveSpell(Fighter $fighter, Spell $spell): void
     {
         if (!$this->activeSpells->contains($fighter)) return;
         $spells = array_filter(

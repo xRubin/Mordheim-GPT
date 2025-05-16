@@ -3,8 +3,8 @@
 namespace Mordheim\Spells\PrayersOfSigmar;
 
 use Mordheim\Battle;
-use Mordheim\Data\Spell;
 use Mordheim\Fighter;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class HammerOfSigmarProcessor extends BaseSpellProcessor

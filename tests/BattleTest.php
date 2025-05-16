@@ -15,7 +15,7 @@ class BattleTest extends TestCase
         $warband1 = new Warband('WB1');
         $warband2 = new Warband('WB2');
         $f1 = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -25,7 +25,7 @@ class BattleTest extends TestCase
             )
         );
         $f2 = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::MARIENBURG_CHAMPION,
+            Mordheim\Blank::MARIENBURG_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -62,7 +62,7 @@ class BattleTest extends TestCase
         $field = new \Mordheim\GameField(5, 5, 1);
         $warband = new \Mordheim\Warband('WB');
         $fighter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState([2, 2, 0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1, \Mordheim\Status::PANIC)
@@ -80,7 +80,7 @@ class BattleTest extends TestCase
         $field = new \Mordheim\GameField(5, 5, 1);
         $warband = new \Mordheim\Warband('WB');
         $fighter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState([0, 2, 0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1, \Mordheim\Status::PANIC)
@@ -97,7 +97,7 @@ class BattleTest extends TestCase
         $field = new \Mordheim\GameField(5, 5, 1);
         $warband = new \Mordheim\Warband('WB');
         $fighter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState([2, 0, 0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1, \Mordheim\Status::PANIC)
@@ -114,7 +114,7 @@ class BattleTest extends TestCase
         $field = new \Mordheim\GameField(5, 5, 1);
         $warband = new \Mordheim\Warband('WB');
         $fighter = new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState([4, 2, 0], $this->createMock(\Mordheim\BattleStrategyInterface::class), 1, \Mordheim\Status::PANIC)

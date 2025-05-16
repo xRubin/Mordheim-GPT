@@ -4,7 +4,7 @@ namespace Mordheim\Strategy;
 
 use Mordheim\Battle;
 use Mordheim\BattleStrategyInterface;
-use Mordheim\Data\Equipment;
+use Mordheim\Equipment;
 use Mordheim\Exceptions\PathfinderTargetUnreachableException;
 use Mordheim\Fighter;
 use Mordheim\Ruler;

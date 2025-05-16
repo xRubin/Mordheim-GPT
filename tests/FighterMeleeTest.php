@@ -2,7 +2,7 @@
 
 use Mordheim\Battle;
 use Mordheim\Characteristics;
-use Mordheim\Data\Equipment;
+use Mordheim\Equipment;
 use Mordheim\GameField;
 use Mordheim\SpecialRule;
 use Mordheim\Strategy\AggressiveStrategy;
@@ -14,7 +14,7 @@ class FighterMeleeTest extends MordheimTestCase
     private static function makeTestFighter(array $skills, array $weapons, int $wounds = 2, array $pos = [0, 0, 0])
     {
         return new class (
-            \Mordheim\Data\Blank::MARIENBURG_SWORDSMAN,
+            Mordheim\Blank::MARIENBURG_SWORDSMAN,
             new \Mordheim\FighterAdvancement(new Characteristics(), $skills),
             new \Mordheim\EquipmentManager($weapons),
             new \Mordheim\FighterState(
@@ -23,7 +23,7 @@ class FighterMeleeTest extends MordheimTestCase
                 $wounds
             )
         ) extends \Mordheim\Fighter {
-            public function getArmourSave(?\Mordheim\EquipmentInterface $attackerWeapon): int
+            public function getArmourSave(?Equipment $attackerWeapon): int
             {
                 return 0;
             }
@@ -33,7 +33,7 @@ class FighterMeleeTest extends MordheimTestCase
     private function makeFighter(array $skills, array $weapons, int $wounds = 2, $pos = [0, 0, 0])
     {
         return new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            Mordheim\Blank::REIKLAND_CHAMPION,
             new \Mordheim\FighterAdvancement(new Characteristics(), $skills),
             new \Mordheim\EquipmentManager($weapons),
             new \Mordheim\FighterState(

@@ -1,40 +1,39 @@
 <?php
 
-namespace Mordheim\Data;
+namespace Mordheim;
 
 use Mordheim\Data\Attributes\Cost;
-use Mordheim\Data\Attributes\SpecialRule;
+use Mordheim\Data\Attributes\Rule;
 use Mordheim\Exceptions\InvalidAttributesException;
-use Mordheim\MutationInterface;
 
-enum Mutation implements MutationInterface
+enum Mutation
 {
     #[Cost(20)]
-    #[SpecialRule('MUTATION_DAEMON_SOUL')]
+    #[Rule('MUTATION_DAEMON_SOUL')]
     case DAEMON_SOUL;
     #[Cost(50)]
-    #[SpecialRule('MUTATION_GREAT_CLAW')]
+    #[Rule('MUTATION_GREAT_CLAW')]
     case GREAT_CLAW;
     #[Cost(40)]
-    #[SpecialRule('MUTATION_CLOVEN_HOOFS')]
+    #[Rule('MUTATION_CLOVEN_HOOFS')]
     case CLOVEN_HOOFS;
     #[Cost(35)]
-    #[SpecialRule('MUTATION_TENTACLE')]
+    #[Rule('MUTATION_TENTACLE')]
     case TENTACLE;
     #[Cost(30)]
-    #[SpecialRule('MUTATION_BLACKBLOOD')]
+    #[Rule('MUTATION_BLACKBLOOD')]
     case BLACKBLOOD;
     #[Cost(35)]
-    #[SpecialRule('MUTATION_SPINES')]
+    #[Rule('MUTATION_SPINES')]
     case SPINES;
     #[Cost(40)]
-    #[SpecialRule('MUTATION_SCORPION_TAIL')]
+    #[Rule('MUTATION_SCORPION_TAIL')]
     case SCORPION_TAIL;
     #[Cost(40)]
-    #[SpecialRule('MUTATION_EXTRA_ARM')]
+    #[Rule('MUTATION_EXTRA_ARM')]
     case EXTRA_ARM;
     #[Cost(40)]
-    #[SpecialRule('CAUSE_FEAR')]
+    #[Rule('CAUSE_FEAR')]
     case HIDEOUS;
 
     public function getCost(): int
@@ -51,7 +50,7 @@ enum Mutation implements MutationInterface
     public function getSpecialRules(): array
     {
         $ref = new \ReflectionClassConstant(self::class, $this->name);
-        $classAttributes = $ref->getAttributes(SpecialRule::class);
+        $classAttributes = $ref->getAttributes(Rule::class);
 
         if (count($classAttributes) === 0)
             return [];

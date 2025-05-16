@@ -9,7 +9,7 @@ class RecoveryPhaseTest extends MordheimTestCase
     private function makeLeader($state = Status::STANDING)
     {
         return new class (
-            \Mordheim\Data\Blank::REIKLAND_MERCENARY_CAPTAIN,
+            Mordheim\Blank::REIKLAND_MERCENARY_CAPTAIN,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(
@@ -29,7 +29,7 @@ class RecoveryPhaseTest extends MordheimTestCase
     private function makeFighter($state = Status::STANDING)
     {
         return new \Mordheim\Fighter(
-            \Mordheim\Data\Blank::REIKLAND_CHAMPION,
+            Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
             new \Mordheim\EquipmentManager(),
             new \Mordheim\FighterState(

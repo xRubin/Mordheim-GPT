@@ -1,12 +1,10 @@
 <?php
 
-namespace Mordheim\Data;
+namespace Mordheim;
 
 use Mordheim\Data\Attributes\Equipment;
-use Mordheim\EquipmentListInterface;
-use Mordheim\Traits\EnumTryFromNameTrait;
 
-enum EquipmentList implements EquipmentListInterface
+enum EquipmentList
 {
     use EnumTryFromNameTrait;
 

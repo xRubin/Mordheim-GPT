@@ -9,11 +9,12 @@ Status: Fear
 
 Magic of the Horned rat
 
-## Вопросы:
-Remove close combats before magic move ? flee ? punch ?
+## Вопросы к правилам:
+Remove close combats before magic move ? punch on flee?
 
 Что происходит если паникер добежал до края стола?
 
+Почему макс характеристики из книги иногда меньше чем характеристики из профиля? (Огр)
 
 ## Strategy
 ### Conditions

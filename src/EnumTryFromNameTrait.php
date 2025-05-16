@@ -1,6 +1,6 @@
 <?php
 
-namespace Mordheim\Traits;
+namespace Mordheim;
 
 trait EnumTryFromNameTrait
 {

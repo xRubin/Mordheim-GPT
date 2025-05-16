@@ -3,13 +3,13 @@
 namespace Mordheim\Spells\Necromancy;
 
 use Mordheim\Battle;
-use Mordheim\Data\Blank;
-use Mordheim\Data\Spell;
+use Mordheim\Blank;
 use Mordheim\Exceptions\ChargeFailedException;
 use Mordheim\Fighter;
 use Mordheim\Rule\Charge;
 use Mordheim\Rule\Move;
 use Mordheim\Ruler;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class CallOfVanhelProcessor extends BaseSpellProcessor

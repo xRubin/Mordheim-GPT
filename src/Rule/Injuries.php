@@ -3,7 +3,7 @@
 namespace Mordheim\Rule;
 
 use Mordheim\Battle;
-use Mordheim\EquipmentInterface;
+use Mordheim\Equipment;
 use Mordheim\Fighter;
 use Mordheim\SpecialRule;
 use Mordheim\Status;
@@ -31,11 +31,11 @@ class Injuries
      * @param Battle $battle
      * @param Fighter $source
      * @param Fighter $target
-     * @param EquipmentInterface|null $weapon
+     * @param Equipment|null $weapon
      * @param bool $isCritical
      * @return bool
      */
-    public static function roll(Battle $battle, Fighter $source, Fighter $target, ?EquipmentInterface $weapon = null, bool $isCritical = false): bool
+    public static function roll(Battle $battle, Fighter $source, Fighter $target, ?Equipment $weapon = null, bool $isCritical = false): bool
     {
         // Critical: если woundRoll=6 и есть Critical, сразу OutOfAction
         if ($weapon && $isCritical) {
@@ -50,7 +50,10 @@ class Injuries
         if ($roll < 1) $roll = 1;
         if ($roll > 6) $roll = 6;
         // Club/Mace/Hammer/Concussion: 1 — выбыл, 2 — knockdown, 3-6 — stun
-        if ($weapon && $weapon->hasSpecialRule(SpecialRule::CONCUSSION) && !$target->hasSpecialRule(SpecialRule::NO_PAIN)) {
+        if ($weapon && $weapon->hasSpecialRule(SpecialRule::CONCUSSION)
+            && !$target->hasSpecialRule(SpecialRule::NO_PAIN)
+            && !$target->hasSpecialRule(SpecialRule::HARD_HEAD)
+        ) {
             if ($roll == 1) {
                 $battle->killFighter($target);
                 \Mordheim\BattleLogger::add("[DEBUG][InjuryRoll] Club/Concussion: После killFighter: статус цели=" . $target->getState()->getStatus()->name);
@@ -80,13 +83,18 @@ class Injuries
             $target->getState()->setStatus(AvoidStun::roll($target) ? Status::KNOCKED_DOWN : Status::STUNNED);
             \Mordheim\BattleLogger::add("[DEBUG][InjuryRoll] Обычная таблица: После setStatus STUNNED/KNOCKED_DOWN: статус цели=" . $target->getState()->getStatus()->name);
         } else {
-            $battle->killFighter($target);
-            \Mordheim\BattleLogger::add("[DEBUG][InjuryRoll] Обычная таблица: После killFighter: статус цели=" . $target->getState()->getStatus()->name);
+            if ($roll == 5 && $target->hasSpecialRule(SpecialRule::HARD_TO_KILL)) {
+                $target->getState()->setStatus( Status::STUNNED);
+                \Mordheim\BattleLogger::add("[DEBUG][InjuryRoll] HARD_TO_KILL proc: После setStatus STUNNED: статус цели=" . $target->getState()->getStatus()->name);
+            } else {
+                $battle->killFighter($target);
+                \Mordheim\BattleLogger::add("[DEBUG][InjuryRoll] Обычная таблица: После killFighter: статус цели=" . $target->getState()->getStatus()->name);
+            }
         }
         return true;
     }
 
-    public static function rollIfNoWounds(Battle $battle, Fighter $source, Fighter $target, ?EquipmentInterface $weapon = null, bool $isCritical = false):bool
+    public static function rollIfNoWounds(Battle $battle, Fighter $source, Fighter $target, ?Equipment $weapon = null, bool $isCritical = false): bool
     {
         if ($target->getState()->getWounds() <= 0) {
             return self::roll($battle, $source, $target, $weapon, $isCritical);

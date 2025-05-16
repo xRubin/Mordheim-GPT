@@ -3,10 +3,10 @@
 namespace Mordheim\Spells\ChaosRituals;
 
 use Mordheim\Battle;
-use Mordheim\Data\Spell;
 use Mordheim\Dice;
 use Mordheim\Fighter;
 use Mordheim\Ruler;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class LureOfChaosProcessor extends BaseSpellProcessor

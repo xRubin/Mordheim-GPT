@@ -3,14 +3,14 @@
 namespace Spells;
 
 use Mordheim\Battle;
+use Mordheim\Blank;
 use Mordheim\Characteristics;
-use Mordheim\Data\Blank;
-use Mordheim\Data\Spell;
 use Mordheim\EquipmentManager;
 use Mordheim\Fighter;
 use Mordheim\FighterAdvancement;
 use Mordheim\FighterState;
 use Mordheim\SpecialRule;
+use Mordheim\Spell;
 use Mordheim\Status;
 use Mordheim\Strategy\AggressiveStrategy;
 use Mordheim\Strategy\CarefulStrategy;
@@ -49,7 +49,7 @@ class NecromancyTest extends MordheimTestCase
         return new Fighter(
             Blank::REIKLAND_CHAMPION,
             FighterAdvancement::empty(),
-            new EquipmentManager([\Mordheim\Data\Equipment::SWORD]),
+            new EquipmentManager([\Mordheim\Equipment::SWORD]),
             new FighterState($pos, new CarefulStrategy(), $wounds)
         );
     }

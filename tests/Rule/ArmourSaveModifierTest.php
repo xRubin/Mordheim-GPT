@@ -1,6 +1,6 @@
 <?php
 
-use Mordheim\Data\Equipment;
+use Mordheim\Equipment;
 use Mordheim\EquipmentManager;
 
 class ArmourSaveModifierTest extends MordheimTestCase

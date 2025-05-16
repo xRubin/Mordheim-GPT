@@ -3,13 +3,13 @@
 namespace Mordheim\Spells\PrayersOfSigmar;
 
 use Mordheim\Battle;
-use Mordheim\Data\Equipment;
-use Mordheim\Data\Spell;
 use Mordheim\Data\Warband;
+use Mordheim\Equipment;
 use Mordheim\Fighter;
 use Mordheim\Rule\Attack;
 use Mordheim\Rule\Injuries;
 use Mordheim\Ruler;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class SoulfireProcessor extends BaseSpellProcessor

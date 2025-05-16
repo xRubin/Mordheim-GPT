@@ -2,13 +2,11 @@
 
 namespace Mordheim;
 
-use Mordheim\Data\Spell;
-
 class FighterState
 {
     /**
      * Активные заклинания на персонаже
-     * @var SpellInterface[]
+     * @var Spell[]
      */
     private array $activeSpells = [];
     private Characteristics $characteristics;
@@ -85,21 +83,21 @@ class FighterState
 
     /**
      * Получить активные заклинания
-     * @return SpellInterface[]
+     * @return Spell[]
      */
     public function getActiveSpells(): array
     {
         return $this->activeSpells;
     }
 
-    public function hasActiveSpell(SpellInterface $spell): bool
+    public function hasActiveSpell(Spell $spell): bool
     {
-        return in_array($spell, $this->activeSpells, true);
+        return in_array($spell, $this->activeSpells);
     }
 
     /**
      * Установить активные заклинания
-     * @param SpellInterface[] $spells
+     * @param Spell[] $spells
      * @return $this
      */
     public function setActiveSpells(array $spells): static
@@ -110,10 +108,10 @@ class FighterState
 
     /**
      * Добавить заклинание
-     * @param SpellInterface $spell
+     * @param Spell $spell
      * @return $this
      */
-    public function addActiveSpell(SpellInterface $spell): static
+    public function addActiveSpell(Spell $spell): static
     {
         if (!in_array($spell, $this->activeSpells, true)) {
             $this->activeSpells[] = $spell;
@@ -123,10 +121,10 @@ class FighterState
 
     /**
      * Удалить заклинание
-     * @param SpellInterface $spell
+     * @param Spell $spell
      * @return $this
      */
-    public function removeActiveSpell(SpellInterface $spell): static
+    public function removeActiveSpell(Spell $spell): static
     {
         $this->activeSpells = array_filter(
             $this->activeSpells,

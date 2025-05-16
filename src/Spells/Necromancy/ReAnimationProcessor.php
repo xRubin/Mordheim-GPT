@@ -3,8 +3,8 @@
 namespace Mordheim\Spells\Necromancy;
 
 use Mordheim\Battle;
-use Mordheim\Data\Spell;
 use Mordheim\Fighter;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class ReAnimationProcessor extends BaseSpellProcessor
@@ -47,7 +47,7 @@ class ReAnimationProcessor extends BaseSpellProcessor
         foreach ($battle->getFighters() as $target) {
             if ($target->getState()->isAlive())
                 continue;
-            if ($target->getBlank() !== \Mordheim\Data\Blank::UNDEAD_ZOMBIE)
+            if ($target->getBlank() !== \Mordheim\Blank::UNDEAD_ZOMBIE)
                 continue;
             return $target;
         }

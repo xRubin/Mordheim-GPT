@@ -4,13 +4,12 @@ namespace Mordheim\Rule;
 
 use Mordheim\Battle;
 use Mordheim\CloseCombat;
-use Mordheim\Data\Equipment;
-use Mordheim\Data\Spell;
-use Mordheim\EquipmentInterface;
+use Mordheim\Equipment;
 use Mordheim\Fighter;
 use Mordheim\Ruler;
 use Mordheim\Slot;
 use Mordheim\SpecialRule;
+use Mordheim\Spell;
 use Mordheim\Status;
 
 class Attack
@@ -104,7 +103,7 @@ class Attack
     /**
      * Расчет повреждения от магического снаряда с учетом силы и модификатора сейва цели
      */
-    public static function magic(Battle $battle, Fighter $caster, Fighter $target, EquipmentInterface $weapon, $useSave = true): bool
+    public static function magic(Battle $battle, Fighter $caster, Fighter $target, Equipment $weapon, $useSave = true): bool
     {
         if (!$target->getState()->getStatus()->isAlive())
             return false;
@@ -312,7 +311,7 @@ class Attack
         return false;
     }
 
-    public static function selectRangedWeapon(Fighter $source, Fighter $target, bool $moved): ?EquipmentInterface
+    public static function selectRangedWeapon(Fighter $source, Fighter $target, bool $moved): ?Equipment
     {
         $weapons = $source->getEquipmentManager()->getItemsBySlot(Slot::RANGED);
         if (!($weapon = reset($weapons))) return null;
@@ -324,7 +323,7 @@ class Attack
         return $weapon;
     }
 
-    public static function calculateRangedParams(Battle $battle, Fighter $source, Fighter $target, EquipmentInterface $weapon, bool $moved): array
+    public static function calculateRangedParams(Battle $battle, Fighter $source, Fighter $target, Equipment $weapon, bool $moved): array
     {
         $bs = $source->getBallisticSkill();
         $toHitBase = 7 - $bs;
@@ -343,7 +342,7 @@ class Attack
         return [$toHit, $shots];
     }
 
-    public static function tryArmourSaveRanged(Fighter $source, Fighter $target, ?EquipmentInterface $weapon): bool
+    public static function tryArmourSaveRanged(Fighter $source, Fighter $target, ?Equipment $weapon): bool
     {
         $armourSave = $target->getArmourSave($weapon);
         if ($armourSave <= 0) {

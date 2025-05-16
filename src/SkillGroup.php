@@ -1,13 +1,8 @@
 <?php
 
-namespace Mordheim\Data;
+namespace Mordheim;
 
-use Mordheim\SkillGroupInterface;
-use Mordheim\SpecialRule;
-use Mordheim\Traits\EnumTryFromNameTrait;
-use Mordheim\WarbandInterface;
-
-enum SkillGroup implements SkillGroupInterface
+enum SkillGroup
 {
     use EnumTryFromNameTrait;
 

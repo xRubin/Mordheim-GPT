@@ -3,11 +3,11 @@
 namespace Mordheim\Spells\LesserMagic;
 
 use Mordheim\Battle;
-use Mordheim\Data\Spell;
 use Mordheim\Data\Warband;
 use Mordheim\Fighter;
 use Mordheim\Ruler;
 use Mordheim\SpecialRule;
+use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
 
 class DreadOfAramarProcessor extends BaseSpellProcessor

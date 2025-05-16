@@ -3,10 +3,9 @@
 namespace Mordheim\Spells;
 
 use Mordheim\Battle;
-use Mordheim\Data\Spell;
 use Mordheim\Dice;
-use Mordheim\Exceptions\MoveRunDeprecatedException;
 use Mordheim\Fighter;
+use Mordheim\Spell;
 
 abstract class BaseSpellProcessor implements SpellProcessorInterface
 {
@@ -51,7 +50,7 @@ abstract class BaseSpellProcessor implements SpellProcessorInterface
      */
     public function rollSpellApplied(Battle $battle, Fighter $caster): bool
     {
-        if ($this->difficulty <= 1 ) {
+        if ($this->difficulty <= 1) {
             \Mordheim\BattleLogger::add("{$caster->getName()} автоматически применяет заклинание {$this->spell->name}!");
             return true;
         }
@@ -94,12 +93,8 @@ abstract class BaseSpellProcessor implements SpellProcessorInterface
             $targetPos = [$newX, $newY, $newZ];
             // Логирование координат
             \Mordheim\BattleLogger::add("runFromCaster: from=" . implode(',', $from) . " to=" . implode(',', $to) . " targetPos=" . implode(',', $targetPos));
-            try {
-                \Mordheim\Rule\Move::run($battle, $target, $targetPos, 0.4, false);
-                \Mordheim\BattleLogger::add("{$target->getName()} не прошёл тест Лидерства и убегает на {$distance}\" от {$caster->getName()} ({$this->spell->name}).");
-            } catch (MoveRunDeprecatedException $e) {
-                \Mordheim\BattleLogger::add("{$target->getName()} не может убежать: " . $e->getMessage());
-            }
+            \Mordheim\Rule\Move::run($battle, $target, $targetPos, 0.4);
+            \Mordheim\BattleLogger::add("{$target->getName()} не прошёл тест Лидерства и убегает на {$distance}\" от {$caster->getName()} ({$this->spell->name}).");
         } else {
             \Mordheim\BattleLogger::add("{$target->getName()} прошёл тест Лидерства и не поддался страху ({$this->spell->name}).");
         }

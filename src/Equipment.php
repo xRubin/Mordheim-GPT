@@ -1,90 +1,86 @@
 <?php
 
-namespace Mordheim\Data;
+namespace Mordheim;
 
 use Mordheim\Data\Attributes\Cost;
 use Mordheim\Data\Attributes\MaximumRange;
+use Mordheim\Data\Attributes\Rule;
+use Mordheim\Data\Attributes\SaveModifier;
 use Mordheim\Data\Attributes\SlotArmour;
 use Mordheim\Data\Attributes\SlotHelmet;
 use Mordheim\Data\Attributes\SlotMelee;
 use Mordheim\Data\Attributes\SlotMisc;
 use Mordheim\Data\Attributes\SlotRanged;
-use Mordheim\Data\Attributes\SpecialRule;
 use Mordheim\Data\Attributes\Strength;
 use Mordheim\Data\Attributes\StrengthBonus;
 use Mordheim\Data\Attributes\Warband;
-use Mordheim\EquipmentInterface;
 use Mordheim\Exceptions\InvalidAttributesException;
-use Mordheim\Slot;
-use Mordheim\SpecialRuleInterface;
-use Mordheim\Traits\EnumTryFromNameTrait;
-use Mordheim\Data\Attributes\SaveModifier;
 
-enum Equipment implements EquipmentInterface
+enum Equipment
 {
     use EnumTryFromNameTrait;
 
     #[StrengthBonus(-1)]
-    #[SpecialRule('PLUS_1_ENEMY_ARMOUR_SAVE')]
+    #[Rule('PLUS_1_ENEMY_ARMOUR_SAVE')]
     #[SlotMelee]
     case FIST;
-    #[SpecialRule('PLUS_1_ENEMY_ARMOUR_SAVE')]
+    #[Rule('PLUS_1_ENEMY_ARMOUR_SAVE')]
     #[SlotMelee]
     case DAGGER;
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case HAMMER;
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case STAFF;
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case MACE;
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case CLUB;
-    #[SpecialRule('CUTTING_EDGE')]
+    #[Rule('CUTTING_EDGE')]
     #[SlotMelee]
     case AXE;
-    #[SpecialRule('PARRY')]
+    #[Rule('PARRY')]
     #[SlotMelee]
     case SWORD;
     #[StrengthBonus(+2)]
-    #[SpecialRule('HEAVY')]
-    #[SpecialRule('TWO_HANDED')]
+    #[Rule('HEAVY')]
+    #[Rule('TWO_HANDED')]
     #[SlotMelee]
     case FLAIL;
     #[StrengthBonus(+1)]
-    #[SpecialRule('HEAVY')]
-    #[SpecialRule('DIFFICULT_TO_USE')]
+    #[Rule('HEAVY')]
+    #[Rule('DIFFICULT_TO_USE')]
     #[SlotMelee]
     case MORNING_STAR;
     #[StrengthBonus(+1)]
-    #[SpecialRule('TWO_HANDED')]
+    #[Rule('TWO_HANDED')]
     #[SlotMelee]
     case HALBERD;
-    #[SpecialRule('STRIKE_FIRST')]
-    #[SpecialRule('UNWIELDY')]
-    #[SpecialRule('CAVALRY_BONUS')]
+    #[Rule('STRIKE_FIRST')]
+    #[Rule('UNWIELDY')]
+    #[Rule('CAVALRY_BONUS')]
     #[SlotMelee]
     case SPEAR;
     #[StrengthBonus(+2)]
-    #[SpecialRule('CAVALRY_BONUS')]
+    #[Rule('CAVALRY_BONUS')]
     #[SlotMelee]
     case LANCE;
     #[StrengthBonus(+2)]
-    #[SpecialRule('TWO_HANDED')]
-    #[SpecialRule('STRIKE_LAST')]
+    #[Rule('TWO_HANDED')]
+    #[Rule('STRIKE_LAST')]
     #[SlotMelee]
     case DOUBLE_HANDED_SWORD;
     #[StrengthBonus(+2)]
-    #[SpecialRule('TWO_HANDED')]
-    #[SpecialRule('STRIKE_LAST')]
+    #[Rule('TWO_HANDED')]
+    #[Rule('STRIKE_LAST')]
     #[SlotMelee]
     case DOUBLE_HANDED_HAMMER;
     #[StrengthBonus(+2)]
-    #[SpecialRule('TWO_HANDED')]
-    #[SpecialRule('CUTTING_EDGE')]
+    #[Rule('TWO_HANDED')]
+    #[Rule('CUTTING_EDGE')]
     #[SlotMelee]
     case DOUBLE_HANDED_AXE;
 
@@ -102,250 +98,251 @@ enum Equipment implements EquipmentInterface
     case LONG_BOW;
     #[MaximumRange(36)]
     #[Strength(3)]
-    #[SpecialRule('MINUS_1_SAVE_MODIFIER')]
+    #[Rule('MINUS_1_SAVE_MODIFIER')]
     #[SlotRanged]
     case ELF_BOW;
     #[MaximumRange(30)]
     #[Strength(4)]
-    #[SpecialRule('MOVE_OR_FIRE')]
+    #[Rule('MOVE_OR_FIRE')]
     #[SlotRanged]
     case CROSSBOW;
     #[MaximumRange(30)]
     #[Strength(3)]
-    #[SpecialRule('FIRE_TWICE_AT_HALF_RANGE')]
+    #[Rule('FIRE_TWICE_AT_HALF_RANGE')]
     #[SlotRanged]
     case SLING;
     #[MaximumRange(6)]
-    #[SpecialRule('THROWN_WEAPON')]
+    #[Rule('THROWN_WEAPON')]
     #[SlotRanged]
     case THROWING_STARS;
     #[MaximumRange(6)]
-    #[SpecialRule('THROWN_WEAPON')]
+    #[Rule('THROWN_WEAPON')]
     #[SlotRanged]
     case THROWING_KNIVES;
     #[MaximumRange(24)]
     #[Strength(3)]
-    #[SpecialRule('FIRE_TWICE')]
+    #[Rule('FIRE_TWICE')]
     #[SlotRanged]
     case REPEATER_CROSSBOW;
     #[MaximumRange(10)]
     #[Strength(4)]
-    #[SpecialRule('SHOOT_IN_HAND_TO_HAND_COMBAT')]
+    #[Rule('SHOOT_IN_HAND_TO_HAND_COMBAT')]
     #[SlotRanged]
     case CROSSBOW_PISTOL;
 
     #[MaximumRange(6)]
     #[Strength(4)]
-    #[SpecialRule('PREPARE_SHOT')]
-    #[SpecialRule('MINUS_1_SAVE_MODIFIER')]
-    #[SpecialRule('HAND_TO_HAND')]
+    #[Rule('PREPARE_SHOT')]
+    #[Rule('MINUS_1_SAVE_MODIFIER')]
+    #[Rule('HAND_TO_HAND')]
     #[SlotRanged]
     case PISTOL;
     #[MaximumRange(10)]
     #[Strength(4)]
-    #[SpecialRule('ACCURACY')]
-    #[SpecialRule('PREPARE_SHOT')]
-    #[SpecialRule('MINUS_1_SAVE_MODIFIER')]
-    #[SpecialRule('HAND_TO_HAND')]
+    #[Rule('ACCURACY')]
+    #[Rule('PREPARE_SHOT')]
+    #[Rule('MINUS_1_SAVE_MODIFIER')]
+    #[Rule('HAND_TO_HAND')]
     #[SlotRanged]
     case DUELLING_PISTOL;
     #[MaximumRange(16)]
     #[Strength(3)]
-    #[SpecialRule('SHOT')]
-    #[SpecialRule('FIRE_ONCE')]
+    #[Rule('SHOT')]
+    #[Rule('FIRE_ONCE')]
     #[SlotRanged]
     case BLUNDERBUSS;
     #[MaximumRange(24)]
     #[Strength(4)]
-    #[SpecialRule('PREPARE_SHOT')]
-    #[SpecialRule('MOVE_OR_FIRE')]
-    #[SpecialRule('MINUS_1_SAVE_MODIFIER')]
+    #[Rule('PREPARE_SHOT')]
+    #[Rule('MOVE_OR_FIRE')]
+    #[Rule('MINUS_1_SAVE_MODIFIER')]
     #[SlotRanged]
     case HANDGUN;
     #[MaximumRange(48)]
     #[Strength(4)]
-    #[SpecialRule('MOVE_OR_FIRE')]
-    #[SpecialRule('PREPARE_SHOT')]
-    #[SpecialRule('PICK_TARGET')]
-    #[SpecialRule('MINUS_1_SAVE_MODIFIER')]
+    #[Rule('MOVE_OR_FIRE')]
+    #[Rule('PREPARE_SHOT')]
+    #[Rule('PICK_TARGET')]
+    #[Rule('MINUS_1_SAVE_MODIFIER')]
     #[SlotRanged]
     case HOCHLAND_LONG_RIFFLE;
 
-    #[SpecialRule('SAVE_6')]
+    #[Rule('SAVE_6')]
     #[SlotArmour]
     case LIGHT_ARMOUR;
-    #[SpecialRule('SAVE_5')]
-    #[SpecialRule('MOVEMENT')]
+    #[Rule('SAVE_5')]
+    #[Rule('MOVEMENT')]
     #[SlotArmour]
     case HEAVY_ARMOUR;
-    #[SpecialRule('SAVE_6')]
+    #[Rule('SAVE_6')]
     #[SlotMelee]
     case SHIELD;
+    #[Rule('PARRY')]
     #[SlotMelee]
     case BUCKLER;
     #[SlotHelmet]
-    #[SpecialRule('AVOID_STUN')]
+    #[Rule('AVOID_STUN')]
     case HELMET;
-    #[SpecialRule('SAVE_5')]
+    #[Rule('SAVE_5')]
     #[SlotArmour]
     case ITHILMAR_ARMOUR;
-    #[SpecialRule('SAVE_4')]
+    #[Rule('SAVE_4')]
     #[SlotArmour]
     case GROMRIL_ARMOUR;
 
-    #[SpecialRule('ITHILMAR')]
-    #[SpecialRule('PLUS_1_ENEMY_ARMOUR_SAVE')]
+    #[Rule('ITHILMAR')]
+    #[Rule('PLUS_1_ENEMY_ARMOUR_SAVE')]
     #[SlotMelee]
     case ITHILMAR_DAGGER;
-    #[SpecialRule('ITHILMAR')]
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('ITHILMAR')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case ITHILMAR_HAMMER;
-    #[SpecialRule('ITHILMAR')]
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('ITHILMAR')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case ITHILMAR_STAFF;
-    #[SpecialRule('ITHILMAR')]
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('ITHILMAR')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case ITHILMAR_MACE;
-    #[SpecialRule('ITHILMAR')]
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('ITHILMAR')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case ITHILMAR_CLUB;
-    #[SpecialRule('ITHILMAR')]
-    #[SpecialRule('CUTTING_EDGE')]
+    #[Rule('ITHILMAR')]
+    #[Rule('CUTTING_EDGE')]
     #[SlotMelee]
     case ITHILMAR_AXE;
-    #[SpecialRule('ITHILMAR')]
+    #[Rule('ITHILMAR')]
     #[StrengthBonus(+2)]
-    #[SpecialRule('HEAVY')]
-    #[SpecialRule('TWO_HANDED')]
+    #[Rule('HEAVY')]
+    #[Rule('TWO_HANDED')]
     #[SlotMelee]
     case ITHILMAR_FLAIL;
-    #[SpecialRule('ITHILMAR')]
+    #[Rule('ITHILMAR')]
     #[StrengthBonus(+1)]
-    #[SpecialRule('HEAVY')]
-    #[SpecialRule('DIFFICULT_TO_USE')]
+    #[Rule('HEAVY')]
+    #[Rule('DIFFICULT_TO_USE')]
     #[SlotMelee]
     case ITHILMAR_MORNING_STAR;
-    #[SpecialRule('ITHILMAR')]
+    #[Rule('ITHILMAR')]
     #[StrengthBonus(+1)]
-    #[SpecialRule('TWO_HANDED')]
+    #[Rule('TWO_HANDED')]
     #[SlotMelee]
     case ITHILMAR_HALBERD;
-    #[SpecialRule('ITHILMAR')]
-    #[SpecialRule('STRIKE_FIRST')]
-    #[SpecialRule('UNWIELDY')]
-    #[SpecialRule('CAVALRY_BONUS')]
+    #[Rule('ITHILMAR')]
+    #[Rule('STRIKE_FIRST')]
+    #[Rule('UNWIELDY')]
+    #[Rule('CAVALRY_BONUS')]
     #[SlotMelee]
     case ITHILMAR_SPEAR;
-    #[SpecialRule('ITHILMAR')]
+    #[Rule('ITHILMAR')]
     #[StrengthBonus(+2)]
-    #[SpecialRule('CAVALRY_BONUS')]
+    #[Rule('CAVALRY_BONUS')]
     #[SlotMelee]
     case ITHILMAR_LANCE;
-    #[SpecialRule('ITHILMAR')]
+    #[Rule('ITHILMAR')]
     #[StrengthBonus(+2)]
-    #[SpecialRule('TWO_HANDED')]
-    #[SpecialRule('STRIKE_LAST')]
+    #[Rule('TWO_HANDED')]
+    #[Rule('STRIKE_LAST')]
     #[SlotMelee]
     case ITHILMAR_DOUBLE_HANDED_SWORD;
-    #[SpecialRule('ITHILMAR')]
+    #[Rule('ITHILMAR')]
     #[StrengthBonus(+2)]
-    #[SpecialRule('TWO_HANDED')]
-    #[SpecialRule('STRIKE_LAST')]
+    #[Rule('TWO_HANDED')]
+    #[Rule('STRIKE_LAST')]
     #[SlotMelee]
     case ITHILMAR_DOUBLE_HANDED_HAMMER;
-    #[SpecialRule('ITHILMAR')]
+    #[Rule('ITHILMAR')]
     #[StrengthBonus(+2)]
-    #[SpecialRule('TWO_HANDED')]
-    #[SpecialRule('STRIKE_LAST')]
+    #[Rule('TWO_HANDED')]
+    #[Rule('STRIKE_LAST')]
     #[SlotMelee]
     case ITHILMAR_DOUBLE_HANDED_AXE;
 
-    #[SpecialRule('GROMRIL')]
-    #[SpecialRule('PLUS_1_ENEMY_ARMOUR_SAVE')]
+    #[Rule('GROMRIL')]
+    #[Rule('PLUS_1_ENEMY_ARMOUR_SAVE')]
     #[SlotMelee]
     case GROMRIL_DAGGER;
-    #[SpecialRule('GROMRIL')]
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('GROMRIL')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case GROMRIL_HAMMER;
-    #[SpecialRule('GROMRIL')]
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('GROMRIL')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case GROMRIL_STAFF;
-    #[SpecialRule('GROMRIL')]
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('GROMRIL')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case GROMRIL_MACE;
-    #[SpecialRule('GROMRIL')]
-    #[SpecialRule('CONCUSSION')]
+    #[Rule('GROMRIL')]
+    #[Rule('CONCUSSION')]
     #[SlotMelee]
     case GROMRIL_CLUB;
-    #[SpecialRule('GROMRIL')]
-    #[SpecialRule('CUTTING_EDGE')]
+    #[Rule('GROMRIL')]
+    #[Rule('CUTTING_EDGE')]
     #[SlotMelee]
     case GROMRIL_AXE;
     #[StrengthBonus(+2)]
-    #[SpecialRule('GROMRIL')]
-    #[SpecialRule('HEAVY')]
-    #[SpecialRule('TWO_HANDED')]
+    #[Rule('GROMRIL')]
+    #[Rule('HEAVY')]
+    #[Rule('TWO_HANDED')]
     #[SlotMelee]
     case GROMRIL_FLAIL;
-    #[SpecialRule('GROMRIL')]
+    #[Rule('GROMRIL')]
     #[StrengthBonus(+1)]
-    #[SpecialRule('HEAVY')]
-    #[SpecialRule('DIFFICULT_TO_USE')]
+    #[Rule('HEAVY')]
+    #[Rule('DIFFICULT_TO_USE')]
     #[SlotMelee]
     case GROMRIL_MORNING_STAR;
-    #[SpecialRule('GROMRIL')]
+    #[Rule('GROMRIL')]
     #[StrengthBonus(+1)]
-    #[SpecialRule('TWO_HANDED')]
+    #[Rule('TWO_HANDED')]
     #[SlotMelee]
     case GROMRIL_HALBERD;
-    #[SpecialRule('GROMRIL')]
-    #[SpecialRule('STRIKE_FIRST')]
-    #[SpecialRule('UNWIELDY')]
-    #[SpecialRule('CAVALRY_BONUS')]
+    #[Rule('GROMRIL')]
+    #[Rule('STRIKE_FIRST')]
+    #[Rule('UNWIELDY')]
+    #[Rule('CAVALRY_BONUS')]
     #[SlotMelee]
     case GROMRIL_SPEAR;
-    #[SpecialRule('GROMRIL')]
+    #[Rule('GROMRIL')]
     #[StrengthBonus(+2)]
-    #[SpecialRule('CAVALRY_BONUS')]
+    #[Rule('CAVALRY_BONUS')]
     #[SlotMelee]
     case GROMRIL_LANCE;
-    #[SpecialRule('GROMRIL')]
+    #[Rule('GROMRIL')]
     #[StrengthBonus(+2)]
-    #[SpecialRule('TWO_HANDED')]
-    #[SpecialRule('STRIKE_LAST')]
+    #[Rule('TWO_HANDED')]
+    #[Rule('STRIKE_LAST')]
     #[SlotMelee]
     case GROMRIL_DOUBLE_HANDED_SWORD;
-    #[SpecialRule('GROMRIL')]
+    #[Rule('GROMRIL')]
     #[StrengthBonus(+2)]
-    #[SpecialRule('TWO_HANDED')]
-    #[SpecialRule('STRIKE_LAST')]
+    #[Rule('TWO_HANDED')]
+    #[Rule('STRIKE_LAST')]
     #[SlotMelee]
     case GROMRIL_DOUBLE_HANDED_HAMMER;
-    #[SpecialRule('GROMRIL')]
+    #[Rule('GROMRIL')]
     #[StrengthBonus(+2)]
-    #[SpecialRule('TWO_HANDED')]
-    #[SpecialRule('STRIKE_LAST')]
+    #[Rule('TWO_HANDED')]
+    #[Rule('STRIKE_LAST')]
     #[SlotMelee]
     case GROMRIL_DOUBLE_HANDED_AXE;
 
     #[Warband('SISTERS_OF_SIGMAR')]
     #[Cost(15)]
     #[StrengthBonus(+1)]
-    #[SpecialRule('CONCUSSION')]
-    #[SpecialRule('HOLY_WEAPON')]
+    #[Rule('CONCUSSION')]
+    #[Rule('HOLY_WEAPON')]
     #[SlotMelee]
     case SIGMARITE_WARHAMMER;
     #[Warband('SISTERS_OF_SIGMAR')]
     #[Cost(10)]
-    #[SpecialRule('CANNOT_BE_PARRIED')]
-    #[SpecialRule('WHIPCRACK')]
+    #[Rule('CANNOT_BE_PARRIED')]
+    #[Rule('WHIPCRACK')]
     #[SlotMelee]
     case STEEL_WHIP;
 
@@ -353,47 +350,52 @@ enum Equipment implements EquipmentInterface
     #[Cost(25)]
     #[MaximumRange(8)]
     #[SaveModifier(+1)]
-    #[SpecialRule('POISON')]
-    #[SpecialRule('STEALTHY')]
+    #[Rule('POISON')]
+    #[Rule('STEALTHY')]
     #[SlotRanged]
     case BLOWPIPE;
     #[Warband('SKAVEN')]
     #[Cost(35)]
     #[MaximumRange(5)]
     #[SaveModifier(-3)]
-    #[SpecialRule('PREPARE_SHOT')]
+    #[Rule('PREPARE_SHOT')]
     #[SlotRanged]
     case WARPLOCK_PISTOL;
     #[Warband('SKAVEN')]
     #[Cost(35)]
-    #[SpecialRule('PAIR')]
-    #[SpecialRule('CLIMB')]
-    #[SpecialRule('PARRY')]
-    #[SpecialRule('CUMBERSOME')]
+    #[Rule('PAIR')]
+    #[Rule('CLIMB')]
+    #[Rule('PARRY')]
+    #[Rule('CUMBERSOME')]
     #[SlotMelee]
     case FIGHTING_CLAWS;
 
     #[Warband('SKAVEN')]
     #[Strength(5)]
     #[SaveModifier(-3)]
-    #[SpecialRule('PAIR')]
-    #[SpecialRule('PARRY')]
+    #[Rule('PAIR')]
+    #[Rule('PARRY')]
     #[SlotMelee]
     case ESHIN_FIGHTING_CLAWS;
     #[Warband('SKAVEN')]
     #[Cost(50)]
-    #[SpecialRule('PAIR')]
-    #[SpecialRule('VENOMOUS')]
-    #[SpecialRule('PARRY')]
+    #[Rule('PAIR')]
+    #[Rule('VENOMOUS')]
+    #[Rule('PARRY')]
     #[SlotMelee]
     case WEEPING_BLADES;
 
     #[Warband('HIRED_SWORDS')]
     #[StrengthBonus(+1)]
-    #[SpecialRule('PARRY')]
-    #[SpecialRule('CRITICAL_HIT_ON_5')]
+    #[Rule('PARRY')]
+    #[Rule('CRITICAL_HIT_ON_5')]
     #[SlotMelee]
     case SWORD_IENH_KHAIN;
+
+    #[Warband('HIRED_SWORDS')]
+    #[Rule('PARRY')]
+    #[SlotMelee]
+    case SPIKED_GAUNTLET;
 
     #[SlotMelee]
     case ROPE_AND_HOOK;
@@ -489,7 +491,7 @@ enum Equipment implements EquipmentInterface
     public function getSpecialRules(): array
     {
         $ref = new \ReflectionClassConstant(self::class, $this->name);
-        $classAttributes = $ref->getAttributes(SpecialRule::class);
+        $classAttributes = $ref->getAttributes(Rule::class);
 
         if (count($classAttributes) === 0)
             return [];
@@ -518,7 +520,7 @@ enum Equipment implements EquipmentInterface
         throw new InvalidAttributesException('Invalid attributes for: ' . $this->name);
     }
 
-    public function hasSpecialRule(SpecialRuleInterface $specialRule): bool
+    public function hasSpecialRule(SpecialRule $specialRule): bool
     {
         return in_array($specialRule, $this->getSpecialRules());
     }

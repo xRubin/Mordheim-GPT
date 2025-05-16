@@ -2,14 +2,14 @@
 
 namespace Mordheim\Rule;
 
-use Mordheim\BlankInterface;
+use Mordheim\Blank;
 use Mordheim\Dice;
 use Mordheim\FighterAdvancement;
 use Mordheim\SpecialRule;
 
 class Advancement
 {
-    public static function getAvailableAdvancementsCount(BlankInterface $blank, int $exp): int
+    public static function getAvailableAdvancementsCount(Blank $blank, int $exp): int
     {
         if ($blank->hasSpecialRule(SpecialRule::ANIMAL) || $blank->hasSpecialRule(SpecialRule::UNLIVING))
             return 0;
@@ -45,11 +45,11 @@ class Advancement
         return $points + $specialRules;
     }
 
-    public static function validateAdvancement(BlankInterface $blank, FighterAdvancement $advancement, array $data = []): bool
+    public static function validateAdvancement(Blank $blank, FighterAdvancement $advancement, array $data = []): bool
     {
         switch ($data[0]) {
             case 'roll_spell':
-                return WizardHelper::isWizard($blank) && count(WizardHelper::getUnlearnedSpells($blank, $advancement));
+                return $blank->isWizard() && count($blank->getUnlearnedSpells($advancement));
             case 'select_skill':
                 // Получаем все доступные группы навыков
                 $groups = $blank->getAdvancementSkillGroups();
@@ -77,13 +77,13 @@ class Advancement
                 ];
                 $getter = $limits[$stat];
                 $currentValue = $blank->getCharacteristics()->$getter() + $advancement->getCharacteristics()->$getter();
-                    return $currentValue < $blank->getMaxCharacteristics()->$getter();
+                return $currentValue < $blank->getMaxCharacteristics()->$getter();
             default:
                 return false;
         }
     }
 
-    public static function rollAdvancement(BlankInterface $blank, FighterAdvancement $advancement, int $exp): array
+    public static function rollAdvancement(Blank $blank, FighterAdvancement $advancement, int $exp): array
     {
         do {
             $suggests = array_filter(
