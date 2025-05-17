@@ -2,24 +2,24 @@
 
 namespace Mordheim;
 
-use Mordheim\Data\Attributes\AllowedWarband;
-use Mordheim\Data\Attributes\Characteristics;
-use Mordheim\Data\Attributes\Equipment;
-use Mordheim\Data\Attributes\EquipmentList;
-use Mordheim\Data\Attributes\ExceptWarband;
-use Mordheim\Data\Attributes\Henchman;
-use Mordheim\Data\Attributes\Hero;
-use Mordheim\Data\Attributes\HiredSword;
-use Mordheim\Data\Attributes\HireFee;
-use Mordheim\Data\Attributes\MaxCharacteristics;
-use Mordheim\Data\Attributes\MaxCount;
-use Mordheim\Data\Attributes\MinCount;
-use Mordheim\Data\Attributes\Rating;
-use Mordheim\Data\Attributes\SkillGroup;
-use Mordheim\Data\Attributes\Rule;
-use Mordheim\Data\Attributes\StartExp;
-use Mordheim\Data\Attributes\UpkeepFee;
-use Mordheim\Data\Attributes\Warband;
+use Mordheim\Attributes\AllowedWarband;
+use Mordheim\Attributes\Characteristics;
+use Mordheim\Attributes\Equipment;
+use Mordheim\Attributes\EquipmentList;
+use Mordheim\Attributes\ExceptWarband;
+use Mordheim\Attributes\Henchman;
+use Mordheim\Attributes\Hero;
+use Mordheim\Attributes\HiredSword;
+use Mordheim\Attributes\HireFee;
+use Mordheim\Attributes\MaxCharacteristics;
+use Mordheim\Attributes\MaxCount;
+use Mordheim\Attributes\MinCount;
+use Mordheim\Attributes\Rating;
+use Mordheim\Attributes\Rule;
+use Mordheim\Attributes\SkillGroup;
+use Mordheim\Attributes\StartExp;
+use Mordheim\Attributes\UpkeepFee;
+use Mordheim\Attributes\Warband;
 use Mordheim\Exceptions\InvalidAttributesException;
 
 enum Blank
@@ -397,7 +397,7 @@ enum Blank
     #[Warband('HIRED_SWORDS'), HiredSword, Rating(5)]
     #[ExceptWarband('SKAVEN')]
     #[HireFee(15), UpkeepFee(5)]
-    #[Characteristics(4, 2, 4, 2, 2, 1, 4, 1, 8 ), MaxCharacteristics(4, 5, 7, 3, 3, 3, 8, 4, 10)]
+    #[Characteristics(4, 2, 4, 2, 2, 1, 4, 1, 8), MaxCharacteristics(4, 5, 7, 3, 3, 3, 8, 4, 10)]
     #[MaxCount(1)]
     #[Equipment('BOW'), Equipment('DAGGER'), Equipment('HELMET')]
     #[Rule('COOK')]
@@ -467,7 +467,7 @@ enum Blank
     #[Rule('UNFEELING'), Rule('NO_PAIN'), Rule('UNBLINKING_EYE'), Rule('METALLIC_BODY')]
     case VESKIT;
 
-    public function getWarband(): ?WarbandInterface
+    public function getWarband(): ?\Mordheim\Warband
     {
         $ref = new \ReflectionClassConstant(self::class, $this->name);
         $classAttributes = $ref->getAttributes(Warband::class);
@@ -493,7 +493,7 @@ enum Blank
         if (count($classAttributes))
             return array_values(
                 array_diff(
-                    \Mordheim\Data\Warband::cases(),
+                    \Mordheim\Warband::cases(),
                     array_map(
                         fn($attribute) => $attribute->newInstance()->getValue(),
                         $classAttributes
@@ -501,7 +501,7 @@ enum Blank
                 )
             );
 
-        return \Mordheim\Data\Warband::cases();
+        return \Mordheim\Warband::cases();
     }
 
     public function getHireFee(): int

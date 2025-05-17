@@ -3,7 +3,7 @@
 namespace Mordheim\Spells\LesserMagic;
 
 use Mordheim\Battle;
-use Mordheim\Data\Warband;
+use Mordheim\Warband;
 use Mordheim\Fighter;
 use Mordheim\Ruler;
 use Mordheim\SpecialRule;

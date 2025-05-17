@@ -16,31 +16,13 @@ class AggressiveStrategy extends BaseBattleStrategy
 
     protected function onMovePhase(Battle $battle, Fighter $fighter, array $enemies): void
     {
-        if (empty($enemies)) return;
-
-        $target = $this->getNearestEnemy($fighter, $enemies);
-
-        if (Ruler::isAdjacent($fighter, $target))
-            return;
-
-        if (!$this->spentCharge) {
-            try {
-                $battle->getActiveCombats()->add(
-                    Charge::attempt($battle, $fighter, $target, $this->aggressiveness)
-                );
-                $this->spentCharge = true;
-                $this->spentShoot = true;
-                $this->spentMagic = true;
-                return;
-            } catch (ChargeFailedException $e) {
-            }
-        }
-
-        try {
-            \Mordheim\Rule\Move::runIfNoEnemies($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
-            $this->spentShoot = true;
-        } catch (MoveRunDeprecatedException $e) {
-            \Mordheim\Rule\Move::common($battle, $fighter, $target->getState()->getPosition(), $this->aggressiveness);
+        foreach ([
+                     new PhaseMove\ChargeBlock($this, 'nearest', 0.8),
+                     new PhaseMove\RunBlock($this, 'nearest', 0.8),
+                     new PhaseMove\MoveBlock($this, 'nearest', 0.8),
+                 ] as $block) {
+            if ($block()($battle, $fighter))
+                break;
         }
     }
 

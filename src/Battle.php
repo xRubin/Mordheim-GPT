@@ -19,10 +19,10 @@ class Battle
     protected int $turn = 1;
     /** @var CloseCombatCollection */
     protected CloseCombatCollection $activeCombats;
-    /** @var Warband[] */
-    protected array $warbands = [];
+    /** @var Band[] */
+    protected array $bands = [];
     /** @var int Индекс активной банды */
-    protected int $activeWarbandIndex = 0;
+
     /**
      * Активные заклинания на поле боя
      * @var SplObjectStorage<Fighter, Spell[]>
@@ -32,7 +32,7 @@ class Battle
     public function __construct(GameField $field, array $warbands)
     {
         $this->field = $field;
-        $this->warbands = $warbands;
+        $this->bands = $warbands;
         $this->activeCombats = new CloseCombatCollection();
         $this->activeSpells = new SplObjectStorage();
         foreach ($warbands as $wb) {
@@ -84,20 +84,20 @@ class Battle
     public function playTurn(): void
     {
         \Mordheim\BattleLogger::add("Ход #{$this->turn}");
-        $actWarbands = $this->warbands;
-        \Mordheim\BattleLogger::add("[DEBUG][Battle] in battle: " . implode(', ', array_map(fn(Warband $warband) => $warband->name . "\n[" . implode(', ', array_map(fn(Fighter $fighter) => $fighter->getName() . " ({$fighter->getState()->getStatus()->name})", $warband->fighters)) . "]", $actWarbands)));
+        $actWarbands = $this->bands;
+        \Mordheim\BattleLogger::add("[DEBUG][Battle] in battle: " . implode(', ', array_map(fn(Band $band) => $band->name . "\n[" . implode(', ', array_map(fn(Fighter $fighter) => $fighter->getName() . " ({$fighter->getState()->getStatus()->name})", $band->fighters)) . "]", $actWarbands)));
         $routed = [];
 
         foreach ($actWarbands as $warband) {
             foreach ($warband->fighters as $fighter) {
-                if (!RecoveryPhase::applyPsychology($this, $fighter, $warband, $this->warbands)) {
+                if (!RecoveryPhase::applyPsychology($this, $fighter, $warband, $this->bands)) {
                     $fighter->getState()->getBattleStrategy()->spentAll();
                 }
             }
         }
 
         foreach ($actWarbands as $warband) {
-            if (!RecoveryPhase::applyRoutTest($warband, $this->warbands)) {
+            if (!RecoveryPhase::applyRoutTest($warband)) {
                 $routed[] = $warband;
                 $this->phaseMove($warband);
             }
@@ -125,10 +125,10 @@ class Battle
     /**
      * Фаза движения
      */
-    protected function phaseMove(Warband $warband): void
+    protected function phaseMove(Band $band): void
     {
-        \Mordheim\BattleLogger::add("Фаза движения: {$warband->name}");
-        foreach ($warband->fighters as $fighter) {
+        \Mordheim\BattleLogger::add("Фаза движения: {$band->name}");
+        foreach ($band->fighters as $fighter) {
             $status = $fighter->getState()->getStatus();
             if ($status === Status::PANIC) {
                 foreach ($this->activeCombats->getByFighter($fighter) as $combat)
@@ -189,14 +189,14 @@ class Battle
     /**
      * Фаза стрельбы
      */
-    protected function phaseShoot(Warband $warband): void
+    protected function phaseShoot(Band $band): void
     {
-        \Mordheim\BattleLogger::add("Фаза стрельбы: {$warband->name}");
-        foreach ($warband->fighters as $fighter) {
+        \Mordheim\BattleLogger::add("Фаза стрельбы: {$band->name}");
+        foreach ($band->fighters as $fighter) {
             foreach ($fighter->getState()->getActiveSpells() as $spell)
                 $spell->getProcessor()?->onPhaseShoot($this, $fighter);
         }
-        foreach ($warband->fighters as $fighter) {
+        foreach ($band->fighters as $fighter) {
             if ($fighter->getState()->getStatus()->canAct()) {
                 $enemies = $this->getEnemiesFor($fighter);
                 $fighter->getState()->getBattleStrategy()->shootPhase($this, $fighter, $enemies);
@@ -207,10 +207,10 @@ class Battle
     /**
      * Фаза магии
      */
-    protected function phaseMagic(Warband $warband): void
+    protected function phaseMagic(Band $band): void
     {
-        \Mordheim\BattleLogger::add("Фаза магии: {$warband->name}");
-        foreach ($warband->fighters as $fighter) {
+        \Mordheim\BattleLogger::add("Фаза магии: {$band->name}");
+        foreach ($band->fighters as $fighter) {
             if ($fighter->getState()->getStatus()->canAct()) {
                 $enemies = $this->getEnemiesFor($fighter);
                 $fighter->getState()->getBattleStrategy()->magicPhase($this, $fighter, $enemies);
@@ -281,7 +281,7 @@ class Battle
     public function getEnemiesFor(Fighter $target): array
     {
         $enemies = [];
-        foreach ($this->warbands as $wb) {
+        foreach ($this->bands as $wb) {
             foreach ($wb->fighters as $fighter) {
                 if ($fighter !== $target && $fighter->getState()->getStatus()->canAct() && !$this->isAlly($target, $fighter)) {
                     $enemies[] = $fighter;
@@ -299,7 +299,7 @@ class Battle
     public function getAlliesFor(Fighter $target): array
     {
         $allies = [];
-        foreach ($this->warbands as $wb) {
+        foreach ($this->bands as $wb) {
             foreach ($wb->fighters as $fighter) {
                 if ($fighter !== $target && $fighter->getState()->getStatus()->canAct() && $this->isAlly($target, $fighter)) {
                     $allies[] = $fighter;
@@ -314,7 +314,7 @@ class Battle
      */
     public function isAlly(Fighter $a, Fighter $b): bool
     {
-        foreach ($this->warbands as $wb) {
+        foreach ($this->bands as $wb) {
             if (in_array($a, $wb->fighters, true) && in_array($b, $wb->fighters, true)) {
                 return true;
             }

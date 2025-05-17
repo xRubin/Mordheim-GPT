@@ -165,13 +165,14 @@ class Fighter
      */
     public function getMovementWeights(): callable
     {
-        return function ($dx, $dy, $dz) {
+        return function (FieldCell $from, FieldCell $to, $dx, $dy, $dz): float {
+            $multiplier = $to->water ? 5.0 : 1.0;
             if ($dz !== 0) {
-                if ($this->hasSpecialRule(SpecialRule::SCALE_SHEER_SURFACES)) return abs(1.0 * $dz);
-                return abs(2.0 * $dz);
+                if ($this->hasSpecialRule(SpecialRule::SCALE_SHEER_SURFACES)) return abs($multiplier * $dz);
+                return abs($multiplier * 2 * $dz);
             }
-            if ($dx !== 0 && $dy !== 0) return 0.7 * (abs($dx) + abs($dy));
-            return abs($dx) + abs($dy) + abs($dz);
+            if ($dx !== 0 && $dy !== 0) return $multiplier * 0.7 * (abs($dx) + abs($dy));
+            return $multiplier * (abs($dx) + abs($dy) + abs($dz));
         };
     }
 
@@ -280,6 +281,11 @@ class Fighter
         }
 
         return Equipment::FIST;
+    }
+
+    public function getRating():int
+    {
+        return $this->getBlank()->getRating() + $this->getAdvancement()->getExp();
     }
 }
 

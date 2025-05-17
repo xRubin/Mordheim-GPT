@@ -5,10 +5,6 @@ Status: Stupidity
 
 Status: Fear
 
-выбрать написание Armor/Armour
-
-Magic of the Horned rat
-
 ## Вопросы к правилам:
 Remove close combats before magic move ? punch on flee?
 

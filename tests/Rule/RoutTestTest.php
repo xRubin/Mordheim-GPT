@@ -2,7 +2,7 @@
 
 use Mordheim\Status;
 use Mordheim\Strategy\AggressiveStrategy;
-use Mordheim\Warband;
+use Mordheim\Band;
 
 class RoutTestTest extends MordheimTestCase
 {
@@ -71,7 +71,7 @@ class RoutTestTest extends MordheimTestCase
             $this->makeLeader(),
             $this->makeFighter(),
         ];
-        $warband = new Warband('Test', $fighters);
+        $warband = new Band('Test', $fighters);
         $result = \Mordheim\Rule\RoutTest::apply($warband);
         $this->assertFalse($result, 'Rout test должен провалиться при 50% OOA');
     }
@@ -85,7 +85,7 @@ class RoutTestTest extends MordheimTestCase
             $this->makeFighter(),
             $this->makeFighter(Status::OUT_OF_ACTION),
         ];
-        $warband = new Warband('Test', $fighters);
+        $warband = new Band('Test', $fighters);
         $result = \Mordheim\Rule\RoutTest::apply($warband);
         $this->assertTrue($result, 'Rout test должен пройти при 25% OOA');
     }

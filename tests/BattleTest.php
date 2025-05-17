@@ -3,7 +3,7 @@
 use Mordheim\Battle;
 use Mordheim\CloseCombat;
 use Mordheim\GameField;
-use Mordheim\Warband;
+use Mordheim\Band;
 use PHPUnit\Framework\TestCase;
 
 class BattleTest extends TestCase
@@ -12,8 +12,8 @@ class BattleTest extends TestCase
     {
         // Простое поле 3x3x1
         $field = new GameField(3, 3, 1);
-        $warband1 = new Warband('WB1');
-        $warband2 = new Warband('WB2');
+        $warband1 = new Band('WB1');
+        $warband2 = new Band('WB2');
         $f1 = new \Mordheim\Fighter(
             Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
@@ -60,7 +60,7 @@ class BattleTest extends TestCase
     public function testRunAwayInPanic_CenterGoesToNearestEdge()
     {
         $field = new \Mordheim\GameField(5, 5, 1);
-        $warband = new \Mordheim\Warband('WB');
+        $warband = new \Mordheim\Band('WB');
         $fighter = new \Mordheim\Fighter(
             Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
@@ -78,7 +78,7 @@ class BattleTest extends TestCase
     public function testRunAwayInPanic_LeftEdgeStaysOrMovesAlongEdge()
     {
         $field = new \Mordheim\GameField(5, 5, 1);
-        $warband = new \Mordheim\Warband('WB');
+        $warband = new \Mordheim\Band('WB');
         $fighter = new \Mordheim\Fighter(
             Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
@@ -95,7 +95,7 @@ class BattleTest extends TestCase
     public function testRunAwayInPanic_TopEdgeStaysOrMovesAlongEdge()
     {
         $field = new \Mordheim\GameField(5, 5, 1);
-        $warband = new \Mordheim\Warband('WB');
+        $warband = new \Mordheim\Band('WB');
         $fighter = new \Mordheim\Fighter(
             Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),
@@ -112,7 +112,7 @@ class BattleTest extends TestCase
     public function testRunAwayInPanic_RightEdgeStaysOrMovesAlongEdge()
     {
         $field = new \Mordheim\GameField(5, 5, 1);
-        $warband = new \Mordheim\Warband('WB');
+        $warband = new \Mordheim\Band('WB');
         $fighter = new \Mordheim\Fighter(
             Mordheim\Blank::REIKLAND_CHAMPION,
             \Mordheim\FighterAdvancement::empty(),

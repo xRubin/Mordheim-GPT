@@ -6,7 +6,7 @@ use Mordheim\Equipment;
 use Mordheim\GameField;
 use Mordheim\SpecialRule;
 use Mordheim\Strategy\AggressiveStrategy;
-use Mordheim\Warband;
+use Mordheim\Band;
 
 class FighterMeleeTest extends MordheimTestCase
 {
@@ -50,8 +50,8 @@ class FighterMeleeTest extends MordheimTestCase
         return new Battle(
             new GameField(),
             [
-                new Warband('Attackers', $attackerFighters),
-                new Warband('Defenders', $defenderFighters)
+                new Band('Attackers', $attackerFighters),
+                new Band('Defenders', $defenderFighters)
             ]
         );
     }

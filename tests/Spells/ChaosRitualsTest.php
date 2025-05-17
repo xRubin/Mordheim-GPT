@@ -90,8 +90,8 @@ class ChaosRitualsTest extends MordheimTestCase
         $battle = new Battle(
             new \Mordheim\GameField(),
             [
-                new \Mordheim\Warband('Attackers', [$mage]),
-                new \Mordheim\Warband('Defenders', [$enemy])
+                new \Mordheim\Band('Attackers', [$mage]),
+                new \Mordheim\Band('Defenders', [$enemy])
             ]
         );
         \Mordheim\Dice::setTestRolls([6, 6]);

@@ -118,7 +118,7 @@ class PathFinder
      * @param GameField $field
      * @param array $start [x,y,z]
      * @param array $goal [x,y,z]
-     * @param callable $weights функция весов движения (dx, dy, dz) => float
+     * @param callable $weights функция весов движения (from, to, dx, dy, dz) => float
      * @param float $aggressiveness агрессивность бойца (0-1), заменяет броски кубика
      * @param array $blockers массив позиций [[x,y,z], ...]
      * @return array|null путь в виде массива [['pos'=>[x,y,z], 'cost'=>float], ...] или null если нет пути
@@ -165,16 +165,16 @@ class PathFinder
                 if ($dz === 1) {
                     if ($dx !== 0 || $dy !== 0) continue;
                     if (!$fromCell->ladder || $cell->obstacle) continue;
-                    $moveCost = $weights($dx, $dy, $dz);
+                    $moveCost = $weights($fromCell, $cell, $dx, $dy, $dz);
                 } else if ($dz === 0) {
                     if ($cell->obstacle) continue;
-                    $moveCost = $weights($dx, $dy, $dz);
+                    $moveCost = $weights($fromCell, $cell, $dx, $dy, $dz);
                 } else if ($dz === -1) {
                     if ($fromCell->ladder && !$cell->obstacle) {
-                        $moveCost = $weights($dx, $dy, $dz);
+                        $moveCost = $weights($fromCell, $cell, $dx, $dy, $dz);
                     } else {
                         if (!self::canJumpUpDown($field, [$x, $y, $z], [$nx, $ny, $nz]) || $aggressiveness < 0.9) continue;
-                        $moveCost = $weights($dx, $dy, $dz) * 1.0;
+                        $moveCost = $weights($fromCell, $cell, $dx, $dy, $dz);
                     }
                 } else {
                     continue;
@@ -205,7 +205,7 @@ class PathFinder
                 }
                 if ($field->isOutOfBounds($nx, $ny, $nz) || self::isBlocked($blockSet, [$nx, $ny, $nz])) continue;
                 if (!self::canClimb($field, [$x, $y, $z], [$nx, $ny, $nz])) continue;
-                $moveCost = $weights($dx, $dy, $dz) * 2; // лазание обычно дороже обычного шага
+                $moveCost = $weights($field->getCell($x, $y, $z), $field->getCell($nx, $ny, $nz), $dx, $dy, $dz);
                 $newCost = $currCost + $moveCost;
                 $key = self::getCostKey([$nx, $ny, $nz]);
                 if (isset($costSoFar[$key]) && $newCost >= $costSoFar[$key]) continue;
@@ -232,7 +232,7 @@ class PathFinder
                     }
                     if ($field->isOutOfBounds($nx, $ny, $nz) || self::isBlocked($blockSet, [$nx, $ny, $nz])) continue;
                     if (!self::canJumpOverGap($field, [$x, $y, $z], [$nx, $ny, $nz])) continue;
-                    $moveCost = $weights($dx * $len, $dy * $len, 0) * 2.0; // стоимость прыжка через gap (можно скорректировать)
+                    $moveCost = $weights($field->getCell($x, $y, $z), $field->getCell($nx, $ny, $nz), $dx * $len, $dy * $len, 0);
                     $newCost = $currCost + $moveCost;
                     $key = self::getCostKey([$nx, $ny, $nz]);
                     if (isset($costSoFar[$key]) && $newCost >= $costSoFar[$key]) continue;

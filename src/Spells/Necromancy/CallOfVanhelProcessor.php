@@ -6,7 +6,6 @@ use Mordheim\Battle;
 use Mordheim\Blank;
 use Mordheim\Exceptions\ChargeFailedException;
 use Mordheim\Fighter;
-use Mordheim\Rule\Charge;
 use Mordheim\Rule\Move;
 use Mordheim\Ruler;
 use Mordheim\Spell;
@@ -44,7 +43,7 @@ class CallOfVanhelProcessor extends BaseSpellProcessor
         \Mordheim\BattleLogger::add("{$target->getName()} получает дополнительное движение от {$this->spell->name}.");
         try {
             $battle->getActiveCombats()->add(
-                Charge::attempt($battle, $target, $enemies[0], 0.4)
+                Move::charge($battle, $target, $enemies[0], 0.4)
             );
         } catch (ChargeFailedException $e) {
             Move::common($battle, $target, $enemies[0]->getState()->getPosition(), 0.4);

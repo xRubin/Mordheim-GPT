@@ -2,18 +2,18 @@
 
 namespace Mordheim;
 
-use Mordheim\Data\Attributes\Cost;
-use Mordheim\Data\Attributes\MaximumRange;
-use Mordheim\Data\Attributes\Rule;
-use Mordheim\Data\Attributes\SaveModifier;
-use Mordheim\Data\Attributes\SlotArmour;
-use Mordheim\Data\Attributes\SlotHelmet;
-use Mordheim\Data\Attributes\SlotMelee;
-use Mordheim\Data\Attributes\SlotMisc;
-use Mordheim\Data\Attributes\SlotRanged;
-use Mordheim\Data\Attributes\Strength;
-use Mordheim\Data\Attributes\StrengthBonus;
-use Mordheim\Data\Attributes\Warband;
+use Mordheim\Attributes\Cost;
+use Mordheim\Attributes\MaximumRange;
+use Mordheim\Attributes\Rule;
+use Mordheim\Attributes\SaveModifier;
+use Mordheim\Attributes\SlotArmour;
+use Mordheim\Attributes\SlotHelmet;
+use Mordheim\Attributes\SlotMelee;
+use Mordheim\Attributes\SlotMisc;
+use Mordheim\Attributes\SlotRanged;
+use Mordheim\Attributes\Strength;
+use Mordheim\Attributes\StrengthBonus;
+use Mordheim\Attributes\Warband;
 use Mordheim\Exceptions\InvalidAttributesException;
 
 enum Equipment

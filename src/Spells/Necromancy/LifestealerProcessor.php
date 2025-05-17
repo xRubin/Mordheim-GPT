@@ -4,7 +4,7 @@ namespace Mordheim\Spells\Necromancy;
 
 use Mordheim\Battle;
 use Mordheim\Blank;
-use Mordheim\Data\Warband;
+use Mordheim\Warband;
 use Mordheim\Fighter;
 use Mordheim\Rule\Injuries;
 use Mordheim\Ruler;

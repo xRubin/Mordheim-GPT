@@ -6,6 +6,7 @@ use Mordheim\Battle;
 use Mordheim\CloseCombat;
 use Mordheim\Fighter;
 use Mordheim\Rule\Charge;
+use Mordheim\Rule\Move;
 use Mordheim\Ruler;
 use Mordheim\Spell;
 use Mordheim\Spells\BaseSpellProcessor;
@@ -34,7 +35,7 @@ class BlackFuryProcessor extends BaseSpellProcessor
             return null;
         }
 
-        $adj = Charge::getNearestChargePosition($battle, $caster, $target);
+        $adj = Move::getNearestChargePosition($battle, $caster, $target);
         if (empty($adj)) {
             \Mordheim\BattleLogger::add("Нет свободных клеток рядом с врагом для {$this->spell->name}.");
             return null;

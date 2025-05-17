@@ -7,18 +7,12 @@ class GameField
     private array $cells = [];
 
     public function __construct(
-        private int $width = 64,
-        private int $length = 64,
-        private int $height = 4,
+        private readonly int $width = 48,
+        private readonly int $length = 48,
+        private readonly int $height = 4,
     )
     {
-        for ($x = 0; $x < $this->width; $x++) {
-            for ($y = 0; $y < $this->length; $y++) {
-                for ($z = 0; $z < $this->height; $z++) {
-                    $this->cells[$x][$y][$z] = new FieldCell();
-                }
-            }
-        }
+
     }
 
     public function getCell(int $x, int $y, int $z): ?FieldCell
@@ -29,7 +23,7 @@ class GameField
         if (isset($this->cells[$x][$y][$z])) {
             return $this->cells[$x][$y][$z];
         }
-        return new FieldCell(); // obstacle=false по умолчанию
+        return new FieldCell($z); // obstacle=false по умолчанию
     }
 
     public function setCell(int $x, int $y, int $z, FieldCell $cell): void

@@ -10,13 +10,13 @@ use Mordheim\Equipment;
 use Mordheim\EquipmentManager;
 use Mordheim\GameField;
 use Mordheim\Strategy\AggressiveStrategy;
-use Mordheim\Warband;
+use Mordheim\Band;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $field = new GameField();
 $battle = new Battle($field, [
-    new Warband('MARIENBURG', [
+    new Band('MARIENBURG', [
         new \Mordheim\Fighter(
             Mordheim\Blank::MARIENBURG_MERCENARY_CAPTAIN,
             \Mordheim\FighterAdvancement::empty(),
@@ -58,7 +58,7 @@ $battle = new Battle($field, [
             )
         ),
     ]),
-    new Warband('MIDDENHEIM', [
+    new Band('MIDDENHEIM', [
         new \Mordheim\Fighter(
             Mordheim\Blank::MIDDENHEIM_MERCENARY_CAPTAIN,
             \Mordheim\FighterAdvancement::empty(),
@@ -102,7 +102,7 @@ $battle = new Battle($field, [
     ])
 ]);
 
-for ($turn = 1; $turn <= 6; ++$turn) {
+for ($turn = 1; $turn <= 8; ++$turn) {
     BattleLogger::clear();
     $battle->playTurn();
     BattleLogger::print();

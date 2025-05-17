@@ -3,7 +3,7 @@
 namespace Mordheim\Spells\PrayersOfSigmar;
 
 use Mordheim\Battle;
-use Mordheim\Data\Warband;
+use Mordheim\Warband;
 use Mordheim\Equipment;
 use Mordheim\Fighter;
 use Mordheim\Rule\Attack;

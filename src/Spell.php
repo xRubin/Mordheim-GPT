@@ -2,10 +2,10 @@
 
 namespace Mordheim;
 
-use Mordheim\Data\Attributes\Difficulty;
-use Mordheim\Data\Attributes\SpellProcessor;
-use Mordheim\Data\Attributes\StateRule;
-use Mordheim\Data\Attributes\WizardRule;
+use Mordheim\Attributes\Difficulty;
+use Mordheim\Attributes\SpellProcessor;
+use Mordheim\Attributes\StateRule;
+use Mordheim\Attributes\WizardRule;
 use Mordheim\Exceptions\InvalidAttributesException;
 
 enum Spell

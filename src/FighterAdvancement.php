@@ -8,6 +8,7 @@ class FighterAdvancement
         private Characteristics $characteristics,
         private array           $specialRules = [],
         private array           $spells = [], // WizardSpell[]
+        private int             $exp = 0,
     )
     {
 
@@ -64,5 +65,10 @@ class FighterAdvancement
     {
         $this->spells = array_unique(array_merge($this->spells, [$spell]));
         return $this;
+    }
+
+    public function getExp(): int
+    {
+        return $this->exp;
     }
 }

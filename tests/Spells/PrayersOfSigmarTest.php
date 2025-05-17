@@ -52,7 +52,7 @@ class PrayersOfSigmarTest extends MordheimTestCase
         $fighter = $this->makeFighterWithSpell(Spell::HEARTS_OF_STEEL);
         $target = $this->makeFighterWithSpell(Spell::HAMMER_OF_SIGMAR, [1, 0, 0]);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Sigmar', [$fighter, $target])
+            new \Mordheim\Band('Sigmar', [$fighter, $target])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6]);
         $result = Spell::HEARTS_OF_STEEL->getProcessor()->onPhaseMagic($battle, $fighter);
@@ -68,7 +68,7 @@ class PrayersOfSigmarTest extends MordheimTestCase
         $target->getState()->modifyWounds(-1);
         $target->getState()->setStatus(Status::STUNNED);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Sigmar', [$fighter, $target])
+            new \Mordheim\Band('Sigmar', [$fighter, $target])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6]);
         $result = Spell::HEALING_HAND->getProcessor()->onPhaseMagic($battle, $fighter);

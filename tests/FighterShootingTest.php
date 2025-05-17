@@ -7,7 +7,7 @@ use Mordheim\Fighter;
 use Mordheim\GameField;
 use Mordheim\Rule\Attack;
 use Mordheim\SpecialRule;
-use Mordheim\Warband;
+use Mordheim\Band;
 use PHPUnit\Framework\TestCase;
 
 class FighterShootingTest extends TestCase
@@ -18,8 +18,8 @@ class FighterShootingTest extends TestCase
         return new Battle(
             new GameField(),
             [
-                new Warband('Shooters', $shooterFighters),
-                new Warband('Targets', $targetFighters)
+                new Band('Shooters', $shooterFighters),
+                new Band('Targets', $targetFighters)
             ]
         );
     }

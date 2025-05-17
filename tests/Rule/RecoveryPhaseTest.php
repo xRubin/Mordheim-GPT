@@ -2,7 +2,7 @@
 
 use Mordheim\Status;
 use Mordheim\Strategy\AggressiveStrategy;
-use Mordheim\Warband;
+use Mordheim\Band;
 
 class RecoveryPhaseTest extends MordheimTestCase
 {
@@ -49,9 +49,9 @@ class RecoveryPhaseTest extends MordheimTestCase
             $this->makeFighter(),
             $this->makeFighter(Status::OUT_OF_ACTION),
         ];
-        $warband = new Warband('Test', $fighters);
+        $warband = new Band('Test', $fighters);
         \Mordheim\Dice::setTestRolls([2]);
-        $result = \Mordheim\Rule\RecoveryPhase::applyRoutTest($warband, [$warband]);
+        $result = \Mordheim\Rule\RecoveryPhase::applyRoutTest($warband);
         $this->assertFalse($result);
         $this->assertEquals(Status::PANIC, $fighters[0]->getState()->getStatus());
         $this->assertEquals(Status::PANIC, $fighters[1]->getState()->getStatus());
@@ -62,7 +62,7 @@ class RecoveryPhaseTest extends MordheimTestCase
     public function testApplyPsychologyPanicRecovery()
     {
         $fighter = $this->makeFighter(Status::PANIC);
-        $warband = new Warband('Test', [$fighter]);
+        $warband = new Band('Test', [$fighter]);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
             $warband
         ]);
@@ -76,7 +76,7 @@ class RecoveryPhaseTest extends MordheimTestCase
     public function testApplyPsychologyPanicFail()
     {
         $fighter = $this->makeFighter(Status::PANIC);
-        $warband = new Warband('Test', [$fighter]);
+        $warband = new Band('Test', [$fighter]);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
             $warband
         ]);

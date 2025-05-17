@@ -6,7 +6,7 @@ use Mordheim\Battle;
 use Mordheim\Fighter;
 use Mordheim\Ruler;
 use Mordheim\SpecialRule;
-use Mordheim\Warband;
+use Mordheim\Band;
 
 class RecoveryPhase
 {
@@ -14,7 +14,7 @@ class RecoveryPhase
      * Проверка теста на бегство для банды
      * @return bool true — если тест пройден, false — если не пройден (все в PANIC)
      */
-    public static function applyRoutTest(Warband $warband, array $warbands): bool
+    public static function applyRoutTest(Band $warband): bool
     {
         if (!RoutTest::apply($warband)) {
             // Если банда не прошла тест на бегство, все бойцы в PANIC
@@ -33,14 +33,14 @@ class RecoveryPhase
      * Применяет психологические проверки к бойцу
      * @return bool true — если боец может действовать после всех проверок
      */
-    public static function applyPsychology(Battle $battle, Fighter $fighter, Warband $warband, array $warbands): bool
+    public static function applyPsychology(Battle $battle, Fighter $fighter, Band $band, array $warbands): bool
     {
         if (!$fighter->getState()->getStatus()->isAlive()) return false;
         foreach ($fighter->getState()->getActiveSpells() as $spell)
             $spell->getProcessor()?->onPhaseRecovery($battle, $fighter);
         // --- PANIC recovery ---
         if ($fighter->getState()->getStatus() === \Mordheim\Status::PANIC) {
-            if (Psychology::leadershipTest($fighter, $warband->fighters)) {
+            if (Psychology::leadershipTest($fighter, $band->fighters)) {
                 $fighter->getState()->setStatus(\Mordheim\Status::STANDING);
                 \Mordheim\BattleLogger::add("{$fighter->getName()} преодолел панику и возвращается в бой!");
                 // TODO: в этот ход может только колдовать
@@ -51,10 +51,10 @@ class RecoveryPhase
         }
         // --- All Alone ---
         if ($fighter->getState()->getStatus() === \Mordheim\Status::STANDING) {
-            $allies = $warband->fighters;
+            $allies = $band->fighters;
             $enemies = [];
             foreach ($warbands as $otherWb) {
-                if ($otherWb !== $warband) {
+                if ($otherWb !== $band) {
                     foreach ($otherWb->fighters as $enemyFighter) {
                         if ($enemyFighter->getState()->getStatus()->isAlive()) $enemies[] = $enemyFighter;
                     }
@@ -73,7 +73,7 @@ class RecoveryPhase
         }
         // --- Stupidity ---
         if ($fighter->hasSpecialRule(SpecialRule::STUPIDITY) && $fighter->getState()->getStatus() === \Mordheim\Status::STANDING) {
-            if (!Psychology::leadershipTest($fighter, $warband->fighters)) {
+            if (!Psychology::leadershipTest($fighter, $band->fighters)) {
                 \Mordheim\BattleLogger::add("{$fighter->getName()} не прошёл тест тупости и стоит без дела!");
                 return false;
             } else {
@@ -83,7 +83,7 @@ class RecoveryPhase
         // --- Fear ---
         $enemies = [];
         foreach ($warbands as $otherWb) {
-            if ($otherWb !== $warband) {
+            if ($otherWb !== $band) {
                 foreach ($otherWb->fighters as $enemyFighter) {
                     if ($enemyFighter->getState()->getStatus()->isAlive()) $enemies[] = $enemyFighter;
                 }
@@ -91,7 +91,7 @@ class RecoveryPhase
         }
         foreach ($enemies as $enemy) {
             if ($enemy->hasSpecialRule(SpecialRule::CAUSE_FEAR) && Ruler::distance($fighter, $enemy) <= 8) {
-                if (!Psychology::testFear($fighter, $enemy, $warband->fighters))
+                if (!Psychology::testFear($fighter, $enemy, $band->fighters))
                     return false;
             }
         }

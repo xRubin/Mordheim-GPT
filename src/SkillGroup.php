@@ -13,7 +13,7 @@ enum SkillGroup
     case SPEED;
     case SPECIAL;
 
-    public function getSpecialRules(WarbandInterface $warband): array
+    public function getSpecialRules(Blank $blank): array
     {
         return match ($this) {
             self::COMBAT => [
@@ -60,7 +60,38 @@ enum SkillGroup
                 SpecialRule::DODGE,
                 SpecialRule::SCALE_SHEER_SURFACES,
             ],
-            self::SPECIAL => [],
+            self::SPECIAL => $this->getSpecialSkills($blank),
+        };
+    }
+
+    private function getSpecialSkills(Blank $blank): array
+    {
+        return match ($blank->getWarband()) {
+            Warband::SISTERS_OF_SIGMAR => [
+                SpecialRule::SIGN_OF_SIGMAR,
+                SpecialRule::PROTECTION_OF_SIGMAR,
+                SpecialRule::UTTER_DETERMINATION,
+                SpecialRule::RIGHTEOUS_FURY,
+                SpecialRule::ABSOLUTE_FAITH,
+            ],
+            Warband::SKAVEN => [
+                SpecialRule::BLACK_HUNGER,
+                SpecialRule::TAIL_FIGHTING,
+                SpecialRule::WALL_RUNNER,
+                SpecialRule::INFILTRATION,
+                SpecialRule::ART_OF_SILENT_DEATH,
+            ],
+            Warband::HIRED_SWORDS => match ($blank) {
+                Blank::ELF_RANGER => [
+                    SpecialRule::SEEKER,
+                    SpecialRule::EXCELLENT_SIGHT,
+                ],
+                Blank::DWARF_TROLL_SLAYER => [
+                    SpecialRule::DEATHWISH,
+                    SpecialRule::HARD_TO_KILL,
+                    SpecialRule::HARD_HEAD
+                ]
+            }
         };
     }
 }

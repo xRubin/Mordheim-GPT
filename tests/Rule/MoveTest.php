@@ -3,7 +3,7 @@
 use Mordheim\Battle;
 use Mordheim\GameField;
 use Mordheim\SpecialRule;
-use Mordheim\Warband;
+use Mordheim\Band;
 use Mordheim\Fighter;
 
 class MoveTest extends MordheimTestCase
@@ -19,7 +19,7 @@ class MoveTest extends MordheimTestCase
             new \Mordheim\FighterState($pos, $this->createMock(\Mordheim\BattleStrategyInterface::class), 1)
         );
         $fighterMock->method('getName')->willReturn('TestFighter');
-        $fighterMock->method('getMovementWeights')->willReturn(function ($dx, $dy, $dz) {
+        $fighterMock->method('getMovementWeights')->willReturn(function (\Mordheim\FieldCell $from, \Mordheim\FieldCell $to, $dx, $dy, $dz): float {
             if ($dz !== 0) return abs(2.0 * $dz);
             if ($dx !== 0 && $dy !== 0) return 0.7 * (abs($dx) + abs($dy));
             return abs($dx) + abs($dy) + abs($dz);
@@ -37,20 +37,18 @@ class MoveTest extends MordheimTestCase
         return new Battle(
             new GameField(),
             [
-                new Warband('Attackers', $attackerFighters),
-                new Warband('Defenders', $defenderFighters)
+                new Band('Attackers', $attackerFighters),
+                new Band('Defenders', $defenderFighters)
             ]
         );
     }
 
     public function testMoveThroughWaterInitiativeSuccess()
     {
-        $waterCell = new \Mordheim\FieldCell();
-        $waterCell->water = true;
         $fighter = $this->makeFighterMock([0, 0, 0], 3, 5);
         \Mordheim\Dice::setTestRolls([4]);
         $battle = $this->makeClearBattle([$fighter], []);
-        $battle->getField()->setCell(1, 0, 0, $waterCell);
+        $battle->getField()->setCell(1, 0, 0,  new \Mordheim\FieldCell(0, water: true));
         \Mordheim\Rule\Move::common($battle, $fighter, [2, 0, 0], 1.0);
         $this->assertEquals([2, 0, 0], $fighter->getState()->getPosition(), 'Боец должен пройти через воду при успешном броске');
         $logs = \Mordheim\BattleLogger::getAll();
@@ -59,12 +57,10 @@ class MoveTest extends MordheimTestCase
 
     public function testMoveThroughWaterInitiativeFail()
     {
-        $waterCell = new \Mordheim\FieldCell();
-        $waterCell->water = true;
         $fighter = $this->makeFighterMock([0, 0, 0], 3, 3);
         \Mordheim\Dice::setTestRolls([5]);
         $battle = $this->makeClearBattle([$fighter], []);
-        $battle->getField()->setCell(1, 0, 0, $waterCell);
+        $battle->getField()->setCell(1, 0, 0,  new \Mordheim\FieldCell(0, water: true));
         try {
             \Mordheim\Rule\Move::common($battle, $fighter, [2, 0, 0], 1.0);
             $this->fail('Ожидалось исключение MoveInitiativeRollFailedException');
@@ -104,12 +100,10 @@ class MoveTest extends MordheimTestCase
 
     public function testMoveAdvancedTowardsNoPath()
     {
-        $cell = new \Mordheim\FieldCell();
-        $cell->obstacle = true;
         $fighter = $this->makeFighterMock([0, 0, 0], 3);
         $target = [2, 0, 0];
         $battle = $this->makeClearBattle([$fighter], []);
-        $battle->getField()->setCell(1, 0, 0, $cell);
+        $battle->getField()->setCell(1, 0, 0, new \Mordheim\FieldCell(0, obstacle: true));
         \Mordheim\Rule\Move::common($battle, $fighter, $target, 1.0);
         $this->assertEquals([2, 0, 0], $fighter->getState()->getPosition());
     }
@@ -145,9 +139,7 @@ class MoveTest extends MordheimTestCase
     {
         $fighter = $this->makeFighterMock([0, 0, 0], 4);
         $battle = $this->makeClearBattle([$fighter], []);
-        $waterCell = new \Mordheim\FieldCell();
-        $waterCell->water = true;
-        $battle->getField()->setCell(3, 0, 0, $waterCell);
+        $battle->getField()->setCell(3, 0, 0, new \Mordheim\FieldCell(0, water: true));
         \Mordheim\Rule\Move::runIfNoEnemies($battle, $fighter, [8, 0, 0], 1.0);
         $this->assertEquals([2, 0, 0], $fighter->getState()->getPosition(), 'Боец должен остановиться перед водой');
         $logs = \Mordheim\BattleLogger::getAll();

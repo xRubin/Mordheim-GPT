@@ -2,8 +2,8 @@
 
 namespace Mordheim;
 
-use Mordheim\Data\Attributes\Cost;
-use Mordheim\Data\Attributes\Rule;
+use Mordheim\Attributes\Cost;
+use Mordheim\Attributes\Rule;
 use Mordheim\Exceptions\InvalidAttributesException;
 
 enum Mutation

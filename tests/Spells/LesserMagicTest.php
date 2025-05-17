@@ -28,8 +28,8 @@ class LesserMagicTest extends MordheimTestCase
         $caster = $this->makeFighterWithSpell(Mordheim\Spell::FIRES_OF_UZHUL, [0, 0, 0]);
         $enemy = $this->makeEnemy([1, 0, 0], 2);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Wizards', [$caster]),
-            new \Mordheim\Warband('Undead', [$enemy])
+            new \Mordheim\Band('Wizards', [$caster]),
+            new \Mordheim\Band('Undead', [$enemy])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6, 6]);
         $result = Mordheim\Spell::FIRES_OF_UZHUL->getProcessor()->onPhaseMagic($battle, $caster);
@@ -42,8 +42,8 @@ class LesserMagicTest extends MordheimTestCase
         $caster = $this->makeFighterWithSpell(Mordheim\Spell::FLIGHT_OF_ZIMMERAN, [0, 0, 0]);
         $enemy = $this->makeEnemy([5, 0, 0], 2);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Wizards', [$caster]),
-            new \Mordheim\Warband('Undead', [$enemy])
+            new \Mordheim\Band('Wizards', [$caster]),
+            new \Mordheim\Band('Undead', [$enemy])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6]);
         $result = Mordheim\Spell::FLIGHT_OF_ZIMMERAN->getProcessor()->onPhaseMagic($battle, $caster);
@@ -61,8 +61,8 @@ class LesserMagicTest extends MordheimTestCase
             new \Mordheim\FighterState([3, 3, 0], new \Mordheim\Strategy\AggressiveStrategy(), 2)
         );
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Wizards', [$caster]),
-            new \Mordheim\Warband('Reikland', [$enemy])
+            new \Mordheim\Band('Wizards', [$caster]),
+            new \Mordheim\Band('Reikland', [$enemy])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6, 6, 6]); // Провал лидерства
         $result = Mordheim\Spell::DREAD_OF_ARAMAR->getProcessor()->onPhaseMagic($battle, $caster);
@@ -75,8 +75,8 @@ class LesserMagicTest extends MordheimTestCase
         $caster = $this->makeFighterWithSpell(Mordheim\Spell::SILVER_ARROWS_OF_ARHA, [0, 0, 0]);
         $enemy = $this->makeEnemy([10, 0, 0], 3);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Wizards', [$caster]),
-            new \Mordheim\Warband('Undead', [$enemy])
+            new \Mordheim\Band('Wizards', [$caster]),
+            new \Mordheim\Band('Undead', [$enemy])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6, 6, 6, 6, 6, 6, 6, 6]); // D6+2 попаданий, все успешные
         $result = Mordheim\Spell::SILVER_ARROWS_OF_ARHA->getProcessor()->onPhaseMagic($battle, $caster);
@@ -88,7 +88,7 @@ class LesserMagicTest extends MordheimTestCase
     {
         $caster = $this->makeFighterWithSpell(Mordheim\Spell::LUCK_OF_SHEMTEK, [0, 0, 0]);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Wizards', [$caster])
+            new \Mordheim\Band('Wizards', [$caster])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6]);
         $result = Mordheim\Spell::LUCK_OF_SHEMTEK->getProcessor()->onPhaseMagic($battle, $caster);
@@ -100,7 +100,7 @@ class LesserMagicTest extends MordheimTestCase
     {
         $caster = $this->makeFighterWithSpell(Mordheim\Spell::SWORD_OF_REZHEBEL, [0, 0, 0]);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Wizards', [$caster])
+            new \Mordheim\Band('Wizards', [$caster])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6]);
         $result = Mordheim\Spell::SWORD_OF_REZHEBEL->getProcessor()->onPhaseMagic($battle, $caster);

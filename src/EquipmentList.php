@@ -2,7 +2,7 @@
 
 namespace Mordheim;
 
-use Mordheim\Data\Attributes\Equipment;
+use Mordheim\Attributes\Equipment;
 
 enum EquipmentList
 {

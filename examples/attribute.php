@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-var_dump(\Mordheim\Data\Warband::MARIENBURG->getBlanks());
+var_dump(\Mordheim\Warband::MARIENBURG->getBlanks());
 
 var_dump(Mordheim\Equipment::FIST->getStrength(3));
 var_dump(Mordheim\Equipment::FIST->getSpecialRules());

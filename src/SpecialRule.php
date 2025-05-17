@@ -123,6 +123,16 @@ enum SpecialRule
     case FEROCIOUS_CHARGE;
     case MONSTER_SLAYER;
     case BERSERKER;
+    case SIGN_OF_SIGMAR;
+    case PROTECTION_OF_SIGMAR;
+    case UTTER_DETERMINATION;
+    case RIGHTEOUS_FURY;
+    case ABSOLUTE_FAITH;
+    case BLACK_HUNGER;
+    case TAIL_FIGHTING;
+    case WALL_RUNNER;
+    case INFILTRATION;
+    case ART_OF_SILENT_DEATH;
     case IMMUNE_TO_SPELLS; // Shield of Faith
     case DOUBLE_DAMAGE; // The Hammer of Sigmar
     case PLUS_1_STRENGTH; // Black Fury

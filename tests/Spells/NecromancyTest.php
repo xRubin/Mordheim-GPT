@@ -14,7 +14,7 @@ use Mordheim\Spell;
 use Mordheim\Status;
 use Mordheim\Strategy\AggressiveStrategy;
 use Mordheim\Strategy\CarefulStrategy;
-use Mordheim\Warband;
+use Mordheim\Band;
 use MordheimTestCase;
 
 class NecromancyTest extends MordheimTestCase
@@ -59,8 +59,8 @@ class NecromancyTest extends MordheimTestCase
         $necromancer = $this->makeFighterWithSpell(Spell::LIFESTEALER, [0, 0, 0], 1);
         $enemy = $this->makeEnemy([1, 0, 0], 2);
         $battle = new Battle(new \Mordheim\GameField(), [
-            new Warband('Undead', [$necromancer]),
-            new Warband('Mercs', [$enemy])
+            new Band('Undead', [$necromancer]),
+            new Band('Mercs', [$enemy])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6]);
         $result = Spell::LIFESTEALER->getProcessor()->onPhaseMagic($battle, $necromancer);
@@ -74,7 +74,7 @@ class NecromancyTest extends MordheimTestCase
         $necromancer = $this->makeFighterWithSpell(Spell::RE_ANIMATION, [0, 0, 0]);
         $zombie = $this->makeZombie([1, 0, 0], false);
         $battle = new Battle(new \Mordheim\GameField(), [
-            new Warband('Undead', [$necromancer, $zombie])
+            new Band('Undead', [$necromancer, $zombie])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6]);
         $result = Spell::RE_ANIMATION->getProcessor()->onPhaseMagic($battle, $necromancer);
@@ -87,7 +87,7 @@ class NecromancyTest extends MordheimTestCase
     {
         $necromancer = $this->makeFighterWithSpell(Spell::DEATH_VISION, [0, 0, 0]);
         $battle = new Battle(new \Mordheim\GameField(), [
-            new Warband('Undead', [$necromancer])
+            new Band('Undead', [$necromancer])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6]);
         $result = Spell::DEATH_VISION->getProcessor()->onPhaseMagic($battle, $necromancer);
@@ -101,8 +101,8 @@ class NecromancyTest extends MordheimTestCase
         $necromancer = $this->makeFighterWithSpell(Spell::SPELL_OF_DOOM, [0, 0, 0]);
         $enemy = $this->makeEnemy([1, 0, 0], 2);
         $battle = new Battle(new \Mordheim\GameField(), [
-            new Warband('Undead', [$necromancer]),
-            new Warband('Mercs', [$enemy])
+            new Band('Undead', [$necromancer]),
+            new Band('Mercs', [$enemy])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6, 6]); // Провалить проверку силы
         $result = Spell::SPELL_OF_DOOM->getProcessor()->onPhaseMagic($battle, $necromancer);
@@ -116,8 +116,8 @@ class NecromancyTest extends MordheimTestCase
         $zombie = $this->makeZombie([1, 0, 0], true);
         $enemy = $this->makeEnemy([3, 2, 0], 2);
         $battle = new Battle(new \Mordheim\GameField(), [
-            new Warband('Undead', [$necromancer, $zombie]),
-            new Warband('Mercs', [$enemy])
+            new Band('Undead', [$necromancer, $zombie]),
+            new Band('Mercs', [$enemy])
         ]);
         $oldPos = $zombie->getState()->getPosition();
         \Mordheim\Dice::setTestRolls([6, 6]);
@@ -130,7 +130,7 @@ class NecromancyTest extends MordheimTestCase
     {
         $necromancer = $this->makeFighterWithSpell(Spell::SPELL_OF_AWAKENING, [0, 0, 0]);
         $battle = new Battle(new \Mordheim\GameField(), [
-            new Warband('Undead', [$necromancer])
+            new Band('Undead', [$necromancer])
         ]);
         $result = Spell::SPELL_OF_AWAKENING->getProcessor()->onPhaseMagic($battle, $necromancer);
         $this->assertTrue($result);

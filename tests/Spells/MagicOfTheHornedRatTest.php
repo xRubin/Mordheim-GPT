@@ -28,8 +28,8 @@ class MagicOfTheHornedRatTest extends MordheimTestCase
         $enemy = $this->makeFighter('Enemy', [2, 0, 0]);
         $aoe = $this->makeFighter('AoE', [2, 1, 0]);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Skaven', [$caster]),
-            new \Mordheim\Warband('Enemies', [$enemy, $aoe])
+            new \Mordheim\Band('Skaven', [$caster]),
+            new \Mordheim\Band('Enemies', [$enemy, $aoe])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6, 1, 6, 6, 6]); // D3=1 попадания
         $result = Mordheim\Spell::WARPFIRE->getProcessor()->onPhaseMagic($battle, $caster);
@@ -43,7 +43,7 @@ class MagicOfTheHornedRatTest extends MordheimTestCase
     {
         $caster = $this->makeFighter('Eshin Sorcerer', [0, 0, 0]);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Skaven', [$caster])
+            new \Mordheim\Band('Skaven', [$caster])
         ]);
         \Mordheim\Dice::setTestRolls([3]); // D3=3 крыс
         $result = Mordheim\Spell::CHILDREN_OF_THE_HORNED_RAT->getProcessor()->onPhaseMagic($battle, $caster);
@@ -58,8 +58,8 @@ class MagicOfTheHornedRatTest extends MordheimTestCase
         $caster = $this->makeFighter('Eshin Sorcerer', [0, 0, 0]);
         $enemy = $this->makeFighter('Enemy', [2, 0, 0]);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Skaven', [$caster]),
-            new \Mordheim\Warband('Enemies', [$enemy])
+            new \Mordheim\Band('Skaven', [$caster]),
+            new \Mordheim\Band('Enemies', [$enemy])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6, 1, 1, 6, 6]); // 2D6=2 попаданий
         $result = Mordheim\Spell::GNAWDOOM->getProcessor()->onPhaseMagic($battle, $caster);
@@ -73,8 +73,8 @@ class MagicOfTheHornedRatTest extends MordheimTestCase
         $caster = $this->makeFighter('Eshin Sorcerer', [0, 0, 0]);
         $enemy = $this->makeFighter('Enemy', [10, 0, 0]);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Skaven', [$caster]),
-            new \Mordheim\Warband('Enemies', [$enemy])
+            new \Mordheim\Band('Skaven', [$caster]),
+            new \Mordheim\Band('Enemies', [$enemy])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6]);
         $result = Mordheim\Spell::BLACK_FURY->getProcessor()->onPhaseMagic($battle, $caster);
@@ -89,8 +89,8 @@ class MagicOfTheHornedRatTest extends MordheimTestCase
         $caster = $this->makeFighter('Eshin Sorcerer', [0, 0, 0]);
         $enemy = $this->makeFighter('Enemy', [1, 0, 0]);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Skaven', [$caster]),
-            new \Mordheim\Warband('Enemies', [$enemy])
+            new \Mordheim\Band('Skaven', [$caster]),
+            new \Mordheim\Band('Enemies', [$enemy])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6, 6, 6]);
         $result = Mordheim\Spell::EYE_OF_THE_WARP->getProcessor()->onPhaseMagic($battle, $caster);
@@ -105,8 +105,8 @@ class MagicOfTheHornedRatTest extends MordheimTestCase
         $caster = $this->makeFighter('Eshin Sorcerer', [0, 0, 0]);
         $enemy = $this->makeFighter('Enemy', [10, 0, 0]);
         $battle = new \Mordheim\Battle(new \Mordheim\GameField(), [
-            new \Mordheim\Warband('Skaven', [$caster]),
-            new \Mordheim\Warband('Enemies', [$enemy])
+            new \Mordheim\Band('Skaven', [$caster]),
+            new \Mordheim\Band('Enemies', [$enemy])
         ]);
         \Mordheim\Dice::setTestRolls([6, 6]);
         $result = Mordheim\Spell::SORCERERS_CURSE->getProcessor()->onPhaseMagic($battle, $caster);

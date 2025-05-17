@@ -3,6 +3,8 @@
 namespace Mordheim\Rule;
 
 use Mordheim\Battle;
+use Mordheim\CloseCombat;
+use Mordheim\Exceptions\ChargeFailedException;
 use Mordheim\Exceptions\MoveRunDeprecatedException;
 use Mordheim\Exceptions\PathfinderTargetUnreachableException;
 use Mordheim\Fighter;
@@ -25,7 +27,7 @@ class Move
         $blockers = self::prepareBlockers($battle, $fighter);
         $movePoints = $fighter->getMoveRange();
         [$path, $lastReachableIdx] = self::findPathAndReachableIndex($battle, $fighter, $target, $aggressiveness, $blockers, $movePoints);
-        self::moveAlongPath($battle, $fighter, $path, $lastReachableIdx);
+        self::moveAlongPath($battle, $fighter, $path, $lastReachableIdx, $movePoints);
     }
 
     /**
@@ -38,7 +40,7 @@ class Move
      * @throws MoveRunDeprecatedException
      * @throws PathfinderTargetUnreachableException
      */
-    public static function runIfNoEnemies(Battle $battle, Fighter $fighter, array $target, float $aggressiveness) : void
+    public static function runIfNoEnemies(Battle $battle, Fighter $fighter, array $target, float $aggressiveness): void
     {
         foreach ($battle->getEnemiesFor($fighter) as $enemy) {
             if (!$enemy->getState()->getStatus()->canAct())
@@ -77,19 +79,132 @@ class Move
                 break;
             }
         }
-        self::moveAlongPath($battle, $fighter, $path, $lastReachableIdx, true);
+        self::moveAlongPath($battle, $fighter, $path, $lastReachableIdx, $movePoints);
     }
 
-    // --- Общие защищённые методы ---
+    /**
+     * Выполнить попытку charge (атаки с разбега) по правилам Mordheim 1999
+     * Возвращает объект CloseCombat при успехе
+     * @param Battle $battle
+     * @param Fighter $attacker
+     * @param Fighter $defender
+     * @param float $aggressiveness
+     * @param array $otherUnits
+     * @return CloseCombat|null
+     * @throws ChargeFailedException
+     */
+    public static function charge(Battle $battle, Fighter $attacker, Fighter $defender, float $aggressiveness, array $otherUnits = []): ?CloseCombat
+    {
+        // Charge запрещён, если атакующий уже вовлечён в ближний бой
+        if ($battle->getActiveCombats()->isFighterInCombat($attacker)) {
+            \Mordheim\BattleLogger::add("{$attacker->getName()} не может объявить charge: уже вовлечён в ближний бой.");
+            throw new ChargeFailedException();
+        }
+
+        $targetPos = self::getNearestChargePosition($battle, $attacker, $defender);
+        if (null === $targetPos) {
+            \Mordheim\BattleLogger::add("{$attacker->getName()} не может совершить charge: зона вокруг с целью заблокирована.");
+            throw new ChargeFailedException();
+        }
+
+        if ($battle->hasObstacleBetween($attacker->getState()->getPosition(), $defender->getState()->getPosition())) {
+            if (Ruler::distance($attacker, $defender) > 4)
+                throw new ChargeFailedException();
+            // Проверка инициативы для скрытой цели
+            $roll = \Mordheim\Dice::roll(6);
+            \Mordheim\BattleLogger::add("{$attacker->getName()} бросает Initiative для hidden цели: $roll против {$defender->getInitiative()}");
+            if ($roll <= $defender->getInitiative()) {
+                \Mordheim\BattleLogger::add("{$attacker->getName()} не может совершить charge: не прошёл проверку инициативы для атаки на скрытую цель.");
+                throw new ChargeFailedException();
+            }
+            \Mordheim\BattleLogger::add("{$attacker->getName()} прошёл проверку инициативы для атаки на скрытую цель.");
+        }
+
+        // Проверить, хватает ли движения
+        $movePoints = $attacker->getChargeRange();
+        $blockers = Move::prepareBlockers($battle, $attacker);
+        try {
+            [$path, $lastReachableIdx] = Move::findPathAndReachableIndex($battle, $attacker, $targetPos, $aggressiveness, $blockers, $movePoints);
+        } catch (PathfinderTargetUnreachableException $e) {
+            \Mordheim\BattleLogger::add("{$attacker->getName()} не может совершить charge: путь к цели заблокирован.");
+            throw new ChargeFailedException();
+        }
+        $cost = $path[count($path) - 1]['cost'];
+        if ($cost > $movePoints) {
+            \Mordheim\BattleLogger::add("{$attacker->getName()} не может совершить charge: не хватает движения (нужно $cost, есть $movePoints).");
+            throw new ChargeFailedException();
+        }
+
+        // Переместить бойца
+        \Mordheim\BattleLogger::add("{$attacker->getName()} совершает charge на {$defender->getName()}! Перемещение на [" . implode(',', $targetPos) . "]");
+        Move::moveAlongPath($battle, $attacker, $path, $lastReachableIdx, $movePoints);
+        return new CloseCombat($attacker, $defender);
+    }
+
+    /**
+     * TODO: obstacles
+     * @param Battle $battle
+     * @param Fighter $attacker
+     * @param Fighter $defender
+     * @return array|null
+     */
+    public static function getNearestChargePosition(Battle $battle, Fighter $attacker, Fighter $defender): ?array
+    {
+        // Определить клетки adjacent к цели
+        $adjacent = self::getAdjacentPositions($battle, $defender->getState()->getPosition());
+        $minDist = INF;
+        $targetPos = null;
+        foreach ($adjacent as $pos) {
+            $dist = Ruler::distance($attacker, $pos);
+            if ($dist < $minDist) {
+                $minDist = $dist;
+                $targetPos = $pos;
+            }
+        }
+        return $targetPos;
+    }
+
+    /**
+     * Получить список позиций, смежных с данной
+     */
+    public static function getAdjacentPositions(Battle $battle, array $position): array
+    {
+        $fightersPos = array_values(
+            array_filter(
+                $battle->getFighters(),
+                fn(Fighter $fighter) => $fighter->getState()->getStatus()->isAlive() ? $fighter->getState()->getPosition() : null
+            )
+        );
+
+        $adj = [];
+        for ($dx = -1; $dx <= 1; $dx++) {
+            for ($dy = -1; $dy <= 1; $dy++) {
+                if ($dx === 0 && $dy === 0) continue;
+                $cell = $battle->getField()->getCell($position[0] + $dx, $position[1] + $dy, $position[2]);
+                if (null === $cell)
+                    continue;
+                if ($cell->obstacle) continue;
+                if (in_array([$position[0] + $dx, $position[1] + $dy, $position[2]], $fightersPos)) continue;
+                $adj[] = [$position[0] + $dx, $position[1] + $dy, $position[2]];
+            }
+        }
+        return $adj;
+    }
 
     /**
      * Подготовка массива блокирующих позиций
      */
-    protected static function prepareBlockers(Battle $battle, Fighter $fighter): array
+    public static function prepareBlockers(Battle $battle, Fighter $attacker): array
     {
         return array_filter(
             array_map(
-                fn(Fighter $fighter) => $fighter->getState()->getStatus()->isAlive() ? $fighter->getState()->getPosition() : null,
+                function (Fighter $fighter) use ($attacker) {
+                    if ($fighter === $attacker)
+                        return null;
+                    if (!$fighter->getState()->getStatus()->isAlive())
+                        return null;
+                    return $fighter->getState()->getPosition();
+                },
                 $battle->getFighters()
             )
         );
@@ -99,7 +214,7 @@ class Move
      * Поиск пути и определение индекса достижимой точки
      * @throws PathfinderTargetUnreachableException
      */
-    protected static function findPathAndReachableIndex(Battle $battle, Fighter $fighter, array $target, float $aggressiveness, array $blockers, int $movePoints): array
+    public static function findPathAndReachableIndex(Battle $battle, Fighter $fighter, array $target, float $aggressiveness, array $blockers, int $movePoints): array
     {
         $path = \Mordheim\PathFinder::findPath($battle->getField(), $fighter->getState()->getPosition(), $target, $fighter->getMovementWeights(), $aggressiveness, $blockers);
         if (!$path || count($path) < 2) {
@@ -120,10 +235,9 @@ class Move
      * Движение по пути до lastReachableIdx (включительно)
      * Если reachedTarget == true, то это бег/движение до максимума, иначе обычное движение
      */
-    protected static function moveAlongPath(Battle $battle, Fighter $fighter, array $path, int $lastReachableIdx, bool $run = false): void
+    public static function moveAlongPath(Battle $battle, Fighter $fighter, array $path, int $lastReachableIdx, int $movePoints): void
     {
         $cur = $fighter->getState()->getPosition();
-        $movePoints = $run ? $fighter->getRunRange() : $fighter->getMoveRange();
         for ($i = 1; $i <= $lastReachableIdx && $movePoints > 0; $i++) {
             [$x, $y, $z] = $path[$i]['pos'];
             if (!is_int($x) || !is_int($y) || !is_int($z)) {
@@ -140,7 +254,7 @@ class Move
                 break;
             }
             $movePoints -= $cost;
-            \Mordheim\BattleLogger::add("{$fighter->getName()} перемещается с [" . implode(',', $cur) . "] на [" . implode(',', [$x, $y, $z]) . "]" . ($run ? " (бег)" : "") . ": $desc Осталось ОД: $movePoints");
+            \Mordheim\BattleLogger::add("{$fighter->getName()} перемещается с [" . implode(',', $cur) . "] на [" . implode(',', [$x, $y, $z]) . "]: $desc Осталось ОД: $movePoints");
             $cur = [$x, $y, $z];
         }
         $fighter->getState()->setPosition($cur);
