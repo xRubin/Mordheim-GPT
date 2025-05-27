@@ -4,99 +4,99 @@
  * Все действия и перемещения выводятся в консоль.
  */
 
-use Mordheim\Battle;
+use Mordheim\Band;
 use Mordheim\BattleLogger;
+use Mordheim\Classic\Battle;
+use Mordheim\Classic\EquipmentManager;
 use Mordheim\Equipment;
-use Mordheim\EquipmentManager;
 use Mordheim\GameField;
 use Mordheim\Strategy\AggressiveStrategy;
-use Mordheim\Band;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $field = new GameField();
 $battle = new Battle($field, [
     new Band('MARIENBURG', [
-        new \Mordheim\Fighter(
-            Mordheim\Blank::MARIENBURG_MERCENARY_CAPTAIN,
-            \Mordheim\FighterAdvancement::empty(),
+        new \Mordheim\Classic\Fighter(
+            Mordheim\Classic\Blank::MARIENBURG_MERCENARY_CAPTAIN,
+            \Mordheim\Classic\FighterAdvancement::empty(),
             new EquipmentManager([Equipment::SWORD, Equipment::LIGHT_ARMOUR]),
-            new \Mordheim\FighterState(
+            new \Mordheim\Classic\FighterState(
                 [0, 0, 0],
                 new AggressiveStrategy(),
-                Mordheim\Blank::MARIENBURG_MERCENARY_CAPTAIN->getCharacteristics()->getWounds()
+                Mordheim\Classic\Blank::MARIENBURG_MERCENARY_CAPTAIN->getCharacteristics()->getWounds()
             )
         ),
-        new \Mordheim\Fighter(
-            Mordheim\Blank::WARLOCK,
-            \Mordheim\FighterAdvancement::empty()->addSpell(\Mordheim\WizardSpell::create(Mordheim\Spell::FIRES_OF_UZHUL)),
+        new \Mordheim\Classic\Fighter(
+            Mordheim\Classic\Blank::WARLOCK,
+            \Mordheim\Classic\FighterAdvancement::empty()->addSpell(\Mordheim\Classic\WizardSpell::create(\Mordheim\Classic\Spell::FIRES_OF_UZHUL)),
             new EquipmentManager([Equipment::STAFF]),
-            new \Mordheim\FighterState(
+            new \Mordheim\Classic\FighterState(
                 [0, 2, 0],
                 new \Mordheim\Strategy\CarefulStrategy(),
-                Mordheim\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->getWounds()
+                Mordheim\Classic\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->getWounds()
             )
         ),
-        new \Mordheim\Fighter(
-            Mordheim\Blank::MARIENBURG_MARKSMAN,
-            \Mordheim\FighterAdvancement::empty(),
+        new \Mordheim\Classic\Fighter(
+            Mordheim\Classic\Blank::MARIENBURG_MARKSMAN,
+            \Mordheim\Classic\FighterAdvancement::empty(),
             new EquipmentManager([Equipment::BOW]),
-            new \Mordheim\FighterState(
+            new \Mordheim\Classic\FighterState(
                 [0, 4, 0],
-                new \Mordheim\Strategy\CowardlyStrategy(),
-                Mordheim\Blank::MARIENBURG_MARKSMAN->getCharacteristics()->getWounds()
+                new \Mordheim\Classic\Strategy\CowardlyStrategy(),
+                Mordheim\Classic\Blank::MARIENBURG_MARKSMAN->getCharacteristics()->getWounds()
             )
         ),
-        new \Mordheim\Fighter(
-            Mordheim\Blank::MARIENBURG_YOUNGBLOOD,
-            \Mordheim\FighterAdvancement::empty(),
+        new \Mordheim\Classic\Fighter(
+            Mordheim\Classic\Blank::MARIENBURG_YOUNGBLOOD,
+            \Mordheim\Classic\FighterAdvancement::empty(),
             new EquipmentManager([Equipment::AXE, Equipment::HEAVY_ARMOUR]),
-            new \Mordheim\FighterState(
+            new \Mordheim\Classic\FighterState(
                 [0, 6, 0],
                 new AggressiveStrategy(),
-                Mordheim\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->getWounds()
+                Mordheim\Classic\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->getWounds()
             )
         ),
     ]),
     new Band('MIDDENHEIM', [
-        new \Mordheim\Fighter(
-            Mordheim\Blank::MIDDENHEIM_MERCENARY_CAPTAIN,
-            \Mordheim\FighterAdvancement::empty(),
+        new \Mordheim\Classic\Fighter(
+            Mordheim\Classic\Blank::MIDDENHEIM_MERCENARY_CAPTAIN,
+            \Mordheim\Classic\FighterAdvancement::empty(),
             new EquipmentManager([Equipment::SWORD, Equipment::SHIELD]),
-            new \Mordheim\FighterState(
+            new \Mordheim\Classic\FighterState(
                 [7, 0, 0],
                 new AggressiveStrategy(),
-                Mordheim\Blank::MIDDENHEIM_MERCENARY_CAPTAIN->getCharacteristics()->getWounds()
+                Mordheim\Classic\Blank::MIDDENHEIM_MERCENARY_CAPTAIN->getCharacteristics()->getWounds()
             )
         ),
-        new \Mordheim\Fighter(
-            Mordheim\Blank::MIDDENHEIM_YOUNGBLOOD,
-            \Mordheim\FighterAdvancement::empty(),
+        new \Mordheim\Classic\Fighter(
+            Mordheim\Classic\Blank::MIDDENHEIM_YOUNGBLOOD,
+            \Mordheim\Classic\FighterAdvancement::empty(),
             new EquipmentManager([Equipment::AXE, Equipment::HEAVY_ARMOUR]),
-            new \Mordheim\FighterState(
+            new \Mordheim\Classic\FighterState(
                 [7, 2, 0],
                 new AggressiveStrategy(),
-                Mordheim\Blank::MIDDENHEIM_YOUNGBLOOD->getCharacteristics()->getWounds()
+                Mordheim\Classic\Blank::MIDDENHEIM_YOUNGBLOOD->getCharacteristics()->getWounds()
             )
         ),
-        new \Mordheim\Fighter(
-            Mordheim\Blank::WARLOCK,
-            \Mordheim\FighterAdvancement::empty()->addSpell(\Mordheim\WizardSpell::create(Mordheim\Spell::SWORD_OF_REZHEBEL)),
+        new \Mordheim\Classic\Fighter(
+            Mordheim\Classic\Blank::WARLOCK,
+            \Mordheim\Classic\FighterAdvancement::empty()->addSpell(\Mordheim\Classic\WizardSpell::create(\Mordheim\Classic\Spell::SWORD_OF_REZHEBEL)),
             new EquipmentManager([Equipment::STAFF]),
-            new \Mordheim\FighterState(
+            new \Mordheim\Classic\FighterState(
                 [7, 4, 0],
                 new AggressiveStrategy(),
-                Mordheim\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->getWounds()
+                Mordheim\Classic\Blank::MARIENBURG_YOUNGBLOOD->getCharacteristics()->getWounds()
             )
         ),
-        new \Mordheim\Fighter(
-            Mordheim\Blank::MIDDENHEIM_WARRIOR,
-            \Mordheim\FighterAdvancement::empty(),
+        new \Mordheim\Classic\Fighter(
+            Mordheim\Classic\Blank::MIDDENHEIM_WARRIOR,
+            \Mordheim\Classic\FighterAdvancement::empty(),
             new EquipmentManager([Equipment::CLUB]),
-            new \Mordheim\FighterState(
+            new \Mordheim\Classic\FighterState(
                 [7, 6, 0],
                 new AggressiveStrategy(),
-                Mordheim\Blank::MIDDENHEIM_WARRIOR->getCharacteristics()->getWounds()
+                Mordheim\Classic\Blank::MIDDENHEIM_WARRIOR->getCharacteristics()->getWounds()
             )
         ),
     ])

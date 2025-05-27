@@ -10,5 +10,5 @@ var_dump(Mordheim\SpecialRule::tryFromName('PARRY'));
 
 var_dump(Mordheim\Equipment::HELMET->getSlot());
 
-var_dump(Mordheim\Blank::VESKIT->getAllowedWarbands());
-var_dump(Mordheim\Blank::AENUR->getAllowedWarbands());
+var_dump(Mordheim\Classic\Blank::VESKIT->getAllowedWarbands());
+var_dump(Mordheim\Classic\Blank::AENUR->getAllowedWarbands());

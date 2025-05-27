@@ -77,15 +77,15 @@ class Characteristics
     public function add(Characteristics $characteristics): Characteristics
     {
         return new Characteristics(
-            movement: $this->movement + $characteristics->getMovement(),
-            weaponSkill: $this->weaponSkill + $characteristics->weaponSkill,
-            ballisticSkill: $this->ballisticSkill + $characteristics->ballisticSkill,
-            strength: $this->strength + $characteristics->strength,
-            toughness: $this->toughness + $characteristics->toughness,
-            wounds: $this->wounds + $characteristics->wounds,
-            initiative: $this->initiative + $characteristics->initiative,
-            attacks: $this->attacks + $characteristics->attacks,
-            leadership: $this->leadership + $characteristics->leadership
+            movement: $this->getMovement() + $characteristics->getMovement(),
+            weaponSkill: $this->getWeaponSkill() + $characteristics->getWeaponSkill(),
+            ballisticSkill: $this->getBallisticSkill() + $characteristics->getBallisticSkill(),
+            strength: $this->getStrength() + $characteristics->getStrength(),
+            toughness: $this->getToughness() + $characteristics->getToughness(),
+            wounds: $this->getWounds() + $characteristics->getWounds(),
+            initiative: $this->getInitiative() + $characteristics->getInitiative(),
+            attacks: $this->getAttacks() + $characteristics->getAttacks(),
+            leadership: $this->getLeadership() + $characteristics->getLeadership()
         );
     }
 }

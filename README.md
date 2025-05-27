@@ -5,12 +5,18 @@ Status: Stupidity
 
 Status: Fear
 
+Annual: taunt mechanic
+
+Hated enemy
+
 ## Вопросы к правилам:
 Remove close combats before magic move ? punch on flee?
 
 Что происходит если паникер добежал до края стола?
 
 Почему макс характеристики из книги иногда меньше чем характеристики из профиля? (Огр)
+
+"every large model contributes 20 to the warband rating" ?
 
 ## Strategy
 ### Conditions
